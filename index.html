@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NextQuest - Control Center</title>
+  <title>Planit - Control Center</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root { --text-hi: #2B2543; --text-mid: #7A758F; --card-radius: 32px; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
-    /* 🛠️ 修復：允許頁面垂直捲動，避免內容被上方切掉 */
     body { min-height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #F8F9FA; color: var(--text-hi); overflow-y: auto; position: relative; padding: 40px 0; }
 
     @keyframes cloudFloat {
@@ -30,8 +29,8 @@
     body.dark .shape-blue { background: #3A0CA3; } 
 
     .view-container { width: 90%; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); transform-style: preserve-3d; }
-    .view-hidden { opacity: 0; transform: scale(0.92) !important; pointer-events: none; visibility: hidden; display: none; }
-    .view-active { opacity: 1; pointer-events: auto; visibility: visible; display: block; }
+    .view-hidden { opacity: 0; transform: scale(0.92) !important; pointer-events: none; visibility: hidden; display: none !important; }
+    .view-active { opacity: 1; pointer-events: auto; visibility: visible; display: block !important; }
 
     .window-shell, .modal-shell {
       background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px) saturate(150%);
@@ -46,16 +45,14 @@
     }
 
     .login-shell { max-width: 400px; margin: auto; }
-    
-    /* 🛠️ 修復：限制 Dashboard 最大高度並允許內部滑動 */
-    .dashboard-shell { max-width: 650px; width: 90%; margin: auto; padding: 28px; max-height: 90vh; overflow-y: auto; }
+    .dashboard-shell { max-width: 680px; width: 95%; margin: auto; padding: 28px; max-height: 90vh; overflow-y: auto; }
     .dashboard-shell::-webkit-scrollbar { width: 4px; }
     .dashboard-shell::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
 
     .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .titlebar h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.5px; margin: 0 auto;}
 
-    .bubble-menu-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-hi); cursor: pointer; font-size: 1rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .bubble-menu-btn { height: 36px; padding: 0 14px; border-radius: 18px; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-hi); cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
     body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
     
     .input-group { margin-bottom: 20px; }
@@ -74,20 +71,22 @@
     .form-footer { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-mid); cursor: pointer; text-decoration: underline; }
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
 
-    /* --- 📅 一週日曆列 (Weekly Timeline Bar) --- */
-    .weekly-bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.2); padding: 8px; border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.4); }
-    body.dark .weekly-bar { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.08); }
-    .week-day-cell { text-align: center; padding: 8px 4px; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 0.75rem; color: var(--text-mid); position: relative; }
-    .week-day-cell:hover { background: rgba(255, 255, 255, 0.4); color: var(--text-hi); }
-    body.dark .week-day-cell:hover { background: rgba(255, 255, 255, 0.1); }
-    .week-day-cell.active-filter { background: var(--text-hi); color: #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    body.dark .week-day-cell.active-filter { background: #E0C3FC; color: #181524; }
-    .week-day-cell.today { border: 1px dashed var(--text-hi); }
-    .day-name { font-weight: 600; margin-bottom: 2px; }
-    .day-date { font-size: 0.85rem; font-weight: 700; }
-    .task-dot-container { display: flex; justify-content: center; gap: 3px; margin-top: 4px; min-height: 6px; }
-    .task-dot { width: 5px; height: 5px; background: #2A9D8F; border-radius: 50%; }
-    .task-dot.urgent { background: #E63946; }
+    /* --- 📅 完整月曆視圖 (Monthly Calendar Panel) --- */
+    .calendar-container { background: rgba(255, 255, 255, 0.2); padding: 16px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.4); margin-bottom: 20px; }
+    body.dark .calendar-container { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.08); }
+    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; font-size: 1rem; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+    .cal-weekday { font-size: 0.75rem; color: var(--text-mid); font-weight: 600; padding-bottom: 4px; }
+    .cal-day { padding: 8px 2px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; position: relative; }
+    .cal-day:hover { background: rgba(255, 255, 255, 0.4); }
+    body.dark .cal-day:hover { background: rgba(255, 255, 255, 0.1); }
+    .cal-day.empty { pointer-events: none; opacity: 0.3; }
+    .cal-day.today { border: 1px dashed var(--text-hi); }
+    .cal-day.active-filter { background: var(--text-hi); color: #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    body.dark .cal-day.active-filter { background: #E0C3FC; color: #181524; }
+    .cal-dot-container { display: flex; justify-content: center; gap: 2px; margin-top: 2px; min-height: 5px; }
+    .cal-dot { width: 4px; height: 4px; background: #2A9D8F; border-radius: 50%; }
+    .cal-dot.urgent { background: #E63946; }
 
     /* --- 標籤與優先順序選擇器 --- */
     .selector-group { margin-bottom: 20px; text-align: left; }
@@ -132,7 +131,7 @@
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; border-radius: 0 4px 4px 0; }
     body.dark .progress-bar-fill { background: #E0C3FC; box-shadow: 0 0 10px #E0C3FC; }
 
-    /* --- 彈跳視窗與封存抽屜共用 --- */
+    /* --- 彈跳視窗與抽屜共用 --- */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 100; transition: all 0.3s; }
     body.dark .modal-overlay { background: rgba(0, 0, 0, 0.5); }
     .modal-shell { max-width: 400px; width: 90%; padding: 32px 28px; max-height: 85vh; overflow-y: auto; }
@@ -158,7 +157,7 @@
   <!-- VIEW 1: 登入畫面 -->
   <div id="login-view" class="view-container view-active window-shell login-shell">
     <div class="titlebar" style="position: relative;">
-      <h1 id="form-title">NextQuest</h1>
+      <h1 id="form-title">Planit</h1>
       <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題" style="position: absolute; right: 0;">☾</button>
     </div>
     <div class="input-group"><input type="text" id="account" placeholder="Account / Email" autocomplete="off"></div>
@@ -173,16 +172,27 @@
   <div id="dashboard-view" class="view-container view-hidden window-shell dashboard-shell">
     <div class="titlebar">
       <h1>Control Center</h1>
-      <div style="display: flex; gap: 12px;">
-        <button class="bubble-menu-btn" onclick="openTaskModal()" title="新增任務">＋</button>
-        <button class="bubble-menu-btn" onclick="openArchiveModal()" title="已完成封存區">📁</button>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button class="bubble-menu-btn" onclick="openTaskModal()" title="新增任務">＋ 新增</button>
+        <button class="bubble-menu-btn" onclick="openArchiveModal()" title="已完成封存區">📁 完成區</button>
         <button class="bubble-menu-btn theme-toggle-btn" title="切換主題">☾</button>
-        <button class="bubble-menu-btn" onclick="logout()" title="登出">🚪</button>
+        <button class="bubble-menu-btn" onclick="logout()" title="登出">🚪 登出</button>
       </div>
     </div>
 
-    <!-- 📅 一週日曆視圖 (Weekly Timeline Bar) -->
-    <div class="weekly-bar" id="weekly-bar"></div>
+    <!-- 📅 完整月曆視圖 (Monthly Calendar Panel) -->
+    <div class="calendar-container">
+      <div class="cal-header">
+        <button class="bubble-menu-btn" onclick="changeMonth(-1)">◀</button>
+        <span id="cal-month-title">2026年 9月</span>
+        <button class="bubble-menu-btn" onclick="changeMonth(1)">▶</button>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-weekday">一</div><div class="cal-weekday">二</div><div class="cal-weekday">三</div>
+        <div class="cal-weekday">四</div><div class="cal-weekday">五</div><div class="cal-weekday">六</div><div class="cal-weekday">日</div>
+      </div>
+      <div class="cal-grid" id="cal-days-grid" style="margin-top: 4px;"></div>
+    </div>
 
     <div class="grid-container" id="grid-container">
       <div style="text-align:center; padding: 40px; color: var(--text-mid);">載入任務矩陣中...</div>
@@ -220,7 +230,7 @@
       </div>
 
       <div class="input-group" style="margin-top: 16px;">
-        <input type="text" id="new-task-input" placeholder="大目標名稱 (例：規劃日本旅遊)" autocomplete="off">
+        <input type="text" id="new-task-input" placeholder="大目標名稱 (例：規劃12月專案)" autocomplete="off">
       </div>
 
       <div class="selector-group">
@@ -274,7 +284,7 @@
   <!-- VIEW 6: 📁 已完成封存區 (Archive Drawer) Modal -->
   <div id="archive-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
-      <h2 style="font-size: 1.25rem; margin-bottom: 16px;">📁 已完成任務封存區</h2>
+      <h2 style="font-size: 1.25rem; margin-bottom: 16px;">📁 已完成任務完成區</h2>
       <p style="color: var(--text-mid); margin-bottom: 16px; font-size: 0.85rem;">子彈筆記歸檔：這裡存放所有已結案的成就！</p>
       
       <div id="archive-list" style="max-height: 300px; overflow-y: auto; text-align: left; margin-bottom: 20px;">
@@ -298,12 +308,17 @@
     let allTasksData = []; 
     let currentDetailTaskId = null; 
     let selectedDateFilter = null; 
+    
+    // 📅 月曆導航狀態
+    let currentCalendarYear = new Date().getFullYear();
+    let currentCalendarMonth = new Date().getMonth(); // 0-11
 
     window.onload = function () {
       google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
       google.accounts.id.renderButton(document.getElementById("google-btn-container"), { theme: "outline", size: "large", shape: "pill", width: 280 });
       initGlobalTilt();
-      const savedUser = localStorage.getItem('nextquest_user');
+      
+      const savedUser = localStorage.getItem('planit_user');
       if (savedUser) {
         currentUser = savedUser;
         document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
@@ -314,8 +329,8 @@
 
     function fetchTasks() {
       callGASAPI({ action: 'getTasks', account: currentUser }, (data) => {
-        allTasksData = data;
-        renderWeeklyBar();
+        allTasksData = data || [];
+        renderCalendar();
         renderTasks();
       });
     }
@@ -336,18 +351,31 @@
     }
 
     function decodeJwtResponse(t) { return JSON.parse(decodeURIComponent(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''))); }
+    
+    // 🛠️ 修復登入卡住與迴圈問題：確保畫面強制跳轉與正確儲存狀態
     function handleCredentialResponse(r) {
-       document.getElementById('message').innerText = "驗證成功，讀取中...";
-       callGASAPI({ action: 'googleLogin', email: decodeJwtResponse(r.credential).email, name: decodeJwtResponse(r.credential).name }, (res) => {
-          if(res.success) { currentUser = res.account; localStorage.setItem('nextquest_user', currentUser); fetchTasks(); }
+       document.getElementById('message').innerText = "驗證成功，進入控制中心...";
+       const userInfo = decodeJwtResponse(r.credential);
+       const email = userInfo.email;
+       const name = userInfo.name || "User";
+
+       callGASAPI({ action: 'googleLogin', email: email, name: name }, (res) => {
+          currentUser = (res && res.account) ? res.account : email;
+          localStorage.setItem('planit_user', currentUser);
+          
+          document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
+          document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
+          fetchTasks();
        });
     }
+
     function toggleMode() {
       isLoginMode = !isLoginMode;
-      document.getElementById('form-title').innerText = isLoginMode ? 'NextQuest' : '新建帳號';
+      document.getElementById('form-title').innerText = isLoginMode ? 'Planit' : '新建帳號';
       document.getElementById('action-btn').innerText = isLoginMode ? '進入系統' : '註冊帳號';
       document.getElementById('message').innerText = ''; 
     }
+
     function submitManualForm() {
       const acc = document.getElementById('account').value.trim(); const pwd = document.getElementById('password').value.trim();
       if (!acc || !pwd) return; document.getElementById('message').innerText = "驗證中...";
@@ -355,14 +383,28 @@
          document.getElementById('message').innerText = res.msg;
          if (res.success) {
            if (!isLoginMode) { setTimeout(toggleMode, 1500); } 
-           else { currentUser = res.account; localStorage.setItem('nextquest_user', currentUser); fetchTasks(); }
+           else { 
+             currentUser = res.account; 
+             localStorage.setItem('planit_user', currentUser); 
+             document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
+             document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
+             fetchTasks();
+           }
          }
       });
     }
+
+    // 🛠️ 徹底修復登出後進不去的問題：完整清除狀態並重新導向
     function logout() {
-      localStorage.removeItem('nextquest_user'); currentUser = ""; allTasksData = [];
+      localStorage.removeItem('planit_user'); 
+      currentUser = ""; 
+      allTasksData = [];
+      selectedDateFilter = null;
       document.getElementById('dashboard-view').classList.replace('view-active', 'view-hidden');
       document.getElementById('login-view').classList.replace('view-hidden', 'view-active');
+      document.getElementById('account').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('message').innerText = '';
     }
 
     function callGASAPI(payload, callback) {
@@ -378,41 +420,61 @@
     });
 
     // =========================================
-    //   📅 渲染一週日曆視圖 (Weekly Timeline Bar)
+    //   📅 完整月曆視圖 (Monthly Grid & Switcher)
     // =========================================
-    function renderWeeklyBar() {
-      const bar = document.getElementById('weekly-bar');
-      bar.innerHTML = '';
+    function changeMonth(direction) {
+      currentCalendarMonth += direction;
+      if (currentCalendarMonth > 11) {
+        currentCalendarMonth = 0;
+        currentCalendarYear++;
+      } else if (currentCalendarMonth < 0) {
+        currentCalendarMonth = 11;
+        currentCalendarYear--;
+      }
+      renderCalendar();
+    }
 
-      const today = new Date();
-      const currentDayOfWeek = today.getDay(); 
-      const distanceToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
-      
-      const monday = new Date(today);
-      monday.setDate(today.getDate() + distanceToMonday);
+    function renderCalendar() {
+      const titleEl = document.getElementById('cal-month-title');
+      const gridEl = document.getElementById('cal-days-grid');
+      gridEl.innerHTML = '';
 
-      const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
+      titleEl.innerText = `${currentCalendarYear}年 ${currentCalendarMonth + 1}月`;
+
+      const firstDayIndex = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay();
+      // 調整成週一為第一天 (0: 週一, ..., 6: 週日)
+      let startDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+      const totalDays = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
+
+      const todayStr = new Date().toISOString().split('T')[0];
       const activeTasks = allTasksData.filter(t => t.status !== 'completed');
 
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
-        const dateStr = d.toISOString().split('T')[0];
-        const isToday = dateStr === today.toISOString().split('T')[0];
+      // 填入上個月的空白格
+      for (let i = 0; i < startDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'cal-day empty';
+        gridEl.appendChild(emptyCell);
+      }
+
+      // 填入當月每一天
+      for (let day = 1; day <= totalDays; day++) {
+        const mStr = String(currentCalendarMonth + 1).padStart(2, '0');
+        const dStr = String(day).padStart(2, '0');
+        const dateStr = `${currentCalendarYear}-${mStr}-${dStr}`;
+        const isToday = dateStr === todayStr;
 
         const tasksOnThisDay = activeTasks.filter(t => t.dueDate && t.dueDate.split('T')[0] === dateStr);
         let dotsHtml = '';
         tasksOnThisDay.forEach(t => {
-          let isUrgent = t.priority === '🔴 緊急' || t.dueDate.split('T')[0] <= today.toISOString().split('T')[0];
-          dotsHtml += `<div class="task-dot ${isUrgent ? 'urgent' : ''}"></div>`;
+          let isUrgent = t.priority === '🔴 緊急' || t.dueDate.split('T')[0] <= todayStr;
+          dotsHtml += `<div class="cal-dot ${isUrgent ? 'urgent' : ''}"></div>`;
         });
 
         const cell = document.createElement('div');
-        cell.className = `week-day-cell ${isToday ? 'today' : ''} ${selectedDateFilter === dateStr ? 'active-filter' : ''}`;
+        cell.className = `cal-day ${isToday ? 'today' : ''} ${selectedDateFilter === dateStr ? 'active-filter' : ''}`;
         cell.innerHTML = `
-          <div class="day-name">週${dayNames[i]}</div>
-          <div class="day-date">${d.getDate()}</div>
-          <div class="task-dot-container">${dotsHtml}</div>
+          <div>${day}</div>
+          <div class="cal-dot-container">${dotsHtml}</div>
         `;
 
         cell.onclick = () => {
@@ -421,11 +483,11 @@
           } else {
             selectedDateFilter = dateStr;
           }
-          renderWeeklyBar();
+          renderCalendar();
           renderTasks();
         };
 
-        bar.appendChild(cell);
+        gridEl.appendChild(cell);
       }
     }
 
@@ -567,7 +629,7 @@
         if(res.success) {
           res.task.w = autoWidth;
           allTasksData.push(res.task);
-          renderWeeklyBar();
+          renderCalendar();
           renderTasks(); 
         }
       });
@@ -624,7 +686,7 @@
     function closeDetailModal() {
       document.getElementById('detail-modal').classList.replace('view-active', 'view-hidden');
       currentDetailTaskId = null;
-      renderWeeklyBar();
+      renderCalendar();
       renderTasks(); 
     }
     
@@ -694,7 +756,7 @@
       callGASAPI({ action: 'updateTaskStatus', taskId: taskId, status: 'active' }, () => {});
       
       closeArchiveModal();
-      renderWeeklyBar();
+      renderCalendar();
       renderTasks();
     }
 
@@ -728,7 +790,7 @@
       const taskId = targetElementToDelete;
       closeDeleteModal();
       allTasksData = allTasksData.filter(t => t.id !== taskId);
-      renderWeeklyBar();
+      renderCalendar();
       renderTasks();
       callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {});
     }
