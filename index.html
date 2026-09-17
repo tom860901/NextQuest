@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NextQuest - Control Center</title>
-  <!-- 載入 Google 官方 SSO 模組 -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root { --text-hi: #2B2543; --text-mid: #7A758F; --card-radius: 32px; }
@@ -37,20 +36,39 @@
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255,255,255,0.02);
     }
 
-    .login-shell { max-width: 400px; margin: 0 auto; text-align: center; }
+    .login-shell { max-width: 400px; margin: 0 auto; }
     .dashboard-shell { max-width: 600px; margin: 0 auto; padding: 32px; }
-    .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 36px; }
-    .titlebar h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.5px; }
+    .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .titlebar h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.5px; margin: 0 auto;}
 
     .bubble-menu-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-hi); cursor: pointer; font-size: 1rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
     body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
     
-    .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; background: #2D283E; color: #FFFFFF; font-size: 1.1rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); transition: transform 0.2s; margin-top: 12px; }
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; font-size: 0.85rem; color: var(--text-mid); margin-bottom: 8px; margin-left: 4px; font-weight: 600; }
+    .input-group input { width: 100%; padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.5); color: var(--text-hi); font-size: 1rem; outline: none; transition: all 0.3s; }
+    body.dark .input-group input { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: white; }
+    .input-group input:focus { background: rgba(255, 255, 255, 0.9); border-color: #FFFFFF; }
+    body.dark .input-group input:focus { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.4); }
+
+    .btn-main { width: 100%; padding: 16px; border-radius: 20px; border: none; background: #2D283E; color: #FFFFFF; font-size: 1.05rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); transition: transform 0.2s; margin-top: 8px; }
     body.dark .btn-main { background: #E0C3FC; color: #181524; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
     .btn-main:active { transform: scale(0.96); }
     .btn-secondary { background: rgba(255,255,255,0.3); color: var(--text-hi); border: 1px solid rgba(255,255,255,0.5); box-shadow: none; }
     body.dark .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-hi); border-color: rgba(255,255,255,0.1); }
 
+    /* 分隔線 UI */
+    .divider { display: flex; align-items: center; text-align: center; margin: 24px 0; color: var(--text-mid); font-size: 0.85rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid rgba(0,0,0,0.1); }
+    body.dark .divider::before, body.dark .divider::after { border-bottom: 1px solid rgba(255,255,255,0.15); }
+    .divider span { padding: 0 10px; }
+
+    .form-footer { text-align: center; margin-top: 20px; }
+    .toggle-text { font-size: 0.85rem; color: var(--text-mid); cursor: pointer; text-decoration: underline; }
+    #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
+    .success { color: #2A9D8F !important; }
+
+    /* 網格與彈窗樣式 */
     .tag-selector { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; }
     .tag-btn { padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
     body.dark .tag-btn { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
@@ -67,10 +85,6 @@
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 100; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
     body.dark .modal-overlay { background: rgba(0, 0, 0, 0.5); }
     .modal-shell { max-width: 360px; width: 90%; padding: 32px 28px; }
-    .input-group input { width: 100%; padding: 16px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.5); color: var(--text-hi); font-size: 1rem; outline: none; }
-    body.dark .input-group input { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: white; }
-    
-    #message { margin-top: 16px; font-size: 0.9rem; color: #2A9D8F; min-height: 20px; text-align: center; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -79,19 +93,30 @@
   <div class="bg-shape shape-orange"></div>
   <div class="bg-shape shape-blue"></div>
 
-  <!-- VIEW 1: 單鍵登入畫面 -->
+  <!-- VIEW 1: 混合登入畫面 -->
   <div id="login-view" class="view-container view-active window-shell login-shell">
-    <div class="titlebar" style="justify-content: center; position: relative;">
-      <h1 id="form-title" style="font-size: 1.8rem;">NextQuest</h1>
+    <div class="titlebar" style="position: relative;">
+      <h1 id="form-title">NextQuest</h1>
       <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題" style="position: absolute; right: 0;">☾</button>
     </div>
     
-    <p style="margin-bottom: 32px; color: var(--text-mid); font-weight: 500;">歡迎來到個人決策控制中心</p>
-
-    <!-- Google 按鈕容器 -->
-    <div id="google-btn-container" style="display: flex; justify-content: center; min-height: 40px;"></div>
-    
+    <!-- 手動輸入區塊 -->
+    <div class="input-group">
+      <input type="text" id="account" placeholder="Account / Email" autocomplete="off">
+    </div>
+    <div class="input-group">
+      <input type="password" id="password" placeholder="Password">
+    </div>
+    <button id="action-btn" class="btn-main" onclick="submitManualForm()">進入系統</button>
     <div id="message"></div>
+
+    <div class="form-footer">
+      <div class="toggle-text" onclick="toggleMode()">沒有帳號？點此新建帳號</div>
+    </div>
+
+    <!-- 分隔線與 Google 登入 -->
+    <div class="divider"><span>或使用</span></div>
+    <div id="google-btn-container" style="display: flex; justify-content: center; min-height: 40px;"></div>
   </div>
 
   <!-- VIEW 2: 控制中心 Dashboard -->
@@ -103,9 +128,7 @@
         <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題">☾</button>
       </div>
     </div>
-    <div class="grid-container" id="grid-container">
-      <div style="text-align:center; padding: 40px; color: var(--text-mid);">準備載入任務矩陣...</div>
-    </div>
+    <div class="grid-container" id="grid-container"></div>
   </div>
 
   <!-- VIEW 3: 新增任務 Modal -->
@@ -130,18 +153,15 @@
 
   <script>
     // =========================================
-    //   系統設定 (請填入你的專屬網址)
+    //   系統設定
     // =========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw9130xk5gFZxkrtpIR-YQSClZaqW3IH0JxU-Ka4fRKsdaq9FFZZzxIEgvVBExnxXTVOQ/exec";
-    
-    // 你的專屬 Google Client ID
     const GOOGLE_CLIENT_ID = "867237692766-9o2nhlnrqlq00k75apvsbvl2r2u1jsqi.apps.googleusercontent.com";
     
+    let isLoginMode = true;
     let currentUser = ""; 
 
-    // =========================================
-    //   Google SSO 初始化
-    // =========================================
+    // --- Google SSO 初始化 ---
     window.onload = function () {
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
@@ -153,7 +173,6 @@
       );
     };
 
-    // 解析 Google 傳回來的 JWT Token，取得 Email
     function decodeJwtResponse(token) {
        let base64Url = token.split('.')[1];
        let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -163,27 +182,54 @@
        return JSON.parse(jsonPayload);
     }
 
-    // Google 驗證成功後的回呼函數
     function handleCredentialResponse(response) {
        const responsePayload = decodeJwtResponse(response.credential);
-       const email = responsePayload.email;
-       const name = responsePayload.name;
+       document.getElementById('message').innerText = "Google 驗證成功，讀取中...";
        
-       document.getElementById('message').innerText = "驗證成功，讀取任務中...";
-       document.getElementById('google-btn-container').style.display = 'none';
-
-       // 呼叫 GAS API 進行註冊或登入
-       callGASAPI({ action: 'googleLogin', email: email, name: name }, (res) => {
+       callGASAPI({ action: 'googleLogin', email: responsePayload.email, name: responsePayload.name }, (res) => {
           if(res.success) {
             currentUser = res.account;
-            callGASAPI({ action: 'getTasks', email: currentUser }, renderTasks);
+            callGASAPI({ action: 'getTasks', account: currentUser }, renderTasks);
           }
        });
     }
 
-    // =========================================
-    //   Fetch API (取代舊的 google.script.run)
-    // =========================================
+    // --- 手動登入/註冊邏輯 ---
+    function toggleMode() {
+      isLoginMode = !isLoginMode;
+      document.getElementById('form-title').innerText = isLoginMode ? 'NextQuest' : '新建帳號';
+      document.getElementById('action-btn').innerText = isLoginMode ? '進入系統' : '註冊帳號';
+      document.querySelector('.toggle-text').innerText = isLoginMode ? '沒有帳號？點此新建帳號' : '已有帳號？返回登入';
+      document.getElementById('message').innerText = ''; 
+    }
+
+    function submitManualForm() {
+      const acc = document.getElementById('account').value.trim();
+      const pwd = document.getElementById('password').value.trim();
+      const msgBox = document.getElementById('message');
+      
+      if (!acc || !pwd) { msgBox.innerText = "請完整填寫帳號與密碼。"; msgBox.className = ''; return; }
+      msgBox.innerText = "驗證中..."; msgBox.className = ''; 
+      
+      const actionType = isLoginMode ? 'login' : 'register';
+      
+      callGASAPI({ action: actionType, account: acc, password: pwd }, (res) => {
+         msgBox.innerText = res.msg;
+         if (res.success) {
+           msgBox.className = 'success';
+           if (!isLoginMode) {
+             setTimeout(toggleMode, 1500); 
+           } else {
+             currentUser = res.account;
+             callGASAPI({ action: 'getTasks', account: currentUser }, renderTasks);
+           }
+         } else {
+           msgBox.className = '';
+         }
+      });
+    }
+
+    // --- Fetch API (取代 google.script.run) ---
     function callGASAPI(payload, callback) {
       fetch(GAS_API_URL, {
         method: 'POST',
@@ -193,7 +239,7 @@
       .then(res => res.json())
       .then(data => callback(data))
       .catch(err => {
-        alert("資料庫連線失敗：" + err);
+        document.getElementById('message').innerText = "連線異常，請稍後再試。";
         console.error(err);
       });
     }
@@ -240,25 +286,22 @@
       const tagValue = activeTagBtn ? activeTagBtn.getAttribute('data-tag') : '⚡️ 碎片';
       closeTaskModal();
       
-      callGASAPI({ action: 'addTask', email: currentUser, title: taskTitle, tag: tagValue }, onTaskAdded);
+      callGASAPI({ action: 'addTask', account: currentUser, title: taskTitle, tag: tagValue }, (res) => {
+        if(res.success) {
+          const task = res.task;
+          const container = document.getElementById('grid-container');
+          const card = document.createElement('div');
+          card.className = "widget-card";
+          card.setAttribute('data-id', task.id);
+          card.setAttribute('data-w', task.w);
+          card.setAttribute('data-h', task.h);
+          card.innerHTML = `<div class="card-tag">${task.tag}</div><div style="text-align:center; padding:10px 10px 0 10px; font-size:1.1rem;">${task.title}</div>`;
+          container.appendChild(card);
+          initGridEngine(); 
+        }
+      });
     }
 
-    function onTaskAdded(response) {
-      if (response.success) {
-        const task = response.task;
-        const container = document.getElementById('grid-container');
-        const card = document.createElement('div');
-        card.className = "widget-card";
-        card.setAttribute('data-id', task.id);
-        card.setAttribute('data-w', task.w);
-        card.setAttribute('data-h', task.h);
-        card.innerHTML = `<div class="card-tag">${task.tag}</div><div style="text-align:center; padding:10px 10px 0 10px; font-size:1.1rem;">${task.title}</div>`;
-        container.appendChild(card);
-        initGridEngine(); 
-      }
-    }
-
-    // 拖曳與長按刪除引擎
     function initGridEngine() {
       let oldContainer = document.getElementById('grid-container');
       let container = oldContainer.cloneNode(true);
