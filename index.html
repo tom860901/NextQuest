@@ -34,7 +34,7 @@
     .window-shell, .modal-shell {
       background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px) saturate(150%);
       -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(255, 255, 255, 0.6);
-      border-radius: var(--card-radius); padding: 40px 32px;
+      border-radius: var(--card-radius); padding: 32px;
       box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
     }
     body.dark .window-shell, body.dark .modal-shell {
@@ -44,9 +44,9 @@
     }
 
     .login-shell { max-width: 400px; margin: 0 auto; }
-    .dashboard-shell { max-width: 600px; margin: 0 auto; padding: 32px; }
-    .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-    .titlebar h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.5px; margin: 0 auto;}
+    .dashboard-shell { max-width: 650px; margin: 0 auto; padding: 28px; }
+    .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .titlebar h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.5px; margin: 0 auto;}
 
     .bubble-menu-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-hi); cursor: pointer; font-size: 1rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
     body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
@@ -66,6 +66,21 @@
 
     .form-footer { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-mid); cursor: pointer; text-decoration: underline; }
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
+
+    /* --- 週曆視圖導航列 (Weekly Timeline Bar) --- */
+    .weekly-bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.2); padding: 8px; border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.4); }
+    body.dark .weekly-bar { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.08); }
+    .week-day-cell { text-align: center; padding: 8px 4px; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 0.75rem; color: var(--text-mid); position: relative; }
+    .week-day-cell:hover { background: rgba(255, 255, 255, 0.4); color: var(--text-hi); }
+    body.dark .week-day-cell:hover { background: rgba(255, 255, 255, 0.1); }
+    .week-day-cell.active-filter { background: var(--text-hi); color: #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    body.dark .week-day-cell.active-filter { background: #E0C3FC; color: #181524; }
+    .week-day-cell.today { border: 1px dashed var(--text-hi); }
+    .day-name { font-weight: 600; margin-bottom: 2px; }
+    .day-date { font-size: 0.85rem; font-weight: 700; }
+    .task-dot-container { display: flex; justify-content: center; gap: 3px; margin-top: 4px; min-height: 6px; }
+    .task-dot { width: 5px; height: 5px; background: #2A9D8F; border-radius: 50%; }
+    .task-dot.urgent { background: #E63946; }
 
     /* --- 標籤與優先順序選擇器 --- */
     .selector-group { margin-bottom: 20px; text-align: left; }
@@ -158,6 +173,10 @@
         <button class="bubble-menu-btn" onclick="logout()" title="登出">🚪</button>
       </div>
     </div>
+
+    <!-- 📅 一週日曆視圖 (Weekly Timeline Bar) -->
+    <div class="weekly-bar" id="weekly-bar"></div>
+
     <div class="grid-container" id="grid-container">
       <div style="text-align:center; padding: 40px; color: var(--text-mid);">載入任務矩陣中...</div>
     </div>
@@ -213,7 +232,7 @@
     </div>
   </div>
 
-  <!-- VIEW 4: 任務詳情 Modal (含 ➡️ 移到明天 Rollover 按鈕) -->
+  <!-- VIEW 4: 任務詳情 Modal -->
   <div id="detail-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       <div style="font-size: 0.8rem; color: var(--text-mid); margin-bottom: 4px;" id="detail-tag"></div>
@@ -271,6 +290,7 @@
     let targetElementToDelete = null; 
     let allTasksData = []; 
     let currentDetailTaskId = null; 
+    let selectedDateFilter = null; // 📅 記錄目前被點擊篩選的日期
 
     window.onload = function () {
       google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
@@ -288,6 +308,7 @@
     function fetchTasks() {
       callGASAPI({ action: 'getTasks', account: currentUser }, (data) => {
         allTasksData = data;
+        renderWeeklyBar(); // 渲染一週日曆列
         renderTasks();
       });
     }
@@ -350,17 +371,77 @@
     });
 
     // =========================================
-    //   UI 渲染 (僅渲染 status === 'active' 的進行中任務)
+    //   📅 渲染一週日曆視圖 (Weekly Timeline Bar)
+    // =========================================
+    function renderWeeklyBar() {
+      const bar = document.getElementById('weekly-bar');
+      bar.innerHTML = '';
+
+      const today = new Date();
+      const currentDayOfWeek = today.getDay(); // 0 (週日) 到 6 (週六)
+      const distanceToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+      
+      const monday = new Date(today);
+      monday.setDate(today.getDate() + distanceToMonday);
+
+      const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
+      const activeTasks = allTasksData.filter(t => t.status !== 'completed');
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const dateStr = d.toISOString().split('T')[0];
+        const isToday = dateStr === today.toISOString().split('T')[0];
+
+        // 計算當天到期的任務與緊急狀態
+        const tasksOnThisDay = activeTasks.filter(t => t.dueDate && t.dueDate.split('T')[0] === dateStr);
+        let dotsHtml = '';
+        tasksOnThisDay.forEach(t => {
+          let isUrgent = t.priority === '🔴 緊急' || t.dueDate.split('T')[0] <= today.toISOString().split('T')[0];
+          dotsHtml += `<div class="task-dot ${isUrgent ? 'urgent' : ''}"></div>`;
+        });
+
+        const cell = document.createElement('div');
+        cell.className = `week-day-cell ${isToday ? 'today' : ''} ${selectedDateFilter === dateStr ? 'active-filter' : ''}`;
+        cell.innerHTML = `
+          <div class="day-name">週${dayNames[i]}</div>
+          <div class="day-date">${d.getDate()}</div>
+          <div class="task-dot-container">${dotsHtml}</div>
+        `;
+
+        // 點擊篩選該日任務
+        cell.onclick = () => {
+          if (selectedDateFilter === dateStr) {
+            selectedDateFilter = null; // 再次點擊取消篩選
+          } else {
+            selectedDateFilter = dateStr;
+          }
+          renderWeeklyBar();
+          renderTasks();
+        };
+
+        bar.appendChild(cell);
+      }
+    }
+
+    // =========================================
+    //   UI 渲染 (支援日期點擊篩選)
     // =========================================
     function renderTasks() {
       const container = document.getElementById('grid-container');
       container.innerHTML = ""; 
       
       const todayStr = new Date().toISOString().split('T')[0];
-      const activeTasks = allTasksData.filter(t => t.status !== 'completed');
+      
+      // 過濾出狀態為進行中的任務，若有點擊日期則進一步篩選
+      let activeTasks = allTasksData.filter(t => t.status !== 'completed');
+      if (selectedDateFilter) {
+        activeTasks = activeTasks.filter(t => t.dueDate && t.dueDate.split('T')[0] === selectedDateFilter);
+      }
 
       if (activeTasks.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-mid);">目前沒有進行中的任務，點擊 ＋ 新增或從📁查看已完成！</div>`;
+        let msg = selectedDateFilter ? `📅 ${selectedDateFilter} 沒有進行中的任務` : `目前沒有進行中的任務，點擊 ＋ 新增！`;
+        container.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-mid);">${msg}</div>`;
         container.style.height = "100px";
         return;
       }
@@ -482,6 +563,7 @@
         if(res.success) {
           res.task.w = autoWidth;
           allTasksData.push(res.task);
+          renderWeeklyBar();
           renderTasks(); 
         }
       });
@@ -538,6 +620,7 @@
     function closeDetailModal() {
       document.getElementById('detail-modal').classList.replace('view-active', 'view-hidden');
       currentDetailTaskId = null;
+      renderWeeklyBar();
       renderTasks(); 
     }
     
@@ -550,10 +633,8 @@
       callGASAPI({ action: 'updateTaskStatus', taskId: currentDetailTaskId, status: 'completed' }, () => {});
       
       closeDetailModal();
-      renderTasks();
     }
 
-    // ⚡ 執行 Rollover (移到明天)
     function rolloverTaskToTomorrow() {
       if(!currentDetailTaskId) return;
       const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
@@ -563,14 +644,12 @@
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-      // 更新前端狀態 (改日期並升級為緊急高亮)
       allTasksData[taskIndex].dueDate = tomorrowStr;
       allTasksData[taskIndex].priority = '🔴 緊急';
 
       callGASAPI({ action: 'rolloverTask', taskId: currentDetailTaskId }, () => {});
       
       closeDetailModal();
-      renderTasks();
     }
 
     function openArchiveModal() {
@@ -611,6 +690,7 @@
       callGASAPI({ action: 'updateTaskStatus', taskId: taskId, status: 'active' }, () => {});
       
       closeArchiveModal();
+      renderWeeklyBar();
       renderTasks();
     }
 
@@ -644,6 +724,7 @@
       const taskId = targetElementToDelete;
       closeDeleteModal();
       allTasksData = allTasksData.filter(t => t.id !== taskId);
+      renderWeeklyBar();
       renderTasks();
       callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {});
     }
