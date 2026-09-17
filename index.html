@@ -37,9 +37,14 @@
     /* ==========================================
        2. 介面與外殼 (毛玻璃果凍感)
     ========================================== */
-    .view-container { grid-area: 1 / 1; width: 90%; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .view-hidden { opacity: 0; transform: scale(0.92); pointer-events: none; visibility: hidden; }
-    .view-active { opacity: 1; transform: scale(1); pointer-events: auto; visibility: visible; }
+    .view-container { 
+      grid-area: 1 / 1; width: 90%; 
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
+      /* 使外層容器支援 3D */
+      transform-style: preserve-3d;
+    }
+    .view-hidden { opacity: 0; transform: scale(0.92) !important; pointer-events: none; visibility: hidden; }
+    .view-active { opacity: 1; pointer-events: auto; visibility: visible; }
 
     .window-shell {
       background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px) saturate(150%);
@@ -117,8 +122,6 @@
     body.dark .widget-card {
       box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,255,255,0.05);
     }
-
-    .widget-card:hover { transform: translateY(-2px); }
     
     /* 拖曳時強制懸浮與加深陰影 (!important 防止被行內樣式覆蓋) */
     .widget-card.dragging { 
@@ -231,6 +234,9 @@
         { theme: "outline", size: "large", shape: "pill", width: 280 } 
       );
 
+      // 👉 啟動全域雙層 3D 視差引擎
+      initGlobalTilt();
+
       const savedUser = localStorage.getItem('nextquest_user');
       if (savedUser) {
         currentUser = savedUser;
@@ -239,6 +245,36 @@
         callGASAPI({ action: 'getTasks', account: currentUser }, renderTasks);
       }
     };
+
+    // ==========================================
+    //   ✨ 全域 2.5D 視差引擎 (外圍主視窗傾斜)
+    // ==========================================
+    function initGlobalTilt() {
+      document.addEventListener('mousemove', (e) => {
+        const activeView = document.querySelector('.view-active');
+        if (!activeView) return;
+        
+        activeView.style.transition = 'transform 0.1s ease-out';
+        
+        const x = e.clientX;
+        const y = e.clientY;
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        
+        // ⚠️ 最外圍的傾斜角度極小 (2度)，避免頭暈
+        const rotateX = ((y - centerY) / centerY) * -2; 
+        const rotateY = ((x - centerX) / centerX) * 2;
+        
+        activeView.style.transform = `perspective(2000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1)`;
+      });
+
+      document.addEventListener('mouseleave', () => {
+        const activeView = document.querySelector('.view-active');
+        if (!activeView) return;
+        activeView.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        activeView.style.transform = ''; 
+      });
+    }
 
     function decodeJwtResponse(token) {
        let base64Url = token.split('.')[1];
@@ -298,8 +334,16 @@
       currentUser = "";
       document.getElementById('password').value = "";
       document.getElementById('message').innerText = "";
-      document.getElementById('dashboard-view').classList.replace('view-active', 'view-hidden');
-      document.getElementById('login-view').classList.replace('view-hidden', 'view-active');
+      
+      // 切換回登入頁
+      const dashboard = document.getElementById('dashboard-view');
+      const login = document.getElementById('login-view');
+      
+      // 確保回彈動畫正確清除
+      dashboard.style.transform = '';
+      dashboard.classList.replace('view-active', 'view-hidden');
+      login.classList.replace('view-hidden', 'view-active');
+      
       document.getElementById('grid-container').innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-mid);">載入任務矩陣中...</div>`;
     }
 
@@ -338,8 +382,13 @@
          card.innerHTML = `<div class="card-tag">${task.tag}</div><div style="text-align:center; padding:10px 10px 0 10px; font-size:1.1rem;">${task.title}</div>`;
          container.appendChild(card);
       });
-      document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
-      document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
+      
+      const login = document.getElementById('login-view');
+      const dashboard = document.getElementById('dashboard-view');
+      login.style.transform = '';
+      login.classList.replace('view-active', 'view-hidden');
+      dashboard.classList.replace('view-hidden', 'view-active');
+      
       setTimeout(() => { initGridEngine(); }, 50);
     }
 
@@ -388,7 +437,7 @@
     }
 
     // =========================================
-    //   核心引擎 (包含拖曳、長按刪除與 2.5D 滑鼠感測)
+    //   核心引擎 (包含拖曳、長按刪除與 2.5D 卡片感測)
     // =========================================
     function initGridEngine() {
       let oldContainer = document.getElementById('grid-container');
@@ -442,7 +491,6 @@
         if (card.el.dataset.bound === "true") return;
         card.el.dataset.bound = "true";
 
-        // --- 拖曳與長按事件 ---
         card.el.addEventListener('pointerdown', (e) => {
           if (e.target.tagName === 'BUTTON') return; 
           draggingCardIndex = cardsData.indexOf(card);
@@ -456,17 +504,14 @@
             openDeleteModal(card.el); 
           }, 700);
 
-          // 清除傾斜，保證拖曳時是正向的
           card.el.style.transform = '';
           card.el.classList.add('dragging'); 
           card.el.setPointerCapture(e.pointerId);
         });
 
         card.el.addEventListener('pointermove', (e) => {
-          // 若有移動，取消長按刪除
           if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) { clearTimeout(longPressTimer); }
           
-          // 如果目前正在拖曳「這張卡片」，執行拖曳換位運算
           if (draggingCardIndex !== -1 && draggingCardIndex === cardsData.indexOf(card)) {
             const dx = e.clientX - startX; const dy = e.clientY - startY;
             card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
@@ -485,28 +530,24 @@
                draggingCardIndex = targetIndex; renderGrid(); 
                card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
             }
-            return; // 拖曳中就不執行下方的 2.5D 傾斜
+            return; 
           }
 
-          // --- 2.5D 滑鼠跟隨傾斜 (Hover 狀態下執行) ---
           if (draggingCardIndex === -1) {
             const rect = card.el.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
-            
-            // 計算傾斜角度 (15 為強度參數)
             const rotateX = ((y - centerY) / centerY) * -15; 
             const rotateY = ((x - centerX) / centerX) * 15;
             
-            card.el.style.transition = 'none'; // 移除過渡，使跟隨更靈敏
+            card.el.style.transition = 'none'; 
             card.el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
             card.el.style.boxShadow = `0 20px 40px rgba(0,0,0,0.1)`;
           }
         });
 
-        // --- 滑鼠移出，恢復原本的 Q 彈狀態 ---
         card.el.addEventListener('pointerleave', () => {
           if (draggingCardIndex !== -1) return;
           card.el.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s ease';
