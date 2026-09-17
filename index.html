@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NextQuest - Control Center</title>
+  <!-- 載入 Google 官方 SSO 模組 -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root { --text-hi: #2B2543; --text-mid: #7A758F; --card-radius: 32px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { min-height: 100vh; display: grid; place-items: center; background-color: #F8F9FA; color: var(--text-hi); overflow: hidden; position: relative; }
+
+    .bg-shape { position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.8; transition: background 0.5s ease; }
+    .shape-pink { top: -10%; left: -10%; width: 55vw; height: 55vw; background: #FFAAC3; }
+    .shape-orange { bottom: -15%; left: 15%; width: 45vw; height: 45vw; background: #FFD0A8; }
+    .shape-blue { top: 10%; right: -15%; width: 60vw; height: 60vw; background: #E0C3FC; }
+    
+    body.dark { background-color: #0c0814; --text-hi: #F4F2FA; --text-mid: #9E9AA8; }
+    body.dark .shape-pink { background: #7B2CBF; } 
+    body.dark .shape-orange { background: #F72585; } 
+    body.dark .shape-blue { background: #3A0CA3; } 
+
+    .view-container { grid-area: 1 / 1; width: 90%; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .view-hidden { opacity: 0; transform: scale(0.92); pointer-events: none; visibility: hidden; }
+    .view-active { opacity: 1; transform: scale(1); pointer-events: auto; visibility: visible; }
+
+    .window-shell {
+      background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px) saturate(150%);
+      -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: var(--card-radius); padding: 40px 32px;
+      box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
+    }
+    body.dark .window-shell, body.dark .widget-card, body.dark .modal-shell {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid rgba(255, 255, 255, 0.2); border-left: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255,255,255,0.02);
+    }
+
+    .login-shell { max-width: 400px; margin: 0 auto; text-align: center; }
+    .dashboard-shell { max-width: 600px; margin: 0 auto; padding: 32px; }
+    .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 36px; }
+    .titlebar h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.5px; }
+
+    .bubble-menu-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-hi); cursor: pointer; font-size: 1rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
+    
+    .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; background: #2D283E; color: #FFFFFF; font-size: 1.1rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); transition: transform 0.2s; margin-top: 12px; }
+    body.dark .btn-main { background: #E0C3FC; color: #181524; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    .btn-main:active { transform: scale(0.96); }
+    .btn-secondary { background: rgba(255,255,255,0.3); color: var(--text-hi); border: 1px solid rgba(255,255,255,0.5); box-shadow: none; }
+    body.dark .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-hi); border-color: rgba(255,255,255,0.1); }
+
+    .tag-selector { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; }
+    .tag-btn { padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
+    body.dark .tag-btn { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+    .tag-btn.active { background: var(--text-hi); color: #FFF; border-color: transparent; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    body.dark .tag-btn.active { background: #E0C3FC; color: #181524; }
+
+    .grid-container { position: relative; width: 100%; transition: height 0.3s ease; }
+    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.2s, opacity 0.2s, box-shadow 0.2s; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; overflow: hidden; }
+    .widget-card:hover { transform: translateY(-2px); }
+    .widget-card.dragging { z-index: 50; cursor: grabbing; transform: scale(1.04); box-shadow: 0 20px 40px rgba(0,0,0,0.15); transition: transform 0.1s; }
+    .widget-card.deleting { transform: scale(0.5); opacity: 0; pointer-events: none; }
+    .card-tag { position: absolute; top: 12px; left: 16px; font-size: 0.75rem; color: var(--text-mid); font-weight: 500; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 100; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    body.dark .modal-overlay { background: rgba(0, 0, 0, 0.5); }
+    .modal-shell { max-width: 360px; width: 90%; padding: 32px 28px; }
+    .input-group input { width: 100%; padding: 16px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.5); color: var(--text-hi); font-size: 1rem; outline: none; }
+    body.dark .input-group input { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: white; }
+    
+    #message { margin-top: 16px; font-size: 0.9rem; color: #2A9D8F; min-height: 20px; text-align: center; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="bg-shape shape-pink"></div>
+  <div class="bg-shape shape-orange"></div>
+  <div class="bg-shape shape-blue"></div>
+
+  <!-- VIEW 1: 單鍵登入畫面 -->
+  <div id="login-view" class="view-container view-active window-shell login-shell">
+    <div class="titlebar" style="justify-content: center; position: relative;">
+      <h1 id="form-title" style="font-size: 1.8rem;">NextQuest</h1>
+      <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題" style="position: absolute; right: 0;">☾</button>
+    </div>
+    
+    <p style="margin-bottom: 32px; color: var(--text-mid); font-weight: 500;">歡迎來到個人決策控制中心</p>
+
+    <!-- Google 按鈕容器 -->
+    <div id="google-btn-container" style="display: flex; justify-content: center; min-height: 40px;"></div>
+    
+    <div id="message"></div>
+  </div>
+
+  <!-- VIEW 2: 控制中心 Dashboard -->
+  <div id="dashboard-view" class="view-container view-hidden window-shell dashboard-shell">
+    <div class="titlebar">
+      <h1>Control Center</h1>
+      <div style="display: flex; gap: 12px;">
+        <button class="bubble-menu-btn" onclick="openTaskModal()" aria-label="新增任務">＋</button>
+        <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題">☾</button>
+      </div>
+    </div>
+    <div class="grid-container" id="grid-container">
+      <div style="text-align:center; padding: 40px; color: var(--text-mid);">準備載入任務矩陣...</div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: 新增任務 Modal -->
+  <div id="task-modal" class="modal-overlay view-hidden">
+    <div class="window-shell modal-shell">
+      <h2 style="font-size: 1.25rem; margin-bottom: 24px; text-align: center;">✨ 新增目標任務</h2>
+      <div class="tag-selector" id="tag-selector">
+        <div class="tag-btn active" onclick="selectTag(this)" data-tag="⚡️ 碎片">⚡️ 碎片</div>
+        <div class="tag-btn" onclick="selectTag(this)" data-tag="🧪 試錯">🧪 試錯</div>
+        <div class="tag-btn" onclick="selectTag(this)" data-tag="🧠 深度">🧠 深度</div>
+        <div class="tag-btn" onclick="selectTag(this)" data-tag="🎮 例行">🎮 例行</div>
+      </div>
+      <div class="input-group">
+        <input type="text" id="new-task-input" placeholder="例如：去超商買咖啡..." autocomplete="off">
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button class="btn-main btn-secondary" onclick="closeTaskModal()">取消</button>
+        <button class="btn-main" onclick="confirmAddTask()">建立卡片</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================
+    //   系統設定 (請填入你的專屬網址)
+    // =========================================
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw9130xk5gFZxkrtpIR-YQSClZaqW3IH0JxU-Ka4fRKsdaq9FFZZzxIEgvVBExnxXTVOQ/exec";
+    
+    // 你的專屬 Google Client ID
+    const GOOGLE_CLIENT_ID = "867237692766-9o2nhlnrqlq00k75apvsbvl2r2u1jsqi.apps.googleusercontent.com";
+    
+    let currentUser = ""; 
+
+    // =========================================
+    //   Google SSO 初始化
+    // =========================================
+    window.onload = function () {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse
+      });
+      google.accounts.id.renderButton(
+        document.getElementById("google-btn-container"),
+        { theme: "outline", size: "large", shape: "pill", width: 280 } 
+      );
+    };
+
+    // 解析 Google 傳回來的 JWT Token，取得 Email
+    function decodeJwtResponse(token) {
+       let base64Url = token.split('.')[1];
+       let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+       let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+       }).join(''));
+       return JSON.parse(jsonPayload);
+    }
+
+    // Google 驗證成功後的回呼函數
+    function handleCredentialResponse(response) {
+       const responsePayload = decodeJwtResponse(response.credential);
+       const email = responsePayload.email;
+       const name = responsePayload.name;
+       
+       document.getElementById('message').innerText = "驗證成功，讀取任務中...";
+       document.getElementById('google-btn-container').style.display = 'none';
+
+       // 呼叫 GAS API 進行註冊或登入
+       callGASAPI({ action: 'googleLogin', email: email, name: name }, (res) => {
+          if(res.success) {
+            currentUser = res.account;
+            callGASAPI({ action: 'getTasks', email: currentUser }, renderTasks);
+          }
+       });
+    }
+
+    // =========================================
+    //   Fetch API (取代舊的 google.script.run)
+    // =========================================
+    function callGASAPI(payload, callback) {
+      fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => callback(data))
+      .catch(err => {
+        alert("資料庫連線失敗：" + err);
+        console.error(err);
+      });
+    }
+
+    // --- 主題切換 ---
+    const themeBtns = document.querySelectorAll('.theme-toggle-btn');
+    themeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        themeBtns.forEach(b => b.innerText = isDark ? '☀' : '☾');
+      });
+    });
+
+    // --- UI 渲染與推擠引擎 ---
+    function renderTasks(tasksData) {
+      const container = document.getElementById('grid-container');
+      container.innerHTML = ""; 
+      
+      tasksData.forEach(task => {
+         const card = document.createElement('div');
+         card.className = "widget-card";
+         card.setAttribute('data-id', task.id); 
+         card.setAttribute('data-w', parseInt(task.w) || 1);
+         card.setAttribute('data-h', parseInt(task.h) || 1);
+         card.innerHTML = `<div class="card-tag">${task.tag}</div><div style="text-align:center; padding:10px 10px 0 10px; font-size:1.1rem;">${task.title}</div>`;
+         container.appendChild(card);
+      });
+
+      document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
+      document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
+      setTimeout(() => { initGridEngine(); }, 50);
+    }
+
+    function selectTag(btn) { document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+    function openTaskModal() { document.getElementById('task-modal').classList.replace('view-hidden', 'view-active'); setTimeout(() => { document.getElementById('new-task-input').focus(); }, 100); }
+    function closeTaskModal() { document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); document.getElementById('new-task-input').value = ""; }
+
+    function confirmAddTask() {
+      const input = document.getElementById('new-task-input');
+      const taskTitle = input.value.trim();
+      if (!taskTitle) { input.focus(); return; }
+      const activeTagBtn = document.querySelector('.tag-btn.active');
+      const tagValue = activeTagBtn ? activeTagBtn.getAttribute('data-tag') : '⚡️ 碎片';
+      closeTaskModal();
+      
+      callGASAPI({ action: 'addTask', email: currentUser, title: taskTitle, tag: tagValue }, onTaskAdded);
+    }
+
+    function onTaskAdded(response) {
+      if (response.success) {
+        const task = response.task;
+        const container = document.getElementById('grid-container');
+        const card = document.createElement('div');
+        card.className = "widget-card";
+        card.setAttribute('data-id', task.id);
+        card.setAttribute('data-w', task.w);
+        card.setAttribute('data-h', task.h);
+        card.innerHTML = `<div class="card-tag">${task.tag}</div><div style="text-align:center; padding:10px 10px 0 10px; font-size:1.1rem;">${task.title}</div>`;
+        container.appendChild(card);
+        initGridEngine(); 
+      }
+    }
+
+    // 拖曳與長按刪除引擎
+    function initGridEngine() {
+      let oldContainer = document.getElementById('grid-container');
+      let container = oldContainer.cloneNode(true);
+      oldContainer.parentNode.replaceChild(container, oldContainer);
+      const cardElements = Array.from(container.children);
+      let cols = window.innerWidth <= 560 ? 2 : 4; 
+      const gap = 16;
+      const rowHeight = window.innerWidth <= 560 ? 88 : 92;
+
+      let cardsData = cardElements.map(el => ({ el: el, w: Math.min(parseInt(el.getAttribute('data-w')) || 1, cols), h: parseInt(el.getAttribute('data-h')) || 1 }));
+
+      function renderGrid() {
+        const containerWidth = container.clientWidth;
+        const cellWidth = (containerWidth - (cols - 1) * gap) / cols;
+        let gridMatrix = []; let maxRow = 0;
+        cardsData.forEach(card => {
+          let placed = false; let r = 0;
+          while (!placed) {
+            for (let c = 0; c <= cols - card.w; c++) {
+              let isFree = true;
+              for (let y = 0; y < card.h; y++) { for (let x = 0; x < card.w; x++) { if (gridMatrix[r + y] && gridMatrix[r + y][c + x]) isFree = false; } }
+              if (isFree) {
+                for (let y = 0; y < card.h; y++) { if (!gridMatrix[r + y]) gridMatrix[r + y] = []; for (let x = 0; x < card.w; x++) { gridMatrix[r + y][c + x] = true; } }
+                const left = c * (cellWidth + gap); const top = r * (rowHeight + gap);
+                const width = card.w * cellWidth + (card.w - 1) * gap; const height = card.h * rowHeight + (card.h - 1) * gap;
+                card.el.style.left = `${left}px`; card.el.style.top = `${top}px`; card.el.style.width = `${width}px`; card.el.style.height = `${height}px`;
+                maxRow = Math.max(maxRow, r + card.h); placed = true; break;
+              }
+            }
+            if (!placed) r++; 
+          }
+        });
+        container.style.height = `${maxRow * rowHeight + (maxRow - 1) * gap}px`;
+      }
+      renderGrid();
+      window.onresize = () => {
+        const newCols = window.innerWidth <= 560 ? 2 : 4;
+        if (cols !== newCols) { cols = newCols; cardsData.forEach(c => c.w = Math.min(parseInt(c.el.getAttribute('data-w')) || 1, cols)); }
+        renderGrid();
+      };
+
+      let draggingCardIndex = -1; let startX, startY, initialLeft, initialTop;
+      let longPressTimer;
+
+      cardsData.forEach((card) => {
+        if (card.el.dataset.bound === "true") return;
+        card.el.dataset.bound = "true";
+
+        card.el.addEventListener('pointerdown', (e) => {
+          if (e.target.tagName === 'BUTTON') return; 
+          draggingCardIndex = cardsData.indexOf(card);
+          startX = e.clientX; startY = e.clientY;
+          initialLeft = parseInt(card.el.style.left || 0); initialTop = parseInt(card.el.style.top || 0);
+          longPressTimer = setTimeout(() => { draggingCardIndex = -1; handleDeleteTask(card); }, 700);
+          card.el.classList.add('dragging'); card.el.setPointerCapture(e.pointerId);
+        });
+
+        card.el.addEventListener('pointermove', (e) => {
+          if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) { clearTimeout(longPressTimer); }
+          if (draggingCardIndex !== cardsData.indexOf(card)) return;
+          const dx = e.clientX - startX; const dy = e.clientY - startY;
+          card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
+          const containerRect = container.getBoundingClientRect();
+          const mouseX = e.clientX - containerRect.left; const mouseY = e.clientY - containerRect.top;
+          let targetIndex = -1;
+          cardsData.forEach((otherCard, i) => {
+             if (i === draggingCardIndex) return;
+             const rect = otherCard.el.getBoundingClientRect();
+             const cardLeft = rect.left - containerRect.left; const cardTop = rect.top - containerRect.top;
+             if (mouseX > cardLeft && mouseX < cardLeft + rect.width && mouseY > cardTop && mouseY < cardTop + rect.height) { targetIndex = i; }
+          });
+          if (targetIndex !== -1 && targetIndex !== draggingCardIndex) {
+             const draggingItem = cardsData.splice(draggingCardIndex, 1)[0];
+             cardsData.splice(targetIndex, 0, draggingItem);
+             draggingCardIndex = targetIndex; renderGrid(); 
+             card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
+          }
+        });
+
+        card.el.addEventListener('pointerup', (e) => {
+          clearTimeout(longPressTimer); 
+          if (draggingCardIndex === -1) return;
+          card.el.classList.remove('dragging'); card.el.releasePointerCapture(e.pointerId);
+          draggingCardIndex = -1; renderGrid(); 
+        });
+      });
+
+      function handleDeleteTask(targetCard) {
+        if (navigator.vibrate) navigator.vibrate(50);
+        const el = targetCard.el;
+        const taskId = el.getAttribute('data-id');
+        el.classList.remove('dragging'); el.classList.add('deleting');
+        const index = cardsData.indexOf(targetCard);
+        if (index > -1) { cardsData.splice(index, 1); renderGrid(); }
+        setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 200);
+        if (taskId) { callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {}); }
+      }
+    }
+  </script>
+</body>
+</html>
