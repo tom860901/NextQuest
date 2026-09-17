@@ -10,16 +10,33 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { min-height: 100vh; display: grid; place-items: center; background-color: #F8F9FA; color: var(--text-hi); overflow: hidden; position: relative; }
 
-    .bg-shape { position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.8; transition: background 0.5s ease; }
-    .shape-pink { top: -10%; left: -10%; width: 55vw; height: 55vw; background: #FFAAC3; }
-    .shape-orange { bottom: -15%; left: 15%; width: 45vw; height: 45vw; background: #FFD0A8; }
-    .shape-blue { top: 10%; right: -15%; width: 60vw; height: 60vw; background: #E0C3FC; }
+    /* ==========================================
+       1. 浮動雲背景動畫 (Ambient Cloud)
+    ========================================== */
+    @keyframes cloudFloat {
+      0% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(30px, -40px) scale(1.05); }
+      66% { transform: translate(-20px, 20px) scale(0.95); }
+      100% { transform: translate(0px, 0px) scale(1); }
+    }
+    
+    .bg-shape { 
+      position: absolute; border-radius: 50%; filter: blur(80px); 
+      z-index: -1; opacity: 0.8; transition: background 0.5s ease;
+      animation: cloudFloat 12s infinite alternate ease-in-out; 
+    }
+    .shape-pink { top: -10%; left: -10%; width: 55vw; height: 55vw; background: #FFAAC3; animation-duration: 14s; }
+    .shape-orange { bottom: -15%; left: 15%; width: 45vw; height: 45vw; background: #FFD0A8; animation-delay: -4s; animation-duration: 16s; }
+    .shape-blue { top: 10%; right: -15%; width: 60vw; height: 60vw; background: #E0C3FC; animation-delay: -7s; animation-duration: 18s; }
     
     body.dark { background-color: #0c0814; --text-hi: #F4F2FA; --text-mid: #9E9AA8; }
     body.dark .shape-pink { background: #7B2CBF; } 
     body.dark .shape-orange { background: #F72585; } 
     body.dark .shape-blue { background: #3A0CA3; } 
 
+    /* ==========================================
+       2. 介面與外殼 (毛玻璃果凍感)
+    ========================================== */
     .view-container { grid-area: 1 / 1; width: 90%; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .view-hidden { opacity: 0; transform: scale(0.92); pointer-events: none; visibility: hidden; }
     .view-active { opacity: 1; transform: scale(1); pointer-events: auto; visibility: visible; }
@@ -56,8 +73,6 @@
     .btn-main:active { transform: scale(0.96); }
     .btn-secondary { background: rgba(255,255,255,0.3); color: var(--text-hi); border: 1px solid rgba(255,255,255,0.5); box-shadow: none; }
     body.dark .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-hi); border-color: rgba(255,255,255,0.1); }
-    
-    /* 危險操作按鈕 (紅色) */
     .btn-danger { background: #E63946 !important; color: #FFFFFF !important; box-shadow: 0 8px 24px rgba(230, 57, 70, 0.3) !important; }
 
     .divider { display: flex; align-items: center; text-align: center; margin: 24px 0; color: var(--text-mid); font-size: 0.85rem; }
@@ -76,10 +91,42 @@
     .tag-btn.active { background: var(--text-hi); color: #FFF; border-color: transparent; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     body.dark .tag-btn.active { background: #E0C3FC; color: #181524; }
 
-    .grid-container { position: relative; width: 100%; transition: height 0.3s ease; }
-    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.2s, opacity 0.2s, box-shadow 0.2s; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; overflow: hidden; }
+    /* ==========================================
+       3. 卡片網格與 2.5D 透視設定
+    ========================================== */
+    .grid-container { 
+      position: relative; width: 100%; transition: height 0.3s ease; 
+      perspective: 1200px; /* 創造 Z 軸深度 */
+    }
+    
+    .widget-card { 
+      position: absolute; background: rgba(255, 255, 255, 0.4); 
+      border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px; 
+      display: flex; flex-direction: column; justify-content: center; align-items: center; 
+      font-weight: 600; overflow: hidden;
+      user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; 
+      
+      /* 2.5D 陰影與動畫設定 */
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3);
+      transform-style: preserve-3d;
+      transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  transform 0.4s ease-out, box-shadow 0.4s ease;
+    }
+    
+    body.dark .widget-card {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,255,255,0.05);
+    }
+
     .widget-card:hover { transform: translateY(-2px); }
-    .widget-card.dragging { z-index: 50; cursor: grabbing; transform: scale(1.04); box-shadow: 0 20px 40px rgba(0,0,0,0.15); transition: transform 0.1s; }
+    
+    /* 拖曳時強制懸浮與加深陰影 (!important 防止被行內樣式覆蓋) */
+    .widget-card.dragging { 
+      z-index: 50; cursor: grabbing; 
+      transform: translateZ(30px) scale(1.05) !important; 
+      box-shadow: 0 30px 60px rgba(0,0,0,0.2) !important; 
+      transition: transform 0.1s; 
+    }
     .widget-card.deleting { transform: scale(0.5); opacity: 0; pointer-events: none; }
     .card-tag { position: absolute; top: 12px; left: 16px; font-size: 0.75rem; color: var(--text-mid); font-weight: 500; }
 
@@ -122,9 +169,12 @@
       <div style="display: flex; gap: 12px;">
         <button class="bubble-menu-btn" onclick="openTaskModal()" aria-label="新增任務">＋</button>
         <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題">☾</button>
+        <button class="bubble-menu-btn" onclick="logout()" aria-label="登出">🚪</button>
       </div>
     </div>
-    <div class="grid-container" id="grid-container"></div>
+    <div class="grid-container" id="grid-container">
+      <div style="text-align:center; padding: 40px; color: var(--text-mid);">載入任務矩陣中...</div>
+    </div>
   </div>
 
   <!-- VIEW 3: 新增任務 Modal -->
@@ -151,9 +201,7 @@
   <div id="delete-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       <h2 style="font-size: 1.25rem; margin-bottom: 16px;">⚠️ 刪除確認</h2>
-      <p style="color: var(--text-mid); margin-bottom: 28px; font-size: 0.95rem;">
-        確定要將這個任務從控制中心移除嗎？<br>此動作無法復原。
-      </p>
+      <p style="color: var(--text-mid); margin-bottom: 28px; font-size: 0.95rem;">確定要將這個任務從控制中心移除嗎？<br>此動作無法復原。</p>
       <div style="display: flex; gap: 12px;">
         <button class="btn-main btn-secondary" onclick="closeDeleteModal()">保留卡片</button>
         <button class="btn-main btn-danger" onclick="confirmDeleteTask()">確定刪除</button>
@@ -163,16 +211,16 @@
 
   <script>
     // =========================================
-    //   系統設定
+    //   系統設定 (請填入正確的 API 網址)
     // =========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw9130xk5gFZxkrtpIR-YQSClZaqW3IH0JxU-Ka4fRKsdaq9FFZZzxIEgvVBExnxXTVOQ/exec";
     const GOOGLE_CLIENT_ID = "867237692766-9o2nhlnrqlq00k75apvsbvl2r2u1jsqi.apps.googleusercontent.com";
     
     let isLoginMode = true;
     let currentUser = ""; 
-    let targetElementToDelete = null; // 記錄等待刪除的卡片
+    let targetElementToDelete = null; 
 
-    // --- Google SSO 初始化 ---
+    // --- 初始化 ---
     window.onload = function () {
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
@@ -182,6 +230,14 @@
         document.getElementById("google-btn-container"),
         { theme: "outline", size: "large", shape: "pill", width: 280 } 
       );
+
+      const savedUser = localStorage.getItem('nextquest_user');
+      if (savedUser) {
+        currentUser = savedUser;
+        document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
+        document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
+        callGASAPI({ action: 'getTasks', account: currentUser }, renderTasks);
+      }
     };
 
     function decodeJwtResponse(token) {
@@ -196,16 +252,15 @@
     function handleCredentialResponse(response) {
        const responsePayload = decodeJwtResponse(response.credential);
        document.getElementById('message').innerText = "Google 驗證成功，讀取中...";
-       
        callGASAPI({ action: 'googleLogin', email: responsePayload.email, name: responsePayload.name }, (res) => {
           if(res.success) {
             currentUser = res.account;
+            localStorage.setItem('nextquest_user', currentUser);
             callGASAPI({ action: 'getTasks', account: currentUser }, renderTasks);
           }
        });
     }
 
-    // --- 手動登入/註冊邏輯 ---
     function toggleMode() {
       isLoginMode = !isLoginMode;
       document.getElementById('form-title').innerText = isLoginMode ? 'NextQuest' : '新建帳號';
@@ -221,7 +276,6 @@
       
       if (!acc || !pwd) { msgBox.innerText = "請完整填寫帳號與密碼。"; msgBox.className = ''; return; }
       msgBox.innerText = "驗證中..."; msgBox.className = ''; 
-      
       const actionType = isLoginMode ? 'login' : 'register';
       
       callGASAPI({ action: actionType, account: acc, password: pwd }, (res) => {
@@ -232,13 +286,23 @@
              setTimeout(toggleMode, 1500); 
            } else {
              currentUser = res.account;
+             localStorage.setItem('nextquest_user', currentUser);
              callGASAPI({ action: 'getTasks', account: currentUser }, renderTasks);
            }
          } else { msgBox.className = ''; }
       });
     }
 
-    // --- Fetch API ---
+    function logout() {
+      localStorage.removeItem('nextquest_user');
+      currentUser = "";
+      document.getElementById('password').value = "";
+      document.getElementById('message').innerText = "";
+      document.getElementById('dashboard-view').classList.replace('view-active', 'view-hidden');
+      document.getElementById('login-view').classList.replace('view-hidden', 'view-active');
+      document.getElementById('grid-container').innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-mid);">載入任務矩陣中...</div>`;
+    }
+
     function callGASAPI(payload, callback) {
       fetch(GAS_API_URL, {
         method: 'POST',
@@ -253,7 +317,6 @@
       });
     }
 
-    // --- 主題切換 ---
     const themeBtns = document.querySelectorAll('.theme-toggle-btn');
     themeBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -263,11 +326,9 @@
       });
     });
 
-    // --- 渲染卡片 ---
     function renderTasks(tasksData) {
       const container = document.getElementById('grid-container');
       container.innerHTML = ""; 
-      
       tasksData.forEach(task => {
          const card = document.createElement('div');
          card.className = "widget-card";
@@ -277,13 +338,11 @@
          card.innerHTML = `<div class="card-tag">${task.tag}</div><div style="text-align:center; padding:10px 10px 0 10px; font-size:1.1rem;">${task.title}</div>`;
          container.appendChild(card);
       });
-
       document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
       document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
       setTimeout(() => { initGridEngine(); }, 50);
     }
 
-    // --- 新增任務 Modal ---
     function selectTag(btn) { document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
     function openTaskModal() { document.getElementById('task-modal').classList.replace('view-hidden', 'view-active'); setTimeout(() => { document.getElementById('new-task-input').focus(); }, 100); }
     function closeTaskModal() { document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); document.getElementById('new-task-input').value = ""; }
@@ -312,51 +371,31 @@
       });
     }
 
-    // --- 刪除確認 Modal ---
     function openDeleteModal(el) {
       if (navigator.vibrate) navigator.vibrate(50);
       targetElementToDelete = el;
       document.getElementById('delete-modal').classList.replace('view-hidden', 'view-active');
     }
-    
-    function closeDeleteModal() {
-      document.getElementById('delete-modal').classList.replace('view-active', 'view-hidden');
-      targetElementToDelete = null;
-    }
-
+    function closeDeleteModal() { document.getElementById('delete-modal').classList.replace('view-active', 'view-hidden'); targetElementToDelete = null; }
     function confirmDeleteTask() {
       if (!targetElementToDelete) return;
       const el = targetElementToDelete;
       const taskId = el.getAttribute('data-id');
-      
-      // 關閉視窗並開始縮小消失動畫
       closeDeleteModal();
       el.classList.add('deleting');
-
-      // 動畫結束後移除元素，重新排版，並呼叫 API
-      setTimeout(() => {
-        if (el.parentNode) el.parentNode.removeChild(el);
-        initGridEngine(); 
-      }, 200);
-
-      if (taskId) {
-        callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {});
-      }
+      setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); initGridEngine(); }, 200);
+      if (taskId) { callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {}); }
     }
 
     // =========================================
-    //   核心推擠引擎 (修復重疊 Bug 版本)
+    //   核心引擎 (包含拖曳、長按刪除與 2.5D 滑鼠感測)
     // =========================================
     function initGridEngine() {
       let oldContainer = document.getElementById('grid-container');
-      
-      // 【修復 Bug 關鍵 1】：深度複製容器，消滅所有舊的幽靈事件
       let container = oldContainer.cloneNode(true);
       oldContainer.parentNode.replaceChild(container, oldContainer);
 
       const cardElements = Array.from(container.children);
-      
-      // 【修復 Bug 關鍵 2】：解除複製過來的 bound 狀態，確保新引擎能接管
       cardElements.forEach(el => el.removeAttribute('data-bound'));
 
       let cols = window.innerWidth <= 560 ? 2 : 4; 
@@ -403,13 +442,13 @@
         if (card.el.dataset.bound === "true") return;
         card.el.dataset.bound = "true";
 
+        // --- 拖曳與長按事件 ---
         card.el.addEventListener('pointerdown', (e) => {
           if (e.target.tagName === 'BUTTON') return; 
           draggingCardIndex = cardsData.indexOf(card);
           startX = e.clientX; startY = e.clientY;
           initialLeft = parseInt(card.el.style.left || 0); initialTop = parseInt(card.el.style.top || 0);
           
-          // 長按觸發刪除確認 Modal
           longPressTimer = setTimeout(() => { 
             draggingCardIndex = -1; 
             card.el.classList.remove('dragging');
@@ -417,36 +456,71 @@
             openDeleteModal(card.el); 
           }, 700);
 
-          card.el.classList.add('dragging'); card.el.setPointerCapture(e.pointerId);
+          // 清除傾斜，保證拖曳時是正向的
+          card.el.style.transform = '';
+          card.el.classList.add('dragging'); 
+          card.el.setPointerCapture(e.pointerId);
         });
 
         card.el.addEventListener('pointermove', (e) => {
+          // 若有移動，取消長按刪除
           if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) { clearTimeout(longPressTimer); }
-          if (draggingCardIndex !== cardsData.indexOf(card)) return;
-          const dx = e.clientX - startX; const dy = e.clientY - startY;
-          card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
-          const containerRect = container.getBoundingClientRect();
-          const mouseX = e.clientX - containerRect.left; const mouseY = e.clientY - containerRect.top;
-          let targetIndex = -1;
-          cardsData.forEach((otherCard, i) => {
-             if (i === draggingCardIndex) return;
-             const rect = otherCard.el.getBoundingClientRect();
-             const cardLeft = rect.left - containerRect.left; const cardTop = rect.top - containerRect.top;
-             if (mouseX > cardLeft && mouseX < cardLeft + rect.width && mouseY > cardTop && mouseY < cardTop + rect.height) { targetIndex = i; }
-          });
-          if (targetIndex !== -1 && targetIndex !== draggingCardIndex) {
-             const draggingItem = cardsData.splice(draggingCardIndex, 1)[0];
-             cardsData.splice(targetIndex, 0, draggingItem);
-             draggingCardIndex = targetIndex; renderGrid(); 
-             card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
+          
+          // 如果目前正在拖曳「這張卡片」，執行拖曳換位運算
+          if (draggingCardIndex !== -1 && draggingCardIndex === cardsData.indexOf(card)) {
+            const dx = e.clientX - startX; const dy = e.clientY - startY;
+            card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
+            const containerRect = container.getBoundingClientRect();
+            const mouseX = e.clientX - containerRect.left; const mouseY = e.clientY - containerRect.top;
+            let targetIndex = -1;
+            cardsData.forEach((otherCard, i) => {
+               if (i === draggingCardIndex) return;
+               const rect = otherCard.el.getBoundingClientRect();
+               const cardLeft = rect.left - containerRect.left; const cardTop = rect.top - containerRect.top;
+               if (mouseX > cardLeft && mouseX < cardLeft + rect.width && mouseY > cardTop && mouseY < cardTop + rect.height) { targetIndex = i; }
+            });
+            if (targetIndex !== -1 && targetIndex !== draggingCardIndex) {
+               const draggingItem = cardsData.splice(draggingCardIndex, 1)[0];
+               cardsData.splice(targetIndex, 0, draggingItem);
+               draggingCardIndex = targetIndex; renderGrid(); 
+               card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
+            }
+            return; // 拖曳中就不執行下方的 2.5D 傾斜
           }
+
+          // --- 2.5D 滑鼠跟隨傾斜 (Hover 狀態下執行) ---
+          if (draggingCardIndex === -1) {
+            const rect = card.el.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            // 計算傾斜角度 (15 為強度參數)
+            const rotateX = ((y - centerY) / centerY) * -15; 
+            const rotateY = ((x - centerX) / centerX) * 15;
+            
+            card.el.style.transition = 'none'; // 移除過渡，使跟隨更靈敏
+            card.el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+            card.el.style.boxShadow = `0 20px 40px rgba(0,0,0,0.1)`;
+          }
+        });
+
+        // --- 滑鼠移出，恢復原本的 Q 彈狀態 ---
+        card.el.addEventListener('pointerleave', () => {
+          if (draggingCardIndex !== -1) return;
+          card.el.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s ease';
+          card.el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)`;
+          card.el.style.boxShadow = '';
         });
 
         card.el.addEventListener('pointerup', (e) => {
           clearTimeout(longPressTimer); 
           if (draggingCardIndex === -1) return;
-          card.el.classList.remove('dragging'); card.el.releasePointerCapture(e.pointerId);
-          draggingCardIndex = -1; renderGrid(); 
+          card.el.classList.remove('dragging'); 
+          card.el.releasePointerCapture(e.pointerId);
+          draggingCardIndex = -1; 
+          renderGrid(); 
         });
       });
     }
