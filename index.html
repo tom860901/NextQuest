@@ -335,9 +335,9 @@
          let progressHtml = total > 0 ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%"></div></div>` : '';
          let subTaskHint = total > 0 ? `<div style="font-size:0.75rem; color:var(--text-mid); margin-top:4px;">${done}/${total} 步驟</div>` : '';
 
-         card.innerHTML = `
-            <div class="card-tag" style="top: 10px; left: 14px; font-size: 0.7rem;">${task.tag}</div>
-            <div style="text-align:center; padding: 28px 12px 12px 12px; font-size: 1rem; line-height:1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; width: 100%;">${task.title}</div>
+        card.innerHTML = `
+            <div class="card-tag" style="top: 8px; left: 12px; font-size: 0.65rem;">${task.tag}</div>
+            <div style="text-align:center; width: 100%; margin-top: 16px; font-size: 0.95rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">${task.title}</div>
             ${subTaskHint}
             ${progressHtml}
          `;
