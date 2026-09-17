@@ -62,6 +62,7 @@
     body.dark .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-hi); border-color: rgba(255,255,255,0.1); }
     .btn-danger { background: #E63946 !important; color: #FFFFFF !important; box-shadow: 0 8px 24px rgba(230, 57, 70, 0.3) !important; }
     .btn-success { background: #2A9D8F !important; color: #FFFFFF !important; box-shadow: 0 8px 24px rgba(42, 157, 143, 0.3) !important; }
+    .btn-warning { background: #F4A261 !important; color: #FFFFFF !important; box-shadow: 0 8px 24px rgba(244, 162, 97, 0.3) !important; }
 
     .form-footer { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-mid); cursor: pointer; text-decoration: underline; }
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
@@ -121,7 +122,6 @@
     .checkbox-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--text-mid); display: flex; justify-content: center; align-items: center; font-size: 14px; color: transparent; transition: all 0.2s; }
     .check-item.done .checkbox-circle { background: #2A9D8F; border-color: #2A9D8F; color: white; }
 
-    /* 已完成清單項目樣式 */
     .archive-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.3); border-radius: 14px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.4); }
     body.dark .archive-item { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
     .archive-item > div { flex: 1; min-width: 0; }
@@ -213,7 +213,7 @@
     </div>
   </div>
 
-  <!-- VIEW 4: 任務詳情 Modal -->
+  <!-- VIEW 4: 任務詳情 Modal (含 ➡️ 移到明天 Rollover 按鈕) -->
   <div id="detail-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       <div style="font-size: 0.8rem; color: var(--text-mid); margin-bottom: 4px;" id="detail-tag"></div>
@@ -222,12 +222,13 @@
       
       <div id="detail-checklist" class="checklist-container"></div>
       
-      <div style="display: flex; gap: 12px; margin-top: 24px;">
-        <button class="btn-main btn-success" style="flex: 1;" onclick="markTaskCompleted()">✅ 標記完成</button>
-        <button class="btn-main btn-secondary" onclick="toggleCardSize()" style="flex: 1;">⛶ 大小</button>
+      <div style="display: flex; gap: 8px; margin-top: 24px;">
+        <button class="btn-main btn-success" style="flex: 1; padding: 12px;" onclick="markTaskCompleted()">✅ 完成</button>
+        <button class="btn-main btn-warning" style="flex: 1; padding: 12px;" onclick="rolloverTaskToTomorrow()">➡️ 移到明天</button>
       </div>
-      <div style="margin-top: 10px;">
-        <button class="btn-main btn-secondary" onclick="closeDetailModal()" style="width: 100%;">關閉</button>
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <button class="btn-main btn-secondary" onclick="toggleCardSize()" style="flex: 1; padding: 12px;">⛶ 大小</button>
+        <button class="btn-main btn-secondary" onclick="closeDetailModal()" style="flex: 1; padding: 12px;">關閉</button>
       </div>
     </div>
   </div>
@@ -386,7 +387,6 @@
          let progressHtml = total > 0 ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%"></div></div>` : '';
          let subTaskHint = total > 0 ? `<div style="font-size:0.75rem; color:var(--text-mid); margin-top:4px;">${done}/${total} 步驟</div>` : '';
          
-         // 📅 安全過濾日期格式 (只取 YYYY-MM-DD，避免後端轉成 ISO 時間亂碼)
          let dueHtml = '';
          if (task.dueDate) {
            let cleanDate = task.dueDate.split('T')[0];
@@ -503,7 +503,7 @@
       try { subTasksArr = JSON.parse(task.subTasks); } catch(e){}
       
       if(subTasksArr.length === 0) {
-        listContainer.innerHTML = `<div style="text-align:center; color:var(--text-mid); padding: 20px;">一般任務，可直接點擊下方「標記完成」。</div>`;
+        listContainer.innerHTML = `<div style="text-align:center; color:var(--text-mid); padding: 20px;">一般任務，可直接標記完成或移到明天。</div>`;
         document.getElementById('detail-progress-text').innerText = '';
       } else {
         renderChecklist(subTasksArr);
@@ -548,6 +548,26 @@
 
       allTasksData[taskIndex].status = 'completed';
       callGASAPI({ action: 'updateTaskStatus', taskId: currentDetailTaskId, status: 'completed' }, () => {});
+      
+      closeDetailModal();
+      renderTasks();
+    }
+
+    // ⚡ 執行 Rollover (移到明天)
+    function rolloverTaskToTomorrow() {
+      if(!currentDetailTaskId) return;
+      const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
+      if(taskIndex === -1) return;
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+      // 更新前端狀態 (改日期並升級為緊急高亮)
+      allTasksData[taskIndex].dueDate = tomorrowStr;
+      allTasksData[taskIndex].priority = '🔴 緊急';
+
+      callGASAPI({ action: 'rolloverTask', taskId: currentDetailTaskId }, () => {});
       
       closeDetailModal();
       renderTasks();
