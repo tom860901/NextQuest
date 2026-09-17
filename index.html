@@ -10,9 +10,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { min-height: 100vh; display: grid; place-items: center; background-color: #F8F9FA; color: var(--text-hi); overflow: hidden; position: relative; }
 
-    /* ==========================================
-       1. 浮動雲背景動畫 (Ambient Cloud)
-    ========================================== */
     @keyframes cloudFloat {
       0% { transform: translate(0px, 0px) scale(1); }
       33% { transform: translate(30px, -40px) scale(1.05); }
@@ -20,11 +17,7 @@
       100% { transform: translate(0px, 0px) scale(1); }
     }
     
-    .bg-shape { 
-      position: absolute; border-radius: 50%; filter: blur(80px); 
-      z-index: -1; opacity: 0.8; transition: background 0.5s ease;
-      animation: cloudFloat 12s infinite alternate ease-in-out; 
-    }
+    .bg-shape { position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.8; animation: cloudFloat 12s infinite alternate ease-in-out; }
     .shape-pink { top: -10%; left: -10%; width: 55vw; height: 55vw; background: #FFAAC3; animation-duration: 14s; }
     .shape-orange { bottom: -15%; left: 15%; width: 45vw; height: 45vw; background: #FFD0A8; animation-delay: -4s; animation-duration: 16s; }
     .shape-blue { top: 10%; right: -15%; width: 60vw; height: 60vw; background: #E0C3FC; animation-delay: -7s; animation-duration: 18s; }
@@ -34,25 +27,17 @@
     body.dark .shape-orange { background: #F72585; } 
     body.dark .shape-blue { background: #3A0CA3; } 
 
-    /* ==========================================
-       2. 介面與外殼 (毛玻璃果凍感)
-    ========================================== */
-    .view-container { 
-      grid-area: 1 / 1; width: 90%; 
-      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
-      /* 使外層容器支援 3D */
-      transform-style: preserve-3d;
-    }
+    .view-container { grid-area: 1 / 1; width: 90%; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); transform-style: preserve-3d; }
     .view-hidden { opacity: 0; transform: scale(0.92) !important; pointer-events: none; visibility: hidden; }
     .view-active { opacity: 1; pointer-events: auto; visibility: visible; }
 
-    .window-shell {
+    .window-shell, .modal-shell {
       background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px) saturate(150%);
       -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(255, 255, 255, 0.6);
       border-radius: var(--card-radius); padding: 40px 32px;
       box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
     }
-    body.dark .window-shell, body.dark .widget-card, body.dark .modal-shell {
+    body.dark .window-shell, body.dark .modal-shell {
       background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);
       border-top: 1px solid rgba(255, 255, 255, 0.2); border-left: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255,255,255,0.02);
@@ -67,79 +52,77 @@
     body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
     
     .input-group { margin-bottom: 20px; }
-    .input-group label { display: block; font-size: 0.85rem; color: var(--text-mid); margin-bottom: 8px; margin-left: 4px; font-weight: 600; }
-    .input-group input { width: 100%; padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.5); color: var(--text-hi); font-size: 1rem; outline: none; transition: all 0.3s; }
+    .input-group input { width: 100%; padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.5); color: var(--text-hi); font-size: 1rem; outline: none; }
     body.dark .input-group input { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: white; }
-    .input-group input:focus { background: rgba(255, 255, 255, 0.9); border-color: #FFFFFF; }
-    body.dark .input-group input:focus { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.4); }
 
-    .btn-main { width: 100%; padding: 16px; border-radius: 20px; border: none; background: #2D283E; color: #FFFFFF; font-size: 1.05rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); transition: transform 0.2s; margin-top: 8px; }
+    .btn-main { width: 100%; padding: 16px; border-radius: 20px; border: none; background: #2D283E; color: #FFFFFF; font-size: 1.05rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); margin-top: 8px; }
     body.dark .btn-main { background: #E0C3FC; color: #181524; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
     .btn-main:active { transform: scale(0.96); }
     .btn-secondary { background: rgba(255,255,255,0.3); color: var(--text-hi); border: 1px solid rgba(255,255,255,0.5); box-shadow: none; }
     body.dark .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-hi); border-color: rgba(255,255,255,0.1); }
     .btn-danger { background: #E63946 !important; color: #FFFFFF !important; box-shadow: 0 8px 24px rgba(230, 57, 70, 0.3) !important; }
 
-    .divider { display: flex; align-items: center; text-align: center; margin: 24px 0; color: var(--text-mid); font-size: 0.85rem; }
-    .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid rgba(0,0,0,0.1); }
-    body.dark .divider::before, body.dark .divider::after { border-bottom: 1px solid rgba(255,255,255,0.15); }
-    .divider span { padding: 0 10px; }
-
-    .form-footer { text-align: center; margin-top: 20px; }
-    .toggle-text { font-size: 0.85rem; color: var(--text-mid); cursor: pointer; text-decoration: underline; }
+    .form-footer { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-mid); cursor: pointer; text-decoration: underline; }
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
     .success { color: #2A9D8F !important; }
 
-    .tag-selector { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; }
-    .tag-btn { padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
-    body.dark .tag-btn { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
-    .tag-btn.active { background: var(--text-hi); color: #FFF; border-color: transparent; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    /* --- 新增：標籤與優先順序選擇器 --- */
+    .selector-group { margin-bottom: 24px; text-align: left; }
+    .selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; margin-left: 8px; }
+    .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag-btn, .pri-btn { padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
+    body.dark .tag-btn, body.dark .pri-btn { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+    .tag-btn.active { background: var(--text-hi); color: #FFF; border-color: transparent; }
     body.dark .tag-btn.active { background: #E0C3FC; color: #181524; }
+    
+    .pri-btn[data-val="🔴 緊急"].active { background: #E63946; color: white; border-color: transparent; }
+    .pri-btn[data-val="🟡 一般"].active { background: #E9C46A; color: #2B2543; border-color: transparent; }
+    .pri-btn[data-val="🟢 輕鬆"].active { background: #2A9D8F; color: white; border-color: transparent; }
 
-    /* ==========================================
-       3. 卡片網格與 2.5D 透視設定
-    ========================================== */
-    .grid-container { 
-      position: relative; width: 100%; transition: height 0.3s ease; 
-      perspective: 1200px; /* 創造 Z 軸深度 */
-    }
-    
-    .widget-card { 
-      position: absolute; background: rgba(255, 255, 255, 0.4); 
-      border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px; 
-      display: flex; flex-direction: column; justify-content: center; align-items: center; 
-      font-weight: 600; overflow: hidden;
-      user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; 
-      
-      /* 2.5D 陰影與動畫設定 */
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3);
-      transform-style: preserve-3d;
-      transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                  left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                  transform 0.4s ease-out, box-shadow 0.4s ease;
-    }
-    
-    body.dark .widget-card {
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,255,255,0.05);
-    }
-    
-    /* 拖曳時強制懸浮與加深陰影 (!important 防止被行內樣式覆蓋) */
-    .widget-card.dragging { 
-      z-index: 50; cursor: grabbing; 
-      transform: translateZ(30px) scale(1.05) !important; 
-      box-shadow: 0 30px 60px rgba(0,0,0,0.2) !important; 
-      transition: transform 0.1s; 
-    }
+    /* --- 子任務輸入區 --- */
+    .manual-subtasks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .subtask-input-row { display: flex; gap: 8px; }
+    .subtask-input-row input { flex: 1; padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.3); outline: none; }
+    body.dark .subtask-input-row input { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: white; }
+    .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 8px; border-radius: 12px; cursor: pointer; font-weight: 600; }
+
+    /* --- 網格卡片 --- */
+    .grid-container { position: relative; width: 100%; transition: height 0.3s ease; perspective: 1200px; }
+    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3); transform-style: preserve-3d; transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s ease-out, box-shadow 0.4s ease; padding: 16px; }
+    body.dark .widget-card { box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,255,255,0.05); }
+    .widget-card.dragging { z-index: 50; cursor: grabbing; transform: translateZ(30px) scale(1.05) !important; box-shadow: 0 30px 60px rgba(0,0,0,0.2) !important; transition: transform 0.1s; }
     .widget-card.deleting { transform: scale(0.5); opacity: 0; pointer-events: none; }
-    .card-tag { position: absolute; top: 12px; left: 16px; font-size: 0.75rem; color: var(--text-mid); font-weight: 500; }
+    
+    /* 優先順序邊框發光 */
+    .widget-card[data-pri="🔴 緊急"] { border-top: 2px solid #E63946; }
+    .widget-card[data-pri="🟡 一般"] { border-top: 2px solid #E9C46A; }
+    .widget-card[data-pri="🟢 輕鬆"] { border-top: 2px solid #2A9D8F; }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 100; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .card-tag { position: absolute; top: 12px; left: 16px; font-size: 0.75rem; color: var(--text-mid); font-weight: 500; }
+    
+    /* 進度條設計 */
+    .progress-bar-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(0,0,0,0.05); }
+    body.dark .progress-bar-bg { background: rgba(255,255,255,0.05); }
+    .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; border-radius: 0 4px 4px 0; }
+    body.dark .progress-bar-fill { background: #E0C3FC; box-shadow: 0 0 10px #E0C3FC; }
+
+    /* --- 彈跳視窗共用 --- */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 100; transition: all 0.3s; }
     body.dark .modal-overlay { background: rgba(0, 0, 0, 0.5); }
-    .modal-shell { max-width: 360px; width: 90%; padding: 32px 28px; }
+    .modal-shell { max-width: 400px; width: 90%; padding: 32px 28px; max-height: 85vh; overflow-y: auto; }
+
+    /* 任務詳情清單 */
+    .checklist-container { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; text-align: left; }
+    .check-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.4); border-radius: 16px; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.5); }
+    body.dark .check-item { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+    .check-item:hover { background: rgba(255,255,255,0.6); }
+    body.dark .check-item:hover { background: rgba(255,255,255,0.1); }
+    .check-item.done { opacity: 0.6; text-decoration: line-through; }
+    .checkbox-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--text-mid); display: flex; justify-content: center; align-items: center; font-size: 14px; color: transparent; transition: all 0.2s; }
+    .check-item.done .checkbox-circle { background: #2A9D8F; border-color: #2A9D8F; color: white; }
   </style>
 </head>
 <body>
-
   <div class="bg-shape shape-pink"></div>
   <div class="bg-shape shape-orange"></div>
   <div class="bg-shape shape-blue"></div>
@@ -150,19 +133,12 @@
       <h1 id="form-title">NextQuest</h1>
       <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題" style="position: absolute; right: 0;">☾</button>
     </div>
-    <div class="input-group">
-      <input type="text" id="account" placeholder="Account / Email" autocomplete="off">
-    </div>
-    <div class="input-group">
-      <input type="password" id="password" placeholder="Password">
-    </div>
+    <div class="input-group"><input type="text" id="account" placeholder="Account / Email" autocomplete="off"></div>
+    <div class="input-group"><input type="password" id="password" placeholder="Password"></div>
     <button id="action-btn" class="btn-main" onclick="submitManualForm()">進入系統</button>
     <div id="message"></div>
-    <div class="form-footer">
-      <div class="toggle-text" onclick="toggleMode()">沒有帳號？點此新建帳號</div>
-    </div>
-    <div class="divider"><span>或使用</span></div>
-    <div id="google-btn-container" style="display: flex; justify-content: center; min-height: 40px;"></div>
+    <div class="form-footer" onclick="toggleMode()">沒有帳號？點此新建帳號</div>
+    <div style="display: flex; justify-content: center; min-height: 40px; margin-top:24px;" id="google-btn-container"></div>
   </div>
 
   <!-- VIEW 2: 控制中心 Dashboard -->
@@ -170,9 +146,9 @@
     <div class="titlebar">
       <h1>Control Center</h1>
       <div style="display: flex; gap: 12px;">
-        <button class="bubble-menu-btn" onclick="openTaskModal()" aria-label="新增任務">＋</button>
-        <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題">☾</button>
-        <button class="bubble-menu-btn" onclick="logout()" aria-label="登出">🚪</button>
+        <button class="bubble-menu-btn" onclick="openTaskModal()">＋</button>
+        <button class="bubble-menu-btn theme-toggle-btn">☾</button>
+        <button class="bubble-menu-btn" onclick="logout()">🚪</button>
       </div>
     </div>
     <div class="grid-container" id="grid-container">
@@ -184,29 +160,66 @@
   <div id="task-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell">
       <h2 style="font-size: 1.25rem; margin-bottom: 24px; text-align: center;">✨ 新增目標任務</h2>
-      <div class="tag-selector" id="tag-selector">
-        <div class="tag-btn active" onclick="selectTag(this)" data-tag="⚡️ 碎片">⚡️ 碎片</div>
-        <div class="tag-btn" onclick="selectTag(this)" data-tag="🧪 試錯">🧪 試錯</div>
-        <div class="tag-btn" onclick="selectTag(this)" data-tag="🧠 深度">🧠 深度</div>
-        <div class="tag-btn" onclick="selectTag(this)" data-tag="🎮 例行">🎮 例行</div>
+      
+      <div class="selector-group">
+        <div class="selector-title">任務類型</div>
+        <div class="tag-selector">
+          <div class="tag-btn active" onclick="selectOpt('.tag-btn', this)" data-val="⚡️ 碎片">⚡️ 碎片</div>
+          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🧪 試錯">🧪 試錯</div>
+          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🧠 深度">🧠 深度</div>
+        </div>
       </div>
+
+      <div class="selector-group">
+        <div class="selector-title">優先順序</div>
+        <div class="tag-selector">
+          <div class="pri-btn" onclick="selectOpt('.pri-btn', this)" data-val="🔴 緊急">🔴 緊急</div>
+          <div class="pri-btn active" onclick="selectOpt('.pri-btn', this)" data-val="🟡 一般">🟡 一般</div>
+          <div class="pri-btn" onclick="selectOpt('.pri-btn', this)" data-val="🟢 輕鬆">🟢 輕鬆</div>
+        </div>
+      </div>
+
       <div class="input-group">
-        <input type="text" id="new-task-input" placeholder="例如：去超商買咖啡..." autocomplete="off">
+        <input type="text" id="new-task-input" placeholder="大目標名稱 (例：規劃日本旅遊)" autocomplete="off">
       </div>
-      <div style="display: flex; gap: 12px;">
+
+      <div class="selector-group">
+        <div class="selector-title">階段性子任務 (選填)</div>
+        <div id="manual-subtasks-container" class="manual-subtasks">
+          <!-- JS 動態新增輸入框 -->
+        </div>
+        <button class="add-step-btn" style="width:100%" onclick="addManualSubtaskInput()">➕ 新增一個步驟</button>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
         <button class="btn-main btn-secondary" onclick="closeTaskModal()">取消</button>
         <button class="btn-main" onclick="confirmAddTask()">建立卡片</button>
       </div>
     </div>
   </div>
 
-  <!-- VIEW 4: 刪除確認 Modal -->
+  <!-- VIEW 4: 任務詳情 (打勾) Modal -->
+  <div id="detail-modal" class="modal-overlay view-hidden">
+    <div class="window-shell modal-shell" style="text-align: center;">
+      <div style="font-size: 0.8rem; color: var(--text-mid); margin-bottom: 4px;" id="detail-tag"></div>
+      <h2 style="font-size: 1.35rem; margin-bottom: 8px;" id="detail-title"></h2>
+      <div id="detail-progress-text" style="font-size: 0.85rem; font-weight: 600; color: #2A9D8F;"></div>
+      
+      <div id="detail-checklist" class="checklist-container">
+        <!-- 這裡會由 JS 渲染 Checkbox -->
+      </div>
+      
+      <button class="btn-main" onclick="closeDetailModal()">完成並關閉</button>
+    </div>
+  </div>
+
+  <!-- VIEW 5: 刪除確認 Modal -->
   <div id="delete-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       <h2 style="font-size: 1.25rem; margin-bottom: 16px;">⚠️ 刪除確認</h2>
-      <p style="color: var(--text-mid); margin-bottom: 28px; font-size: 0.95rem;">確定要將這個任務從控制中心移除嗎？<br>此動作無法復原。</p>
+      <p style="color: var(--text-mid); margin-bottom: 28px; font-size: 0.95rem;">確定移除此任務嗎？</p>
       <div style="display: flex; gap: 12px;">
-        <button class="btn-main btn-secondary" onclick="closeDeleteModal()">保留卡片</button>
+        <button class="btn-main btn-secondary" onclick="closeDeleteModal()">保留</button>
         <button class="btn-main btn-danger" onclick="confirmDeleteTask()">確定刪除</button>
       </div>
     </div>
@@ -222,81 +235,52 @@
     let isLoginMode = true;
     let currentUser = ""; 
     let targetElementToDelete = null; 
+    let allTasksData = []; // 緩存所有任務資料
+    let currentDetailTaskId = null; // 紀錄目前打開詳情的任務ID
 
-    // --- 初始化 ---
     window.onload = function () {
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleCredentialResponse
-      });
-      google.accounts.id.renderButton(
-        document.getElementById("google-btn-container"),
-        { theme: "outline", size: "large", shape: "pill", width: 280 } 
-      );
-
-      // 👉 啟動全域雙層 3D 視差引擎
+      google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
+      google.accounts.id.renderButton(document.getElementById("google-btn-container"), { theme: "outline", size: "large", shape: "pill", width: 280 });
       initGlobalTilt();
-
       const savedUser = localStorage.getItem('nextquest_user');
       if (savedUser) {
         currentUser = savedUser;
         document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
         document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
-        callGASAPI({ action: 'getTasks', account: currentUser }, renderTasks);
+        fetchTasks();
       }
     };
 
-    // ==========================================
-    //   ✨ 全域 2.5D 視差引擎 (外圍主視窗傾斜)
-    // ==========================================
+    function fetchTasks() {
+      callGASAPI({ action: 'getTasks', account: currentUser }, (data) => {
+        allTasksData = data;
+        renderTasks();
+      });
+    }
+
     function initGlobalTilt() {
       document.addEventListener('mousemove', (e) => {
         const activeView = document.querySelector('.view-active');
         if (!activeView) return;
-        
         activeView.style.transition = 'transform 0.1s ease-out';
-        
-        const x = e.clientX;
-        const y = e.clientY;
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-        
-        // ⚠️ 最外圍的傾斜角度極小 (2度)，避免頭暈
-        const rotateX = ((y - centerY) / centerY) * -2; 
-        const rotateY = ((x - centerX) / centerX) * 2;
-        
+        const rotateX = ((e.clientY - window.innerHeight / 2) / (window.innerHeight / 2)) * -2; 
+        const rotateY = ((e.clientX - window.innerWidth / 2) / (window.innerWidth / 2)) * 2;
         activeView.style.transform = `perspective(2000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1)`;
       });
-
       document.addEventListener('mouseleave', () => {
         const activeView = document.querySelector('.view-active');
-        if (!activeView) return;
-        activeView.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-        activeView.style.transform = ''; 
+        if (activeView) { activeView.style.transition = 'all 0.5s'; activeView.style.transform = ''; }
       });
     }
 
-    function decodeJwtResponse(token) {
-       let base64Url = token.split('.')[1];
-       let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-       let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-       }).join(''));
-       return JSON.parse(jsonPayload);
-    }
-
-    function handleCredentialResponse(response) {
-       const responsePayload = decodeJwtResponse(response.credential);
-       document.getElementById('message').innerText = "Google 驗證成功，讀取中...";
-       callGASAPI({ action: 'googleLogin', email: responsePayload.email, name: responsePayload.name }, (res) => {
-          if(res.success) {
-            currentUser = res.account;
-            localStorage.setItem('nextquest_user', currentUser);
-            callGASAPI({ action: 'getTasks', account: currentUser }, renderTasks);
-          }
+    // --- Google & Auth ---
+    function decodeJwtResponse(t) { return JSON.parse(decodeURIComponent(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''))); }
+    function handleCredentialResponse(r) {
+       document.getElementById('message').innerText = "驗證成功，讀取中...";
+       callGASAPI({ action: 'googleLogin', email: decodeJwtResponse(r.credential).email, name: decodeJwtResponse(r.credential).name }, (res) => {
+          if(res.success) { currentUser = res.account; localStorage.setItem('nextquest_user', currentUser); fetchTasks(); }
        });
     }
-
     function toggleMode() {
       isLoginMode = !isLoginMode;
       document.getElementById('form-title').innerText = isLoginMode ? 'NextQuest' : '新建帳號';
@@ -304,170 +288,222 @@
       document.querySelector('.toggle-text').innerText = isLoginMode ? '沒有帳號？點此新建帳號' : '已有帳號？返回登入';
       document.getElementById('message').innerText = ''; 
     }
-
     function submitManualForm() {
-      const acc = document.getElementById('account').value.trim();
-      const pwd = document.getElementById('password').value.trim();
-      const msgBox = document.getElementById('message');
-      
-      if (!acc || !pwd) { msgBox.innerText = "請完整填寫帳號與密碼。"; msgBox.className = ''; return; }
-      msgBox.innerText = "驗證中..."; msgBox.className = ''; 
-      const actionType = isLoginMode ? 'login' : 'register';
-      
-      callGASAPI({ action: actionType, account: acc, password: pwd }, (res) => {
-         msgBox.innerText = res.msg;
+      const acc = document.getElementById('account').value.trim(); const pwd = document.getElementById('password').value.trim();
+      if (!acc || !pwd) return; document.getElementById('message').innerText = "驗證中...";
+      callGASAPI({ action: isLoginMode ? 'login' : 'register', account: acc, password: pwd }, (res) => {
+         document.getElementById('message').innerText = res.msg;
          if (res.success) {
-           msgBox.className = 'success';
-           if (!isLoginMode) {
-             setTimeout(toggleMode, 1500); 
-           } else {
-             currentUser = res.account;
-             localStorage.setItem('nextquest_user', currentUser);
-             callGASAPI({ action: 'getTasks', account: currentUser }, renderTasks);
-           }
-         } else { msgBox.className = ''; }
+           if (!isLoginMode) { setTimeout(toggleMode, 1500); } 
+           else { currentUser = res.account; localStorage.setItem('nextquest_user', currentUser); fetchTasks(); }
+         }
       });
     }
-
     function logout() {
-      localStorage.removeItem('nextquest_user');
-      currentUser = "";
-      document.getElementById('password').value = "";
-      document.getElementById('message').innerText = "";
-      
-      // 切換回登入頁
-      const dashboard = document.getElementById('dashboard-view');
-      const login = document.getElementById('login-view');
-      
-      // 確保回彈動畫正確清除
-      dashboard.style.transform = '';
-      dashboard.classList.replace('view-active', 'view-hidden');
-      login.classList.replace('view-hidden', 'view-active');
-      
-      document.getElementById('grid-container').innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-mid);">載入任務矩陣中...</div>`;
+      localStorage.removeItem('nextquest_user'); currentUser = ""; allTasksData = [];
+      document.getElementById('dashboard-view').classList.replace('view-active', 'view-hidden');
+      document.getElementById('login-view').classList.replace('view-hidden', 'view-active');
     }
 
     function callGASAPI(payload, callback) {
-      fetch(GAS_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(data => callback(data))
-      .catch(err => {
-        document.getElementById('message').innerText = "連線異常，請稍後再試。";
-        console.error(err);
-      });
+      fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(res => res.json()).then(data => callback(data)).catch(err => console.error(err));
     }
 
-    const themeBtns = document.querySelectorAll('.theme-toggle-btn');
-    themeBtns.forEach(btn => {
+    document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.body.classList.toggle('dark');
-        const isDark = document.body.classList.contains('dark');
-        themeBtns.forEach(b => b.innerText = isDark ? '☀' : '☾');
+        document.querySelectorAll('.theme-toggle-btn').forEach(b => b.innerText = document.body.classList.contains('dark') ? '☀' : '☾');
       });
     });
 
-    function renderTasks(tasksData) {
+    // =========================================
+    //   UI 渲染與資料處理
+    // =========================================
+    function renderTasks() {
       const container = document.getElementById('grid-container');
       container.innerHTML = ""; 
-      tasksData.forEach(task => {
+      allTasksData.forEach(task => {
+         // 解析子任務並計算進度
+         let subTasksArr = [];
+         try { subTasksArr = JSON.parse(task.subTasks); } catch(e){}
+         let total = subTasksArr.length;
+         let done = subTasksArr.filter(s => s.done).length;
+         let progress = total === 0 ? 0 : Math.round((done / total) * 100);
+
          const card = document.createElement('div');
          card.className = "widget-card";
          card.setAttribute('data-id', task.id); 
-         card.setAttribute('data-w', parseInt(task.w) || 1);
-         card.setAttribute('data-h', parseInt(task.h) || 1);
-         card.innerHTML = `<div class="card-tag">${task.tag}</div><div style="text-align:center; padding:10px 10px 0 10px; font-size:1.1rem;">${task.title}</div>`;
+         card.setAttribute('data-w', task.w); card.setAttribute('data-h', task.h);
+         card.setAttribute('data-pri', task.priority); // 注入優先順序以渲染 CSS
+         
+         let progressHtml = total > 0 ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%"></div></div>` : '';
+         let subTaskHint = total > 0 ? `<div style="font-size:0.75rem; color:var(--text-mid); margin-top:4px;">${done}/${total} 步驟</div>` : '';
+
+         card.innerHTML = `
+            <div class="card-tag">${task.tag}</div>
+            <div style="text-align:center; padding:10px 10px 0 10px; font-size:1.1rem; line-height:1.4;">${task.title}</div>
+            ${subTaskHint}
+            ${progressHtml}
+         `;
          container.appendChild(card);
       });
-      
-      const login = document.getElementById('login-view');
-      const dashboard = document.getElementById('dashboard-view');
-      login.style.transform = '';
-      login.classList.replace('view-active', 'view-hidden');
-      dashboard.classList.replace('view-hidden', 'view-active');
-      
       setTimeout(() => { initGridEngine(); }, 50);
     }
 
-    function selectTag(btn) { document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
-    function openTaskModal() { document.getElementById('task-modal').classList.replace('view-hidden', 'view-active'); setTimeout(() => { document.getElementById('new-task-input').focus(); }, 100); }
-    function closeTaskModal() { document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); document.getElementById('new-task-input').value = ""; }
+    // --- 新增任務 Modal 互動 ---
+    function selectOpt(groupClass, btn) { 
+      document.querySelectorAll(groupClass).forEach(b => b.classList.remove('active')); 
+      btn.classList.add('active'); 
+    }
+    
+    function addManualSubtaskInput() {
+      const container = document.getElementById('manual-subtasks-container');
+      const row = document.createElement('div'); row.className = 'subtask-input-row';
+      row.innerHTML = `<input type="text" placeholder="步驟描述..."><button class="add-step-btn" onclick="this.parentElement.remove()" style="border:none">❌</button>`;
+      container.appendChild(row);
+      row.querySelector('input').focus();
+    }
+
+    function openTaskModal() { 
+      document.getElementById('task-modal').classList.replace('view-hidden', 'view-active'); 
+      document.getElementById('manual-subtasks-container').innerHTML = ''; // 清空舊輸入框
+    }
+    
+    function closeTaskModal() { 
+      document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); 
+      document.getElementById('new-task-input').value = ""; 
+    }
 
     function confirmAddTask() {
       const input = document.getElementById('new-task-input');
-      const taskTitle = input.value.trim();
-      if (!taskTitle) { input.focus(); return; }
-      const activeTagBtn = document.querySelector('.tag-btn.active');
-      const tagValue = activeTagBtn ? activeTagBtn.getAttribute('data-tag') : '⚡️ 碎片';
+      const title = input.value.trim();
+      if (!title) { input.focus(); return; }
+      
+      const tag = document.querySelector('.tag-btn.active').getAttribute('data-val');
+      const pri = document.querySelector('.pri-btn.active').getAttribute('data-val');
+      
+      // 收集手動輸入的子任務
+      let subTasks = [];
+      document.querySelectorAll('#manual-subtasks-container input').forEach(inp => {
+        if(inp.value.trim()) subTasks.push({ step: inp.value.trim(), done: false });
+      });
+
       closeTaskModal();
       
-      callGASAPI({ action: 'addTask', account: currentUser, title: taskTitle, tag: tagValue }, (res) => {
+      callGASAPI({ action: 'addTask', account: currentUser, title: title, tag: tag, priority: pri, subTasks: JSON.stringify(subTasks) }, (res) => {
         if(res.success) {
-          const task = res.task;
-          const container = document.getElementById('grid-container');
-          const card = document.createElement('div');
-          card.className = "widget-card";
-          card.setAttribute('data-id', task.id);
-          card.setAttribute('data-w', task.w);
-          card.setAttribute('data-h', task.h);
-          card.innerHTML = `<div class="card-tag">${task.tag}</div><div style="text-align:center; padding:10px 10px 0 10px; font-size:1.1rem;">${task.title}</div>`;
-          container.appendChild(card);
-          initGridEngine(); 
+          allTasksData.push(res.task);
+          renderTasks(); 
         }
       });
     }
 
-    function openDeleteModal(el) {
+    // --- 任務詳情 (打勾) Modal 互動 ---
+    function openTaskDetail(taskId) {
+      const task = allTasksData.find(t => t.id === taskId);
+      if(!task) return;
+      currentDetailTaskId = taskId;
+
+      document.getElementById('detail-tag').innerText = `${task.priority} • ${task.tag}`;
+      document.getElementById('detail-title').innerText = task.title;
+      
+      const listContainer = document.getElementById('detail-checklist');
+      listContainer.innerHTML = '';
+      
+      let subTasksArr = [];
+      try { subTasksArr = JSON.parse(task.subTasks); } catch(e){}
+      
+      if(subTasksArr.length === 0) {
+        listContainer.innerHTML = `<div style="text-align:center; color:var(--text-mid); padding: 20px;">這是一般任務，沒有子步驟。</div>`;
+        document.getElementById('detail-progress-text').innerText = '';
+      } else {
+        renderChecklist(subTasksArr);
+      }
+
+      document.getElementById('detail-modal').classList.replace('view-hidden', 'view-active');
+    }
+
+    function renderChecklist(subTasksArr) {
+      const listContainer = document.getElementById('detail-checklist');
+      listContainer.innerHTML = '';
+      let doneCount = 0;
+
+      subTasksArr.forEach((st, index) => {
+        if(st.done) doneCount++;
+        const item = document.createElement('div');
+        item.className = `check-item ${st.done ? 'done' : ''}`;
+        item.innerHTML = `<div class="checkbox-circle">✔</div><div style="font-weight:600;">${st.step}</div>`;
+        
+        // 點擊打勾邏輯
+        item.onclick = () => {
+          st.done = !st.done; // 切換狀態
+          
+          // 更新緩存的資料
+          const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
+          allTasksData[taskIndex].subTasks = JSON.stringify(subTasksArr);
+          
+          // 重新渲染這個清單
+          renderChecklist(subTasksArr);
+          // 在背景呼叫 API 更新到資料庫
+          callGASAPI({ action: 'updateTask', taskId: currentDetailTaskId, subTasks: JSON.stringify(subTasksArr) }, ()=>{});
+        };
+        listContainer.appendChild(item);
+      });
+
+      const prog = Math.round((doneCount / subTasksArr.length) * 100);
+      document.getElementById('detail-progress-text').innerText = `目前進度：${prog}%`;
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detail-modal').classList.replace('view-active', 'view-hidden');
+      currentDetailTaskId = null;
+      renderTasks(); // 關閉時重新渲染主畫面，更新進度條
+    }
+
+    // --- 刪除 Modal ---
+    function openDeleteModal(taskId) {
       if (navigator.vibrate) navigator.vibrate(50);
-      targetElementToDelete = el;
+      targetElementToDelete = taskId;
       document.getElementById('delete-modal').classList.replace('view-hidden', 'view-active');
     }
     function closeDeleteModal() { document.getElementById('delete-modal').classList.replace('view-active', 'view-hidden'); targetElementToDelete = null; }
     function confirmDeleteTask() {
       if (!targetElementToDelete) return;
-      const el = targetElementToDelete;
-      const taskId = el.getAttribute('data-id');
+      const taskId = targetElementToDelete;
       closeDeleteModal();
-      el.classList.add('deleting');
-      setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); initGridEngine(); }, 200);
-      if (taskId) { callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {}); }
+      // 從前端資料剔除並重新渲染
+      allTasksData = allTasksData.filter(t => t.id !== taskId);
+      renderTasks();
+      callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {});
     }
 
     // =========================================
-    //   核心引擎 (包含拖曳、長按刪除與 2.5D 卡片感測)
+    //   核心推擠引擎與事件判定 (區分拖曳 vs 點擊)
     // =========================================
     function initGridEngine() {
       let oldContainer = document.getElementById('grid-container');
       let container = oldContainer.cloneNode(true);
       oldContainer.parentNode.replaceChild(container, oldContainer);
-
       const cardElements = Array.from(container.children);
-      cardElements.forEach(el => el.removeAttribute('data-bound'));
-
       let cols = window.innerWidth <= 560 ? 2 : 4; 
-      const gap = 16;
-      const rowHeight = window.innerWidth <= 560 ? 88 : 92;
+      const gap = 16; const rowHeight = window.innerWidth <= 560 ? 88 : 92;
 
       let cardsData = cardElements.map(el => ({ el: el, w: Math.min(parseInt(el.getAttribute('data-w')) || 1, cols), h: parseInt(el.getAttribute('data-h')) || 1 }));
 
       function renderGrid() {
-        const containerWidth = container.clientWidth;
-        const cellWidth = (containerWidth - (cols - 1) * gap) / cols;
+        const cellWidth = (container.clientWidth - (cols - 1) * gap) / cols;
         let gridMatrix = []; let maxRow = 0;
         cardsData.forEach(card => {
           let placed = false; let r = 0;
           while (!placed) {
             for (let c = 0; c <= cols - card.w; c++) {
               let isFree = true;
-              for (let y = 0; y < card.h; y++) { for (let x = 0; x < card.w; x++) { if (gridMatrix[r + y] && gridMatrix[r + y][c + x]) isFree = false; } }
+              for (let y = 0; y < card.h; y++) for (let x = 0; x < card.w; x++) if (gridMatrix[r + y] && gridMatrix[r + y][c + x]) isFree = false;
               if (isFree) {
-                for (let y = 0; y < card.h; y++) { if (!gridMatrix[r + y]) gridMatrix[r + y] = []; for (let x = 0; x < card.w; x++) { gridMatrix[r + y][c + x] = true; } }
-                const left = c * (cellWidth + gap); const top = r * (rowHeight + gap);
-                const width = card.w * cellWidth + (card.w - 1) * gap; const height = card.h * rowHeight + (card.h - 1) * gap;
-                card.el.style.left = `${left}px`; card.el.style.top = `${top}px`; card.el.style.width = `${width}px`; card.el.style.height = `${height}px`;
+                for (let y = 0; y < card.h; y++) { if (!gridMatrix[r + y]) gridMatrix[r + y] = []; for (let x = 0; x < card.w; x++) gridMatrix[r + y][c + x] = true; }
+                card.el.style.left = `${c * (cellWidth + gap)}px`; card.el.style.top = `${r * (rowHeight + gap)}px`;
+                card.el.style.width = `${card.w * cellWidth + (card.w - 1) * gap}px`; card.el.style.height = `${card.h * rowHeight + (card.h - 1) * gap}px`;
                 maxRow = Math.max(maxRow, r + card.h); placed = true; break;
               }
             }
@@ -480,38 +516,30 @@
       
       window.onresize = () => {
         const newCols = window.innerWidth <= 560 ? 2 : 4;
-        if (cols !== newCols) { cols = newCols; cardsData.forEach(c => c.w = Math.min(parseInt(c.el.getAttribute('data-w')) || 1, cols)); }
-        renderGrid();
+        if (cols !== newCols) { cols = newCols; cardsData.forEach(c => c.w = Math.min(parseInt(c.el.getAttribute('data-w')) || 1, cols)); renderGrid(); }
       };
 
       let draggingCardIndex = -1; let startX, startY, initialLeft, initialTop;
-      let longPressTimer;
+      let longPressTimer; let clickStartTime;
 
       cardsData.forEach((card) => {
-        if (card.el.dataset.bound === "true") return;
-        card.el.dataset.bound = "true";
-
         card.el.addEventListener('pointerdown', (e) => {
           if (e.target.tagName === 'BUTTON') return; 
           draggingCardIndex = cardsData.indexOf(card);
           startX = e.clientX; startY = e.clientY;
+          clickStartTime = new Date().getTime(); // 記錄按下的時間
           initialLeft = parseInt(card.el.style.left || 0); initialTop = parseInt(card.el.style.top || 0);
           
           longPressTimer = setTimeout(() => { 
-            draggingCardIndex = -1; 
-            card.el.classList.remove('dragging');
-            card.el.releasePointerCapture(e.pointerId);
-            openDeleteModal(card.el); 
+            draggingCardIndex = -1; card.el.classList.remove('dragging'); card.el.releasePointerCapture(e.pointerId);
+            openDeleteModal(card.el.getAttribute('data-id')); 
           }, 700);
 
-          card.el.style.transform = '';
-          card.el.classList.add('dragging'); 
-          card.el.setPointerCapture(e.pointerId);
+          card.el.style.transform = ''; card.el.classList.add('dragging'); card.el.setPointerCapture(e.pointerId);
         });
 
         card.el.addEventListener('pointermove', (e) => {
-          if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) { clearTimeout(longPressTimer); }
-          
+          if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) clearTimeout(longPressTimer);
           if (draggingCardIndex !== -1 && draggingCardIndex === cardsData.indexOf(card)) {
             const dx = e.clientX - startX; const dy = e.clientY - startY;
             card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
@@ -521,30 +549,22 @@
             cardsData.forEach((otherCard, i) => {
                if (i === draggingCardIndex) return;
                const rect = otherCard.el.getBoundingClientRect();
-               const cardLeft = rect.left - containerRect.left; const cardTop = rect.top - containerRect.top;
-               if (mouseX > cardLeft && mouseX < cardLeft + rect.width && mouseY > cardTop && mouseY < cardTop + rect.height) { targetIndex = i; }
+               if (mouseX > rect.left - containerRect.left && mouseX < rect.right - containerRect.left && mouseY > rect.top - containerRect.top && mouseY < rect.bottom - containerRect.top) targetIndex = i;
             });
             if (targetIndex !== -1 && targetIndex !== draggingCardIndex) {
-               const draggingItem = cardsData.splice(draggingCardIndex, 1)[0];
-               cardsData.splice(targetIndex, 0, draggingItem);
+               cardsData.splice(targetIndex, 0, cardsData.splice(draggingCardIndex, 1)[0]);
                draggingCardIndex = targetIndex; renderGrid(); 
                card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
             }
             return; 
           }
-
+          // 2.5D Tilt Hover
           if (draggingCardIndex === -1) {
             const rect = card.el.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = ((y - centerY) / centerY) * -15; 
-            const rotateY = ((x - centerX) / centerX) * 15;
-            
+            const rotateX = (((e.clientY - rect.top) - rect.height / 2) / (rect.height / 2)) * -15; 
+            const rotateY = (((e.clientX - rect.left) - rect.width / 2) / (rect.width / 2)) * 15;
             card.el.style.transition = 'none'; 
             card.el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
-            card.el.style.boxShadow = `0 20px 40px rgba(0,0,0,0.1)`;
           }
         });
 
@@ -552,16 +572,22 @@
           if (draggingCardIndex !== -1) return;
           card.el.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s ease';
           card.el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)`;
-          card.el.style.boxShadow = '';
         });
 
         card.el.addEventListener('pointerup', (e) => {
           clearTimeout(longPressTimer); 
-          if (draggingCardIndex === -1) return;
-          card.el.classList.remove('dragging'); 
-          card.el.releasePointerCapture(e.pointerId);
-          draggingCardIndex = -1; 
-          renderGrid(); 
+          const timeElapsed = new Date().getTime() - clickStartTime;
+          const moved = Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5;
+          
+          if (draggingCardIndex !== -1) {
+            card.el.classList.remove('dragging'); card.el.releasePointerCapture(e.pointerId);
+            draggingCardIndex = -1; renderGrid(); 
+          }
+
+          // 如果按下時間極短且沒有移動，判定為「點擊(Click)」
+          if (!moved && timeElapsed < 300) {
+            openTaskDetail(card.el.getAttribute('data-id'));
+          }
         });
       });
     }
