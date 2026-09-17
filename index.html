@@ -66,7 +66,7 @@
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
     .success { color: #2A9D8F !important; }
 
-    /* --- 新增：標籤與優先順序選擇器 --- */
+    /* --- 標籤與優先順序選擇器 --- */
     .selector-group { margin-bottom: 24px; text-align: left; }
     .selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; margin-left: 8px; }
     .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -93,14 +93,12 @@
     .widget-card.dragging { z-index: 50; cursor: grabbing; transform: translateZ(30px) scale(1.05) !important; box-shadow: 0 30px 60px rgba(0,0,0,0.2) !important; transition: transform 0.1s; }
     .widget-card.deleting { transform: scale(0.5); opacity: 0; pointer-events: none; }
     
-    /* 優先順序邊框發光 */
     .widget-card[data-pri="🔴 緊急"] { border-top: 2px solid #E63946; }
     .widget-card[data-pri="🟡 一般"] { border-top: 2px solid #E9C46A; }
     .widget-card[data-pri="🟢 輕鬆"] { border-top: 2px solid #2A9D8F; }
 
     .card-tag { position: absolute; top: 12px; left: 16px; font-size: 0.75rem; color: var(--text-mid); font-weight: 500; }
     
-    /* 進度條設計 */
     .progress-bar-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(0,0,0,0.05); }
     body.dark .progress-bar-bg { background: rgba(255,255,255,0.05); }
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; border-radius: 0 4px 4px 0; }
@@ -111,7 +109,6 @@
     body.dark .modal-overlay { background: rgba(0, 0, 0, 0.5); }
     .modal-shell { max-width: 400px; width: 90%; padding: 32px 28px; max-height: 85vh; overflow-y: auto; }
 
-    /* 任務詳情清單 */
     .checklist-container { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; text-align: left; }
     .check-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.4); border-radius: 16px; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.5); }
     body.dark .check-item { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
@@ -127,7 +124,7 @@
   <div class="bg-shape shape-orange"></div>
   <div class="bg-shape shape-blue"></div>
 
-  <!-- VIEW 1: 混合登入畫面 -->
+  <!-- VIEW 1: 登入畫面 -->
   <div id="login-view" class="view-container view-active window-shell login-shell">
     <div class="titlebar" style="position: relative;">
       <h1 id="form-title">NextQuest</h1>
@@ -185,9 +182,7 @@
 
       <div class="selector-group">
         <div class="selector-title">階段性子任務 (選填)</div>
-        <div id="manual-subtasks-container" class="manual-subtasks">
-          <!-- JS 動態新增輸入框 -->
-        </div>
+        <div id="manual-subtasks-container" class="manual-subtasks"></div>
         <button class="add-step-btn" style="width:100%" onclick="addManualSubtaskInput()">➕ 新增一個步驟</button>
       </div>
 
@@ -198,18 +193,19 @@
     </div>
   </div>
 
-  <!-- VIEW 4: 任務詳情 (打勾) Modal -->
+  <!-- VIEW 4: 任務詳情 (打勾與切換大小) Modal -->
   <div id="detail-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       <div style="font-size: 0.8rem; color: var(--text-mid); margin-bottom: 4px;" id="detail-tag"></div>
       <h2 style="font-size: 1.35rem; margin-bottom: 8px;" id="detail-title"></h2>
       <div id="detail-progress-text" style="font-size: 0.85rem; font-weight: 600; color: #2A9D8F;"></div>
       
-      <div id="detail-checklist" class="checklist-container">
-        <!-- 這裡會由 JS 渲染 Checkbox -->
-      </div>
+      <div id="detail-checklist" class="checklist-container"></div>
       
-      <button class="btn-main" onclick="closeDetailModal()">完成並關閉</button>
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button class="btn-main btn-secondary" onclick="toggleCardSize()">⛶ 切換大小</button>
+        <button class="btn-main" onclick="closeDetailModal()">完成並關閉</button>
+      </div>
     </div>
   </div>
 
@@ -227,7 +223,7 @@
 
   <script>
     // =========================================
-    //   系統設定 (請填入正確的 API 網址)
+    //   系統設定 (⚠️ 請填入正確的 API 網址)
     // =========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw9130xk5gFZxkrtpIR-YQSClZaqW3IH0JxU-Ka4fRKsdaq9FFZZzxIEgvVBExnxXTVOQ/exec";
     const GOOGLE_CLIENT_ID = "867237692766-9o2nhlnrqlq00k75apvsbvl2r2u1jsqi.apps.googleusercontent.com";
@@ -235,8 +231,8 @@
     let isLoginMode = true;
     let currentUser = ""; 
     let targetElementToDelete = null; 
-    let allTasksData = []; // 緩存所有任務資料
-    let currentDetailTaskId = null; // 紀錄目前打開詳情的任務ID
+    let allTasksData = []; 
+    let currentDetailTaskId = null; 
 
     window.onload = function () {
       google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
@@ -324,7 +320,6 @@
       const container = document.getElementById('grid-container');
       container.innerHTML = ""; 
       allTasksData.forEach(task => {
-         // 解析子任務並計算進度
          let subTasksArr = [];
          try { subTasksArr = JSON.parse(task.subTasks); } catch(e){}
          let total = subTasksArr.length;
@@ -335,14 +330,14 @@
          card.className = "widget-card";
          card.setAttribute('data-id', task.id); 
          card.setAttribute('data-w', task.w); card.setAttribute('data-h', task.h);
-         card.setAttribute('data-pri', task.priority); // 注入優先順序以渲染 CSS
+         card.setAttribute('data-pri', task.priority);
          
          let progressHtml = total > 0 ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%"></div></div>` : '';
          let subTaskHint = total > 0 ? `<div style="font-size:0.75rem; color:var(--text-mid); margin-top:4px;">${done}/${total} 步驟</div>` : '';
 
          card.innerHTML = `
-            <div class="card-tag">${task.tag}</div>
-            <div style="text-align:center; padding:10px 10px 0 10px; font-size:1.1rem; line-height:1.4;">${task.title}</div>
+            <div class="card-tag" style="top: 10px; left: 14px; font-size: 0.7rem;">${task.tag}</div>
+            <div style="text-align:center; padding: 28px 12px 12px 12px; font-size: 1rem; line-height:1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; width: 100%;">${task.title}</div>
             ${subTaskHint}
             ${progressHtml}
          `;
@@ -351,7 +346,6 @@
       setTimeout(() => { initGridEngine(); }, 50);
     }
 
-    // --- 新增任務 Modal 互動 ---
     function selectOpt(groupClass, btn) { 
       document.querySelectorAll(groupClass).forEach(b => b.classList.remove('active')); 
       btn.classList.add('active'); 
@@ -367,7 +361,7 @@
 
     function openTaskModal() { 
       document.getElementById('task-modal').classList.replace('view-hidden', 'view-active'); 
-      document.getElementById('manual-subtasks-container').innerHTML = ''; // 清空舊輸入框
+      document.getElementById('manual-subtasks-container').innerHTML = ''; 
     }
     
     function closeTaskModal() { 
@@ -383,7 +377,6 @@
       const tag = document.querySelector('.tag-btn.active').getAttribute('data-val');
       const pri = document.querySelector('.pri-btn.active').getAttribute('data-val');
       
-      // 收集手動輸入的子任務
       let subTasks = [];
       document.querySelectorAll('#manual-subtasks-container input').forEach(inp => {
         if(inp.value.trim()) subTasks.push({ step: inp.value.trim(), done: false });
@@ -399,7 +392,7 @@
       });
     }
 
-    // --- 任務詳情 (打勾) Modal 互動 ---
+    // --- 任務詳情 (打勾與尺寸切換) ---
     function openTaskDetail(taskId) {
       const task = allTasksData.find(t => t.id === taskId);
       if(!task) return;
@@ -410,7 +403,6 @@
       
       const listContainer = document.getElementById('detail-checklist');
       listContainer.innerHTML = '';
-      
       let subTasksArr = [];
       try { subTasksArr = JSON.parse(task.subTasks); } catch(e){}
       
@@ -420,7 +412,6 @@
       } else {
         renderChecklist(subTasksArr);
       }
-
       document.getElementById('detail-modal').classList.replace('view-hidden', 'view-active');
     }
 
@@ -435,22 +426,15 @@
         item.className = `check-item ${st.done ? 'done' : ''}`;
         item.innerHTML = `<div class="checkbox-circle">✔</div><div style="font-weight:600;">${st.step}</div>`;
         
-        // 點擊打勾邏輯
         item.onclick = () => {
-          st.done = !st.done; // 切換狀態
-          
-          // 更新緩存的資料
+          st.done = !st.done; 
           const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
           allTasksData[taskIndex].subTasks = JSON.stringify(subTasksArr);
-          
-          // 重新渲染這個清單
           renderChecklist(subTasksArr);
-          // 在背景呼叫 API 更新到資料庫
           callGASAPI({ action: 'updateTask', taskId: currentDetailTaskId, subTasks: JSON.stringify(subTasksArr) }, ()=>{});
         };
         listContainer.appendChild(item);
       });
-
       const prog = Math.round((doneCount / subTasksArr.length) * 100);
       document.getElementById('detail-progress-text').innerText = `目前進度：${prog}%`;
     }
@@ -458,10 +442,29 @@
     function closeDetailModal() {
       document.getElementById('detail-modal').classList.replace('view-active', 'view-hidden');
       currentDetailTaskId = null;
-      renderTasks(); // 關閉時重新渲染主畫面，更新進度條
+      renderTasks(); 
+    }
+    
+    function toggleCardSize() {
+      if(!currentDetailTaskId) return;
+      const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
+      if(taskIndex === -1) return;
+      
+      let w = parseInt(allTasksData[taskIndex].w);
+      let h = parseInt(allTasksData[taskIndex].h);
+      
+      if(w === 1 && h === 1) { w = 2; h = 1; }
+      else if(w === 2 && h === 1) { w = 2; h = 2; }
+      else { w = 1; h = 1; }
+      
+      allTasksData[taskIndex].w = w;
+      allTasksData[taskIndex].h = h;
+      
+      callGASAPI({ action: 'updateTaskSize', taskId: currentDetailTaskId, w: w, h: h }, () => {});
+      closeDetailModal();
     }
 
-    // --- 刪除 Modal ---
+    // --- 刪除 ---
     function openDeleteModal(taskId) {
       if (navigator.vibrate) navigator.vibrate(50);
       targetElementToDelete = taskId;
@@ -472,14 +475,13 @@
       if (!targetElementToDelete) return;
       const taskId = targetElementToDelete;
       closeDeleteModal();
-      // 從前端資料剔除並重新渲染
       allTasksData = allTasksData.filter(t => t.id !== taskId);
       renderTasks();
       callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {});
     }
 
     // =========================================
-    //   核心推擠引擎與事件判定 (區分拖曳 vs 點擊)
+    //   核心推擠引擎與事件判定
     // =========================================
     function initGridEngine() {
       let oldContainer = document.getElementById('grid-container');
@@ -527,7 +529,7 @@
           if (e.target.tagName === 'BUTTON') return; 
           draggingCardIndex = cardsData.indexOf(card);
           startX = e.clientX; startY = e.clientY;
-          clickStartTime = new Date().getTime(); // 記錄按下的時間
+          clickStartTime = new Date().getTime(); 
           initialLeft = parseInt(card.el.style.left || 0); initialTop = parseInt(card.el.style.top || 0);
           
           longPressTimer = setTimeout(() => { 
@@ -558,7 +560,6 @@
             }
             return; 
           }
-          // 2.5D Tilt Hover
           if (draggingCardIndex === -1) {
             const rect = card.el.getBoundingClientRect();
             const rotateX = (((e.clientY - rect.top) - rect.height / 2) / (rect.height / 2)) * -15; 
@@ -584,7 +585,6 @@
             draggingCardIndex = -1; renderGrid(); 
           }
 
-          // 如果按下時間極短且沒有移動，判定為「點擊(Click)」
           if (!moved && timeElapsed < 300) {
             openTaskDetail(card.el.getAttribute('data-id'));
           }
