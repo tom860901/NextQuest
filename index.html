@@ -93,7 +93,6 @@
     body.dark .widget-card { box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,255,255,0.05); }
     .widget-card.dragging { z-index: 50; cursor: grabbing; transform: translateZ(30px) scale(1.05) !important; box-shadow: 0 30px 60px rgba(0,0,0,0.2) !important; }
     
-    /* 🚨 緊急呼吸燈光暈特效 */
     @keyframes urgentPulse {
       0% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.4), inset 0 0 15px rgba(255,255,255,0.3); border-color: rgba(230, 57, 70, 0.8); }
       50% { box-shadow: 0 0 25px rgba(230, 57, 70, 0.8), inset 0 0 20px rgba(230, 57, 70, 0.2); border-color: #E63946; }
@@ -156,7 +155,7 @@
     </div>
   </div>
 
-  <!-- VIEW 3: 新增任務 Modal (含完成期限) -->
+  <!-- VIEW 3: 新增任務 Modal -->
   <div id="task-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell">
       <h2 style="font-size: 1.25rem; margin-bottom: 20px; text-align: center;">✨ 新增目標任務</h2>
@@ -179,7 +178,6 @@
         </div>
       </div>
 
-      <!-- 📅 預計完成時間選擇 -->
       <div class="selector-group">
         <div class="selector-title">預計完成期限 (Due Date)</div>
         <div class="input-group" style="margin-bottom: 0;">
@@ -207,7 +205,7 @@
     </div>
   </div>
 
-  <!-- VIEW 4: 任務詳情 (打勾與切換大小) Modal -->
+  <!-- VIEW 4: 任務詳情 Modal -->
   <div id="detail-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       <div style="font-size: 0.8rem; color: var(--text-mid); margin-bottom: 4px;" id="detail-tag"></div>
@@ -237,7 +235,7 @@
 
   <script>
     // =========================================
-    //   系統設定 (⚠️ 請填入正確的 API 網址)
+    //   系統設定 (⚠️ 請填入正確的 GAS API 網址)
     // =========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw9130xk5gFZxkrtpIR-YQSClZaqW3IH0JxU-Ka4fRKsdaq9FFZZzxIEgvVBExnxXTVOQ/exec";
     const GOOGLE_CLIENT_ID = "867237692766-9o2nhlnrqlq00k75apvsbvl2r2u1jsqi.apps.googleusercontent.com";
@@ -326,7 +324,7 @@
     });
 
     // =========================================
-    //   UI 渲染與資料處理 (含緊急高亮與期限顯示)
+    //   UI 渲染與智慧尺寸判定
     // =========================================
     function renderTasks() {
       const container = document.getElementById('grid-container');
@@ -343,7 +341,6 @@
 
          const card = document.createElement('div');
          
-         // 🚨 判斷是否緊急或過期 (手動設定為緊急，或者 期限 <= 今天)
          let isUrgent = task.priority === '🔴 緊急';
          if (task.dueDate && task.dueDate <= todayStr) {
            isUrgent = true;
@@ -357,13 +354,17 @@
          let progressHtml = total > 0 ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%"></div></div>` : '';
          let subTaskHint = total > 0 ? `<div style="font-size:0.75rem; color:var(--text-mid); margin-top:4px;">${done}/${total} 步驟</div>` : '';
          
-         // 📅 期限標籤顯示
-         let dueHtml = task.dueDate ? `<div class="card-due">📅 ${task.dueDate}</div>` : '';
+         // 📅 智慧排版：精簡日期顯示，避免 1x1 擠壓
+         let dueHtml = '';
+         if (task.dueDate) {
+           let dateDisplay = task.dueDate.slice(5); 
+           dueHtml = `<div class="card-due">📅 ${dateDisplay}</div>`;
+         }
 
          card.innerHTML = `
             <div class="card-tag" style="top: 10px; left: 14px; font-size: 0.65rem;">${task.tag}</div>
             ${dueHtml}
-            <div style="text-align:center; width: 100%; margin-top: 16px; font-size: 0.95rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">${task.title}</div>
+            <div style="text-align:center; width: 100%; margin-top: ${task.dueDate ? '16px' : '10px'}; font-size: 0.95rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">${task.title}</div>
             ${subTaskHint}
             ${progressHtml}
          `;
@@ -433,6 +434,10 @@
 
       closeTaskModal();
       
+      // 🧠 智慧自動決定尺寸：有日期或有子步驟自動給 2x1 寬卡片，避免擠壓！
+      const hasExtra = (dueDate && dueDate.trim() !== "") || subTasks.length > 0;
+      const autoWidth = hasExtra ? 2 : 1; 
+
       callGASAPI({ 
         action: 'addTask', 
         account: currentUser, 
@@ -443,13 +448,14 @@
         dueDate: dueDate 
       }, (res) => {
         if(res.success) {
+          // 強制覆寫前端拿到的預設寬度
+          res.task.w = autoWidth;
           allTasksData.push(res.task);
           renderTasks(); 
         }
       });
     }
 
-    // --- 任務詳情 (打勾與尺寸切換) ---
     function openTaskDetail(taskId) {
       const task = allTasksData.find(t => t.id === taskId);
       if(!task) return;
