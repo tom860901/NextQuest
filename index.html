@@ -80,11 +80,19 @@
     .pri-btn[data-val="🟢 輕鬆"].active { background: #2A9D8F; color: white; border-color: transparent; }
 
     /* --- 子任務輸入區 --- */
-    .manual-subtasks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-    .subtask-input-row { display: flex; gap: 8px; }
-    .subtask-input-row input { flex: 1; padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.3); outline: none; }
+    .manual-subtasks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .subtask-input-row { display: flex; gap: 8px; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .subtask-input-row input { flex: 1; padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.3); outline: none; transition: border 0.3s; }
+    .subtask-input-row input:focus { border-color: var(--text-hi); background: rgba(255,255,255,0.7); }
     body.dark .subtask-input-row input { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: white; }
-    .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 8px; border-radius: 12px; cursor: pointer; font-weight: 600; }
+    .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 10px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .add-step-btn:hover { background: rgba(255,255,255,0.2); }
+    
+    /* AI 魔法按鈕設計 */
+    .ai-btn { background: linear-gradient(135deg, #7B2CBF, #F72585); color: white; border: none; box-shadow: 0 4px 15px rgba(247, 37, 133, 0.25); }
+    .ai-btn:hover { box-shadow: 0 6px 20px rgba(247, 37, 133, 0.4); transform: translateY(-1px); color: white; }
+    .ai-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
     /* --- 網格卡片 --- */
     .grid-container { position: relative; width: 100%; transition: height 0.3s ease; perspective: 1200px; }
@@ -183,7 +191,10 @@
       <div class="selector-group">
         <div class="selector-title">階段性子任務 (選填)</div>
         <div id="manual-subtasks-container" class="manual-subtasks"></div>
-        <button class="add-step-btn" style="width:100%" onclick="addManualSubtaskInput()">➕ 新增一個步驟</button>
+        <div style="display: flex; gap: 8px;">
+          <button class="add-step-btn" style="flex: 1;" onclick="addManualSubtaskInput()">➕ 手動新增</button>
+          <button id="ai-decompose-btn" class="add-step-btn ai-btn" style="flex: 1;" onclick="triggerAIDecompose()">✨ AI 幫我拆解</button>
+        </div>
       </div>
 
       <div style="display: flex; gap: 12px; margin-top: 24px;">
@@ -269,7 +280,6 @@
       });
     }
 
-    // --- Google & Auth ---
     function decodeJwtResponse(t) { return JSON.parse(decodeURIComponent(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''))); }
     function handleCredentialResponse(r) {
        document.getElementById('message').innerText = "驗證成功，讀取中...";
@@ -335,7 +345,8 @@
          let progressHtml = total > 0 ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%"></div></div>` : '';
          let subTaskHint = total > 0 ? `<div style="font-size:0.75rem; color:var(--text-mid); margin-top:4px;">${done}/${total} 步驟</div>` : '';
 
-        card.innerHTML = `
+         // ✨ 這是剛剛修復過的防擠壓排版
+         card.innerHTML = `
             <div class="card-tag" style="top: 8px; left: 12px; font-size: 0.65rem;">${task.tag}</div>
             <div style="text-align:center; width: 100%; margin-top: 16px; font-size: 0.95rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">${task.title}</div>
             ${subTaskHint}
@@ -351,12 +362,44 @@
       btn.classList.add('active'); 
     }
     
-    function addManualSubtaskInput() {
+    // ✨ 支援帶入預設文字，讓 AI 可以自動填寫
+    function addManualSubtaskInput(defaultText = "") {
       const container = document.getElementById('manual-subtasks-container');
       const row = document.createElement('div'); row.className = 'subtask-input-row';
-      row.innerHTML = `<input type="text" placeholder="步驟描述..."><button class="add-step-btn" onclick="this.parentElement.remove()" style="border:none">❌</button>`;
+      row.innerHTML = `<input type="text" placeholder="步驟描述..." value="${defaultText}"><button class="add-step-btn" onclick="this.parentElement.remove()" style="border:none">❌</button>`;
       container.appendChild(row);
-      row.querySelector('input').focus();
+      if(!defaultText) row.querySelector('input').focus();
+    }
+
+    // ✨ AI 呼叫核心邏輯
+    function triggerAIDecompose() {
+      const titleInput = document.getElementById('new-task-input');
+      const title = titleInput.value.trim();
+      if (!title) {
+        alert("請先輸入上方的大目標名稱，AI 才知道要拆解什麼喔！");
+        titleInput.focus();
+        return;
+      }
+      
+      const aiBtn = document.getElementById('ai-decompose-btn');
+      const originalText = aiBtn.innerHTML;
+      aiBtn.innerHTML = "🧠 思考中...";
+      aiBtn.disabled = true;
+
+      callGASAPI({ action: 'aiDecompose', title: title }, (res) => {
+        aiBtn.innerHTML = originalText;
+        aiBtn.disabled = false;
+        
+        if (res.success && res.steps && res.steps.length > 0) {
+          const container = document.getElementById('manual-subtasks-container');
+          container.innerHTML = ""; // 清空原本的輸入框
+          res.steps.forEach(stepText => {
+            addManualSubtaskInput(stepText); // 自動把 AI 結果填入
+          });
+        } else {
+          alert(res.msg || "AI 拆解失敗，請稍後再試！");
+        }
+      });
     }
 
     function openTaskModal() { 
@@ -464,7 +507,6 @@
       closeDetailModal();
     }
 
-    // --- 刪除 ---
     function openDeleteModal(taskId) {
       if (navigator.vibrate) navigator.vibrate(50);
       targetElementToDelete = taskId;
