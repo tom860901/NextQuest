@@ -10,11 +10,10 @@
       --text-hi: #2B2543; 
       --text-mid: #7A758F; 
       --card-radius: 32px; 
-      --accent-glow: rgba(108, 92, 231, 0.2);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
-    body { min-height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #F4F5F7; color: var(--text-hi); overflow-y: auto; position: relative; padding: 40px 0; }
+    body { min-height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #F4F5F7; color: var(--text-hi); overflow-y: auto; position: relative; padding: 40px 0; transition: background 0.3s ease; }
 
     @keyframes cloudFloat {
       0% { transform: translate(0px, 0px) scale(1); }
@@ -28,8 +27,8 @@
     .shape-orange { bottom: -15%; left: 15%; width: 45vw; height: 45vw; background: #C5CAE9; animation-delay: -4s; animation-duration: 16s; }
     .shape-blue { top: 10%; right: -15%; width: 60vw; height: 60vw; background: #B3E5FC; animation-delay: -7s; animation-duration: 18s; }
     
-    /* 🖤 全新暗色系模式 (無粉紅色，改為冷調深色與靛藍科技感) */
-    body.dark { background-color: #0A0A12; --text-hi: #F1F0F7; --text-mid: #9E9AA8; }
+    /* 🖤 完美修復暗黑模式：涵蓋所有面板、文字與邊框 */
+    body.dark { background-color: #0A0A12 !important; color: #F1F0F7 !important; --text-hi: #F1F0F7; --text-mid: #9E9AA8; }
     body.dark .shape-pink { background: #1a153b; } 
     body.dark .shape-orange { background: #12193b; } 
     body.dark .shape-blue { background: #0c2340; } 
@@ -45,60 +44,55 @@
       box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
     }
     body.dark .window-shell, body.dark .modal-shell {
-      background: rgba(20, 20, 30, 0.65); border: 1px solid rgba(255, 255, 255, 0.08);
-      border-top: 1px solid rgba(255, 255, 255, 0.15); border-left: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255,255,255,0.02);
+      background: rgba(18, 18, 26, 0.75) !important; border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255,255,255,0.02) !important;
     }
 
     .login-shell { max-width: 400px; margin: auto; }
     
-    /* 🎛️ 主控制中心大局配置 (支援右側未來任務提醒) */
     .dashboard-layout { display: flex; gap: 24px; max-width: 960px; width: 95%; margin: auto; align-items: flex-start; }
     .dashboard-main { flex: 1; min-width: 0; max-height: 90vh; overflow-y: auto; padding: 28px; }
     .dashboard-main::-webkit-scrollbar { width: 4px; }
     .dashboard-main::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
 
-    /* 📌 右側未來任務提醒面板 */
     .upcoming-panel { width: 280px; max-height: 90vh; overflow-y: auto; padding: 24px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); border-radius: var(--card-radius); border: 1px solid rgba(255, 255, 255, 0.6); }
-    body.dark .upcoming-panel { background: rgba(20, 20, 30, 0.65); border: 1px solid rgba(255, 255, 255, 0.08); }
+    body.dark .upcoming-panel { background: rgba(18, 18, 26, 0.75) !important; border: 1px solid rgba(255, 255, 255, 0.12) !important; }
     .upcoming-panel h3 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; color: var(--text-hi); }
-    .upcoming-item { padding: 10px 12px; background: rgba(255,255,255,0.3); border-radius: 12px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.4); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
-    body.dark .upcoming-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
+    .upcoming-item { padding: 10px 12px; background: rgba(255,255,255,0.3); border-radius: 12px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.4); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; color: var(--text-hi); }
+    body.dark .upcoming-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #F1F0F7; }
     .upcoming-item:hover { transform: translateY(-2px); background: rgba(255,255,255,0.5); }
-    body.dark .upcoming-item:hover { background: rgba(255,255,255,0.08); }
+    body.dark .upcoming-item:hover { background: rgba(255,255,255,0.12); }
 
     .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    
-    /* ✨ 品牌名稱 Planit 改為英文草寫體字型 */
     .titlebar h1, #form-title { font-family: 'Brush Script MT', 'Lucida Handwriting', 'Segoe Script', cursive, sans-serif; font-size: 2rem !important; font-weight: 700; letter-spacing: 1px; margin: 0 auto; color: var(--text-hi); }
 
     .bubble-menu-btn { height: 36px; padding: 0 14px; border-radius: 18px; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-hi); cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-    body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
+    body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: #F1F0F7; }
     
     .input-group { margin-bottom: 20px; }
     .input-group input, .input-group select { width: 100%; padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.5); color: var(--text-hi); font-size: 1rem; outline: none; }
-    body.dark .input-group input, body.dark .input-group select { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.12); color: white; }
+    body.dark .input-group input, body.dark .input-group select { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.15); color: #F1F0F7; }
 
     .btn-main { width: 100%; padding: 16px; border-radius: 20px; border: none; background: #2D283E; color: #FFFFFF; font-size: 1.05rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); margin-top: 8px; }
     body.dark .btn-main { background: #6C5CE7; color: #FFFFFF; box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4); }
     .btn-main:active { transform: scale(0.96); }
     .btn-secondary { background: rgba(255,255,255,0.3); color: var(--text-hi); border: 1px solid rgba(255,255,255,0.5); box-shadow: none; }
-    body.dark .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-hi); border-color: rgba(255,255,255,0.1); }
-    .btn-danger { background: #E63946 !important; color: #FFFFFF !important; box-shadow: 0 8px 24px rgba(230, 57, 70, 0.3) !important; }
-    .btn-success { background: #2A9D8F !important; color: #FFFFFF !important; box-shadow: 0 8px 24px rgba(42, 157, 143, 0.3) !important; }
-    .btn-warning { background: #F4A261 !important; color: #FFFFFF !important; box-shadow: 0 8px 24px rgba(244, 162, 97, 0.3) !important; }
-    .btn-disabled { background: rgba(120, 120, 120, 0.2) !important; color: rgba(150, 150, 150, 0.7) !important; cursor: not-allowed !important; box-shadow: none !important; pointer-events: none; }
+    body.dark .btn-secondary { background: rgba(255,255,255,0.08); color: #F1F0F7; border-color: rgba(255,255,255,0.15); }
+    .btn-danger { background: #E63946 !important; color: #FFFFFF !important; }
+    .btn-success { background: #2A9D8F !important; color: #FFFFFF !important; }
+    .btn-warning { background: #F4A261 !important; color: #FFFFFF !important; }
+    .btn-disabled { background: rgba(120, 120, 120, 0.2) !important; color: rgba(150, 150, 150, 0.7) !important; cursor: not-allowed !important; pointer-events: none; }
 
     .form-footer { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-mid); cursor: pointer; text-decoration: underline; }
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
 
-    /* --- 📅 完整月曆視圖 --- */
+    /* --- 月曆視圖 --- */
     .calendar-container { background: rgba(255, 255, 255, 0.2); padding: 16px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.4); margin-bottom: 20px; }
-    body.dark .calendar-container { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.08); }
-    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; font-size: 1rem; }
+    body.dark .calendar-container { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.08); }
+    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; font-size: 1rem; color: var(--text-hi); }
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
     .cal-weekday { font-size: 0.75rem; color: var(--text-mid); font-weight: 600; padding-bottom: 4px; }
-    .cal-day { padding: 8px 2px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; position: relative; }
+    .cal-day { padding: 8px 2px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; position: relative; color: var(--text-hi); }
     .cal-day:hover { background: rgba(255, 255, 255, 0.4); }
     body.dark .cal-day:hover { background: rgba(255, 255, 255, 0.1); }
     .cal-day.empty { pointer-events: none; opacity: 0.3; }
@@ -114,7 +108,7 @@
     .selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; margin-left: 8px; }
     .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; }
     .tag-btn, .pri-btn { padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
-    body.dark .tag-btn, body.dark .pri-btn { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+    body.dark .tag-btn, body.dark .pri-btn { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: #F1F0F7; }
     .tag-btn.active { background: var(--text-hi); color: #FFF; border-color: transparent; }
     body.dark .tag-btn.active { background: #6C5CE7; color: #FFF; }
     
@@ -127,14 +121,14 @@
     .subtask-input-row { display: flex; gap: 8px; animation: slideIn 0.3s ease; }
     @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .subtask-input-row input { flex: 1; padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.3); outline: none; }
-    body.dark .subtask-input-row input { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: white; }
+    body.dark .subtask-input-row input { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: white; }
     .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 10px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
     .ai-btn { background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white; border: none; box-shadow: 0 4px 15px rgba(142, 45, 226, 0.25); }
 
     /* --- 網格卡片與緊急呼吸燈特效 --- */
     .grid-container { position: relative; width: 100%; transition: height 0.3s ease; perspective: 1200px; }
-    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3); transform-style: preserve-3d; transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s ease-out, box-shadow 0.4s ease; padding: 16px; }
-    body.dark .widget-card { box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,255,255,0.03); }
+    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3); transform-style: preserve-3d; transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s ease-out, box-shadow 0.4s ease; padding: 16px; color: var(--text-hi); }
+    body.dark .widget-card { background: rgba(25, 25, 38, 0.6) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: 0 10px 30px rgba(0,0,0,0.7), inset 0 0 15px rgba(255,255,255,0.02); color: #F1F0F7; }
     .widget-card.dragging { z-index: 50; cursor: grabbing; transform: translateZ(30px) scale(1.05) !important; box-shadow: 0 30px 60px rgba(0,0,0,0.4) !important; }
     
     @keyframes urgentPulse {
@@ -154,18 +148,18 @@
 
     /* --- 彈跳視窗與抽屜共用 --- */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 100; transition: all 0.3s; }
-    body.dark .modal-overlay { background: rgba(0, 0, 0, 0.7); }
-    .modal-shell { max-width: 400px; width: 90%; padding: 32px 28px; max-height: 85vh; overflow-y: auto; }
+    body.dark .modal-overlay { background: rgba(0, 0, 0, 0.75); }
+    .modal-shell { max-width: 400px; width: 90%; padding: 32px 28px; max-height: 85vh; overflow-y: auto; color: var(--text-hi); }
 
     .checklist-container { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; text-align: left; }
-    .check-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.4); border-radius: 16px; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.5); }
-    body.dark .check-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
+    .check-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.4); border-radius: 16px; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.5); color: var(--text-hi); }
+    body.dark .check-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #F1F0F7; }
     .check-item.done { opacity: 0.6; text-decoration: line-through; }
     .checkbox-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--text-mid); display: flex; justify-content: center; align-items: center; font-size: 14px; color: transparent; transition: all 0.2s; }
     .check-item.done .checkbox-circle { background: #2A9D8F; border-color: #2A9D8F; color: white; }
 
-    .archive-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.3); border-radius: 14px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.4); }
-    body.dark .archive-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
+    .archive-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.3); border-radius: 14px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.4); color: var(--text-hi); }
+    body.dark .archive-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #F1F0F7; }
     .archive-item > div { flex: 1; min-width: 0; }
     .archive-item button { flex-shrink: 0; width: auto !important; padding: 6px 16px !important; font-size: 0.8rem !important; margin-top: 0 !important; }
   </style>
@@ -186,10 +180,11 @@
     <button id="action-btn" class="btn-main" onclick="submitManualForm()">進入系統</button>
     <div id="message"></div>
     <div class="form-footer" onclick="toggleMode()">沒有帳號？點此新建帳號</div>
-    <div style="display: flex; justify-content: center; min-height: 40px; margin-top:24px;" id="google-btn-container"></div>
+    <!-- ⚡ 確保 Google 按鈕容器永不遺失 -->
+    <div style="display: flex; justify-content: center; min-height: 45px; margin-top:24px;" id="google-btn-container"></div>
   </div>
 
-  <!-- VIEW 2: 控制中心 Dashboard Layout (主畫面 + 右側未來任務提醒) -->
+  <!-- VIEW 2: 控制中心 Dashboard Layout -->
   <div id="dashboard-view" class="view-container view-hidden dashboard-layout">
     
     <!-- 左側主控制中心 -->
@@ -287,9 +282,8 @@
   <div id="detail-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       
-      <!-- ✏️ 任務編輯區 (直接在詳情視窗中修改) -->
       <div style="margin-bottom: 12px;">
-        <input type="text" id="edit-task-title" style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.4); font-size: 1.1rem; font-weight: 700; text-align: center; color: var(--text-hi); outline: none;" placeholder="任務名稱">
+        <input type="text" id="edit-task-title" style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.3); font-size: 1.1rem; font-weight: 700; text-align: center; color: var(--text-hi); outline: none;" placeholder="任務名稱">
       </div>
 
       <div style="display: flex; gap: 8px; margin-bottom: 12px;">
@@ -360,12 +354,7 @@
     let currentCalendarMonth = new Date().getMonth();
 
     window.onload = function () {
-      if (typeof google !== 'undefined' && google.accounts) {
-        initGoogleAuth();
-      } else {
-        window.addEventListener('load', initGoogleAuth);
-      }
-
+      initGoogleAuth();
       initGlobalTilt();
       
       const savedUser = localStorage.getItem('planit_user');
@@ -378,17 +367,22 @@
     };
 
     function initGoogleAuth() {
-      try {
-        google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse, auto_select: false });
-        google.accounts.id.renderButton(document.getElementById("google-btn-container"), { theme: "outline", size: "large", shape: "pill", width: 280 });
-      } catch(e) { console.error("Google Auth init error:", e); }
+      // ⚡ 強健的 Google 登入按鈕渲染機制，確保不遺失
+      setTimeout(() => {
+        try {
+          if (typeof google !== 'undefined' && google.accounts) {
+            google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse, auto_select: false });
+            google.accounts.id.renderButton(document.getElementById("google-btn-container"), { theme: "outline", size: "large", shape: "pill", width: 280 });
+          }
+        } catch(e) { console.error("Google Auth init error:", e); }
+      }, 300);
     }
 
     function fetchTasks() {
       callGASAPI({ action: 'getTasks', account: currentUser }, (data) => {
         allTasksData = data || [];
         renderCalendar();
-        renderUpcomingPanel(); // 渲染右側未來任務提醒
+        renderUpcomingPanel();
         renderTasks();
       });
     }
@@ -461,6 +455,7 @@
       document.getElementById('account').value = '';
       document.getElementById('password').value = '';
       document.getElementById('message').innerText = '';
+      initGoogleAuth(); // 重新渲染登入按鈕
     }
 
     function callGASAPI(payload, callback) {
@@ -468,10 +463,12 @@
       .then(res => res.json()).then(data => callback(data)).catch(err => console.error(err));
     }
 
+    // 🖤 完美修復暗黑模式切換：綁定所有主題切換按鈕
     document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.body.classList.toggle('dark');
-        document.querySelectorAll('.theme-toggle-btn').forEach(b => b.innerText = document.body.classList.contains('dark') ? '☀' : '☾');
+        const isDark = document.body.classList.contains('dark');
+        document.querySelectorAll('.theme-toggle-btn').forEach(b => b.innerText = isDark ? '☀' : '☾');
       });
     });
 
@@ -554,7 +551,6 @@
       const todayStr = new Date().toISOString().split('T')[0];
       const activeTasks = allTasksData.filter(t => t.status !== 'completed' && t.dueDate && t.dueDate.split('T')[0] >= todayStr);
       
-      // 依日期排序
       activeTasks.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
 
       if (activeTasks.length === 0) {
@@ -731,7 +727,6 @@
       if(!task) return;
       currentDetailTaskId = taskId;
 
-      // 填入可編輯欄位
       document.getElementById('edit-task-title').value = task.title;
       document.getElementById('edit-task-duedate').value = task.dueDate ? task.dueDate.split('T')[0] : '';
       document.getElementById('edit-task-priority').value = task.priority || '🟡 一般';
@@ -791,7 +786,6 @@
       }
     }
 
-    // 💾 儲存任務編輯
     function saveTaskEdits() {
       if(!currentDetailTaskId) return;
       const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
@@ -807,9 +801,8 @@
       allTasksData[taskIndex].dueDate = newDueDate;
       allTasksData[taskIndex].priority = newPriority;
 
-      // 同步更新後端 (透過修改後的標題與期限)
       callGASAPI({ 
-        action: 'addTask', // 這裡可以沿用新增或擴充 updateTaskDetails，若後端未獨立寫 updateDetails，可直接用對應更新
+        action: 'addTask', 
         account: currentUser,
         taskId: currentDetailTaskId,
         title: newTitle,
@@ -934,7 +927,7 @@
       targetElementToDelete = taskId;
       document.getElementById('delete-modal').classList.replace('view-hidden', 'view-active');
     }
-    function closeDeleteModal() { document.getElementById('delete-modal').classList.replace('view-hidden', 'view-hidden'); targetElementToDelete = null; }
+    function closeDeleteModal() { document.getElementById('delete-modal').classList.replace('view-active', 'view-hidden'); targetElementToDelete = null; }
     function confirmDeleteTask() {
       if (!targetElementToDelete) return;
       const taskId = targetElementToDelete;
@@ -1047,7 +1040,7 @@
           const moved = Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5;
           
           if (draggingCardIndex !== -1) {
-            card.el.classList.——remove('dragging'); card.el.releasePointerCapture(e.pointerId);
+            card.el.classList.remove('dragging'); card.el.releasePointerCapture(e.pointerId);
             draggingCardIndex = -1; renderGrid(); 
           }
 
