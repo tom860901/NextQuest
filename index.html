@@ -52,8 +52,8 @@
     body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
     
     .input-group { margin-bottom: 20px; }
-    .input-group input { width: 100%; padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.5); color: var(--text-hi); font-size: 1rem; outline: none; }
-    body.dark .input-group input { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: white; }
+    .input-group input, .input-group select { width: 100%; padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.5); color: var(--text-hi); font-size: 1rem; outline: none; }
+    body.dark .input-group input, body.dark .input-group select { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: white; }
 
     .btn-main { width: 100%; padding: 16px; border-radius: 20px; border: none; background: #2D283E; color: #FFFFFF; font-size: 1.05rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); margin-top: 8px; }
     body.dark .btn-main { background: #E0C3FC; color: #181524; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
@@ -64,10 +64,9 @@
 
     .form-footer { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-mid); cursor: pointer; text-decoration: underline; }
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
-    .success { color: #2A9D8F !important; }
 
     /* --- 標籤與優先順序選擇器 --- */
-    .selector-group { margin-bottom: 24px; text-align: left; }
+    .selector-group { margin-bottom: 20px; text-align: left; }
     .selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; margin-left: 8px; }
     .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; }
     .tag-btn, .pri-btn { padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
@@ -79,33 +78,31 @@
     .pri-btn[data-val="🟡 一般"].active { background: #E9C46A; color: #2B2543; border-color: transparent; }
     .pri-btn[data-val="🟢 輕鬆"].active { background: #2A9D8F; color: white; border-color: transparent; }
 
-    /* --- 子任務輸入區 --- */
+    /* --- 子任務與 AI --- */
     .manual-subtasks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
     .subtask-input-row { display: flex; gap: 8px; animation: slideIn 0.3s ease; }
     @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    .subtask-input-row input { flex: 1; padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.3); outline: none; transition: border 0.3s; }
-    .subtask-input-row input:focus { border-color: var(--text-hi); background: rgba(255,255,255,0.7); }
+    .subtask-input-row input { flex: 1; padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.3); outline: none; }
     body.dark .subtask-input-row input { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: white; }
     .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 10px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-    .add-step-btn:hover { background: rgba(255,255,255,0.2); }
-    
-    /* AI 魔法按鈕設計 */
     .ai-btn { background: linear-gradient(135deg, #7B2CBF, #F72585); color: white; border: none; box-shadow: 0 4px 15px rgba(247, 37, 133, 0.25); }
-    .ai-btn:hover { box-shadow: 0 6px 20px rgba(247, 37, 133, 0.4); transform: translateY(-1px); color: white; }
-    .ai-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* --- 網格卡片 --- */
+    /* --- 網格卡片與緊急呼吸燈特效 --- */
     .grid-container { position: relative; width: 100%; transition: height 0.3s ease; perspective: 1200px; }
     .widget-card { position: absolute; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3); transform-style: preserve-3d; transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s ease-out, box-shadow 0.4s ease; padding: 16px; }
     body.dark .widget-card { box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,255,255,0.05); }
-    .widget-card.dragging { z-index: 50; cursor: grabbing; transform: translateZ(30px) scale(1.05) !important; box-shadow: 0 30px 60px rgba(0,0,0,0.2) !important; transition: transform 0.1s; }
-    .widget-card.deleting { transform: scale(0.5); opacity: 0; pointer-events: none; }
+    .widget-card.dragging { z-index: 50; cursor: grabbing; transform: translateZ(30px) scale(1.05) !important; box-shadow: 0 30px 60px rgba(0,0,0,0.2) !important; }
     
-    .widget-card[data-pri="🔴 緊急"] { border-top: 2px solid #E63946; }
-    .widget-card[data-pri="🟡 一般"] { border-top: 2px solid #E9C46A; }
-    .widget-card[data-pri="🟢 輕鬆"] { border-top: 2px solid #2A9D8F; }
+    /* 🚨 緊急呼吸燈光暈特效 */
+    @keyframes urgentPulse {
+      0% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.4), inset 0 0 15px rgba(255,255,255,0.3); border-color: rgba(230, 57, 70, 0.8); }
+      50% { box-shadow: 0 0 25px rgba(230, 57, 70, 0.8), inset 0 0 20px rgba(230, 57, 70, 0.2); border-color: #E63946; }
+      100% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.4), inset 0 0 15px rgba(255,255,255,0.3); border-color: rgba(230, 57, 70, 0.8); }
+    }
+    .widget-card.urgent-glow { animation: urgentPulse 2s infinite ease-in-out; border-top: 3px solid #E63946; }
 
-    .card-tag { position: absolute; top: 12px; left: 16px; font-size: 0.75rem; color: var(--text-mid); font-weight: 500; }
+    .card-tag { position: absolute; top: 10px; left: 14px; font-size: 0.65rem; color: var(--text-mid); font-weight: 500; }
+    .card-due { position: absolute; top: 10px; right: 14px; font-size: 0.65rem; color: #E63946; font-weight: 700; background: rgba(230, 57, 70, 0.1); padding: 2px 6px; border-radius: 8px; }
     
     .progress-bar-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(0,0,0,0.05); }
     body.dark .progress-bar-bg { background: rgba(255,255,255,0.05); }
@@ -120,8 +117,6 @@
     .checklist-container { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; text-align: left; }
     .check-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.4); border-radius: 16px; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.5); }
     body.dark .check-item { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
-    .check-item:hover { background: rgba(255,255,255,0.6); }
-    body.dark .check-item:hover { background: rgba(255,255,255,0.1); }
     .check-item.done { opacity: 0.6; text-decoration: line-through; }
     .checkbox-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--text-mid); display: flex; justify-content: center; align-items: center; font-size: 14px; color: transparent; transition: all 0.2s; }
     .check-item.done .checkbox-circle { background: #2A9D8F; border-color: #2A9D8F; color: white; }
@@ -161,10 +156,10 @@
     </div>
   </div>
 
-  <!-- VIEW 3: 新增任務 Modal -->
+  <!-- VIEW 3: 新增任務 Modal (含完成期限) -->
   <div id="task-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell">
-      <h2 style="font-size: 1.25rem; margin-bottom: 24px; text-align: center;">✨ 新增目標任務</h2>
+      <h2 style="font-size: 1.25rem; margin-bottom: 20px; text-align: center;">✨ 新增目標任務</h2>
       
       <div class="selector-group">
         <div class="selector-title">任務類型</div>
@@ -184,7 +179,15 @@
         </div>
       </div>
 
-      <div class="input-group">
+      <!-- 📅 預計完成時間選擇 -->
+      <div class="selector-group">
+        <div class="selector-title">預計完成期限 (Due Date)</div>
+        <div class="input-group" style="margin-bottom: 0;">
+          <input type="date" id="new-task-duedate">
+        </div>
+      </div>
+
+      <div class="input-group" style="margin-top: 16px;">
         <input type="text" id="new-task-input" placeholder="大目標名稱 (例：規劃日本旅遊)" autocomplete="off">
       </div>
 
@@ -291,7 +294,6 @@
       isLoginMode = !isLoginMode;
       document.getElementById('form-title').innerText = isLoginMode ? 'NextQuest' : '新建帳號';
       document.getElementById('action-btn').innerText = isLoginMode ? '進入系統' : '註冊帳號';
-      document.querySelector('.toggle-text').innerText = isLoginMode ? '沒有帳號？點此新建帳號' : '已有帳號？返回登入';
       document.getElementById('message').innerText = ''; 
     }
     function submitManualForm() {
@@ -324,11 +326,14 @@
     });
 
     // =========================================
-    //   UI 渲染與資料處理
+    //   UI 渲染與資料處理 (含緊急高亮與期限顯示)
     // =========================================
     function renderTasks() {
       const container = document.getElementById('grid-container');
       container.innerHTML = ""; 
+      
+      const todayStr = new Date().toISOString().split('T')[0];
+
       allTasksData.forEach(task => {
          let subTasksArr = [];
          try { subTasksArr = JSON.parse(task.subTasks); } catch(e){}
@@ -337,17 +342,27 @@
          let progress = total === 0 ? 0 : Math.round((done / total) * 100);
 
          const card = document.createElement('div');
-         card.className = "widget-card";
+         
+         // 🚨 判斷是否緊急或過期 (手動設定為緊急，或者 期限 <= 今天)
+         let isUrgent = task.priority === '🔴 緊急';
+         if (task.dueDate && task.dueDate <= todayStr) {
+           isUrgent = true;
+         }
+
+         card.className = `widget-card ${isUrgent ? 'urgent-glow' : ''}`;
          card.setAttribute('data-id', task.id); 
          card.setAttribute('data-w', task.w); card.setAttribute('data-h', task.h);
          card.setAttribute('data-pri', task.priority);
          
          let progressHtml = total > 0 ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%"></div></div>` : '';
          let subTaskHint = total > 0 ? `<div style="font-size:0.75rem; color:var(--text-mid); margin-top:4px;">${done}/${total} 步驟</div>` : '';
+         
+         // 📅 期限標籤顯示
+         let dueHtml = task.dueDate ? `<div class="card-due">📅 ${task.dueDate}</div>` : '';
 
-         // ✨ 這是剛剛修復過的防擠壓排版
          card.innerHTML = `
-            <div class="card-tag" style="top: 8px; left: 12px; font-size: 0.65rem;">${task.tag}</div>
+            <div class="card-tag" style="top: 10px; left: 14px; font-size: 0.65rem;">${task.tag}</div>
+            ${dueHtml}
             <div style="text-align:center; width: 100%; margin-top: 16px; font-size: 0.95rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">${task.title}</div>
             ${subTaskHint}
             ${progressHtml}
@@ -362,7 +377,6 @@
       btn.classList.add('active'); 
     }
     
-    // ✨ 支援帶入預設文字，讓 AI 可以自動填寫
     function addManualSubtaskInput(defaultText = "") {
       const container = document.getElementById('manual-subtasks-container');
       const row = document.createElement('div'); row.className = 'subtask-input-row';
@@ -371,33 +385,23 @@
       if(!defaultText) row.querySelector('input').focus();
     }
 
-    // ✨ AI 呼叫核心邏輯
     function triggerAIDecompose() {
       const titleInput = document.getElementById('new-task-input');
       const title = titleInput.value.trim();
-      if (!title) {
-        alert("請先輸入上方的大目標名稱，AI 才知道要拆解什麼喔！");
-        titleInput.focus();
-        return;
-      }
+      if (!title) { alert("請先輸入上方的大目標名稱！"); titleInput.focus(); return; }
       
       const aiBtn = document.getElementById('ai-decompose-btn');
       const originalText = aiBtn.innerHTML;
-      aiBtn.innerHTML = "🧠 思考中...";
-      aiBtn.disabled = true;
+      aiBtn.innerHTML = "🧠 思考中..."; aiBtn.disabled = true;
 
       callGASAPI({ action: 'aiDecompose', title: title }, (res) => {
-        aiBtn.innerHTML = originalText;
-        aiBtn.disabled = false;
-        
+        aiBtn.innerHTML = originalText; aiBtn.disabled = false;
         if (res.success && res.steps && res.steps.length > 0) {
           const container = document.getElementById('manual-subtasks-container');
-          container.innerHTML = ""; // 清空原本的輸入框
-          res.steps.forEach(stepText => {
-            addManualSubtaskInput(stepText); // 自動把 AI 結果填入
-          });
+          container.innerHTML = ""; 
+          res.steps.forEach(stepText => { addManualSubtaskInput(stepText); });
         } else {
-          alert(res.msg || "AI 拆解失敗，請稍後再試！");
+          alert(res.msg || "AI 拆解失敗！");
         }
       });
     }
@@ -405,11 +409,12 @@
     function openTaskModal() { 
       document.getElementById('task-modal').classList.replace('view-hidden', 'view-active'); 
       document.getElementById('manual-subtasks-container').innerHTML = ''; 
+      document.getElementById('new-task-input').value = "";
+      document.getElementById('new-task-duedate').value = "";
     }
     
     function closeTaskModal() { 
       document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); 
-      document.getElementById('new-task-input').value = ""; 
     }
 
     function confirmAddTask() {
@@ -419,6 +424,7 @@
       
       const tag = document.querySelector('.tag-btn.active').getAttribute('data-val');
       const pri = document.querySelector('.pri-btn.active').getAttribute('data-val');
+      const dueDate = document.getElementById('new-task-duedate').value;
       
       let subTasks = [];
       document.querySelectorAll('#manual-subtasks-container input').forEach(inp => {
@@ -427,7 +433,15 @@
 
       closeTaskModal();
       
-      callGASAPI({ action: 'addTask', account: currentUser, title: title, tag: tag, priority: pri, subTasks: JSON.stringify(subTasks) }, (res) => {
+      callGASAPI({ 
+        action: 'addTask', 
+        account: currentUser, 
+        title: title, 
+        tag: tag, 
+        priority: pri, 
+        subTasks: JSON.stringify(subTasks),
+        dueDate: dueDate 
+      }, (res) => {
         if(res.success) {
           allTasksData.push(res.task);
           renderTasks(); 
@@ -441,7 +455,8 @@
       if(!task) return;
       currentDetailTaskId = taskId;
 
-      document.getElementById('detail-tag').innerText = `${task.priority} • ${task.tag}`;
+      let dueText = task.dueDate ? ` | 期限: ${task.dueDate}` : '';
+      document.getElementById('detail-tag').innerText = `${task.priority} • ${task.tag}${dueText}`;
       document.getElementById('detail-title').innerText = task.title;
       
       const listContainer = document.getElementById('detail-checklist');
