@@ -121,7 +121,7 @@
     .checkbox-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--text-mid); display: flex; justify-content: center; align-items: center; font-size: 14px; color: transparent; transition: all 0.2s; }
     .check-item.done .checkbox-circle { background: #2A9D8F; border-color: #2A9D8F; color: white; }
 
-    /* 已完成清單項目樣式（已修正按鈕大小與排版） */
+    /* 已完成清單項目樣式 */
     .archive-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.3); border-radius: 14px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.4); }
     body.dark .archive-item { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
     .archive-item > div { flex: 1; min-width: 0; }
@@ -374,7 +374,7 @@
          const card = document.createElement('div');
          
          let isUrgent = task.priority === '🔴 緊急';
-         if (task.dueDate && task.dueDate <= todayStr) {
+         if (task.dueDate && task.dueDate.split('T')[0] <= todayStr) {
            isUrgent = true;
          }
 
@@ -386,9 +386,11 @@
          let progressHtml = total > 0 ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%"></div></div>` : '';
          let subTaskHint = total > 0 ? `<div style="font-size:0.75rem; color:var(--text-mid); margin-top:4px;">${done}/${total} 步驟</div>` : '';
          
+         // 📅 安全過濾日期格式 (只取 YYYY-MM-DD，避免後端轉成 ISO 時間亂碼)
          let dueHtml = '';
          if (task.dueDate) {
-           let dateDisplay = task.dueDate.slice(5); 
+           let cleanDate = task.dueDate.split('T')[0];
+           let dateDisplay = cleanDate.slice(5); 
            dueHtml = `<div class="card-due">📅 ${dateDisplay}</div>`;
          }
 
@@ -490,7 +492,8 @@
       if(!task) return;
       currentDetailTaskId = taskId;
 
-      let dueText = task.dueDate ? ` | 期限: ${task.dueDate}` : '';
+      let cleanDate = task.dueDate ? task.dueDate.split('T')[0] : '';
+      let dueText = cleanDate ? ` | 期限: ${cleanDate}` : '';
       document.getElementById('detail-tag').innerText = `${task.priority} • ${task.tag}${dueText}`;
       document.getElementById('detail-title').innerText = task.title;
       
@@ -562,10 +565,11 @@
         completedTasks.forEach(task => {
           const item = document.createElement('div');
           item.className = 'archive-item';
+          let cleanDate = task.dueDate ? task.dueDate.split('T')[0] : '無';
           item.innerHTML = `
             <div>
               <div style="font-weight: 700; font-size: 0.95rem;">✅ ${task.title}</div>
-              <div style="font-size: 0.75rem; color: var(--text-mid);">${task.tag} | 期限: ${task.dueDate || '無'}</div>
+              <div style="font-size: 0.75rem; color: var(--text-mid);">${task.tag} | 期限: ${cleanDate}</div>
             </div>
             <button class="btn-main btn-secondary" onclick="restoreTask('${task.id}')">復原</button>
           `;
