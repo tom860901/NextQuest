@@ -56,8 +56,10 @@
     .btn-main:active { transform: scale(0.96); }
     .btn-secondary { background: rgba(255,255,255,0.3); color: var(--text-hi); border: 1px solid rgba(255,255,255,0.5); box-shadow: none; }
     body.dark .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-hi); border-color: rgba(255,255,255,0.1); }
+    
+    /* 危險操作按鈕 (紅色) */
+    .btn-danger { background: #E63946 !important; color: #FFFFFF !important; box-shadow: 0 8px 24px rgba(230, 57, 70, 0.3) !important; }
 
-    /* 分隔線 UI */
     .divider { display: flex; align-items: center; text-align: center; margin: 24px 0; color: var(--text-mid); font-size: 0.85rem; }
     .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid rgba(0,0,0,0.1); }
     body.dark .divider::before, body.dark .divider::after { border-bottom: 1px solid rgba(255,255,255,0.15); }
@@ -68,7 +70,6 @@
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
     .success { color: #2A9D8F !important; }
 
-    /* 網格與彈窗樣式 */
     .tag-selector { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; }
     .tag-btn { padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
     body.dark .tag-btn { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
@@ -99,8 +100,6 @@
       <h1 id="form-title">NextQuest</h1>
       <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題" style="position: absolute; right: 0;">☾</button>
     </div>
-    
-    <!-- 手動輸入區塊 -->
     <div class="input-group">
       <input type="text" id="account" placeholder="Account / Email" autocomplete="off">
     </div>
@@ -109,12 +108,9 @@
     </div>
     <button id="action-btn" class="btn-main" onclick="submitManualForm()">進入系統</button>
     <div id="message"></div>
-
     <div class="form-footer">
       <div class="toggle-text" onclick="toggleMode()">沒有帳號？點此新建帳號</div>
     </div>
-
-    <!-- 分隔線與 Google 登入 -->
     <div class="divider"><span>或使用</span></div>
     <div id="google-btn-container" style="display: flex; justify-content: center; min-height: 40px;"></div>
   </div>
@@ -151,6 +147,20 @@
     </div>
   </div>
 
+  <!-- VIEW 4: 刪除確認 Modal -->
+  <div id="delete-modal" class="modal-overlay view-hidden">
+    <div class="window-shell modal-shell" style="text-align: center;">
+      <h2 style="font-size: 1.25rem; margin-bottom: 16px;">⚠️ 刪除確認</h2>
+      <p style="color: var(--text-mid); margin-bottom: 28px; font-size: 0.95rem;">
+        確定要將這個任務從控制中心移除嗎？<br>此動作無法復原。
+      </p>
+      <div style="display: flex; gap: 12px;">
+        <button class="btn-main btn-secondary" onclick="closeDeleteModal()">保留卡片</button>
+        <button class="btn-main btn-danger" onclick="confirmDeleteTask()">確定刪除</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // =========================================
     //   系統設定
@@ -160,6 +170,7 @@
     
     let isLoginMode = true;
     let currentUser = ""; 
+    let targetElementToDelete = null; // 記錄等待刪除的卡片
 
     // --- Google SSO 初始化 ---
     window.onload = function () {
@@ -223,13 +234,11 @@
              currentUser = res.account;
              callGASAPI({ action: 'getTasks', account: currentUser }, renderTasks);
            }
-         } else {
-           msgBox.className = '';
-         }
+         } else { msgBox.className = ''; }
       });
     }
 
-    // --- Fetch API (取代 google.script.run) ---
+    // --- Fetch API ---
     function callGASAPI(payload, callback) {
       fetch(GAS_API_URL, {
         method: 'POST',
@@ -254,7 +263,7 @@
       });
     });
 
-    // --- UI 渲染與推擠引擎 ---
+    // --- 渲染卡片 ---
     function renderTasks(tasksData) {
       const container = document.getElementById('grid-container');
       container.innerHTML = ""; 
@@ -274,6 +283,7 @@
       setTimeout(() => { initGridEngine(); }, 50);
     }
 
+    // --- 新增任務 Modal ---
     function selectTag(btn) { document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
     function openTaskModal() { document.getElementById('task-modal').classList.replace('view-hidden', 'view-active'); setTimeout(() => { document.getElementById('new-task-input').focus(); }, 100); }
     function closeTaskModal() { document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); document.getElementById('new-task-input').value = ""; }
@@ -302,11 +312,53 @@
       });
     }
 
+    // --- 刪除確認 Modal ---
+    function openDeleteModal(el) {
+      if (navigator.vibrate) navigator.vibrate(50);
+      targetElementToDelete = el;
+      document.getElementById('delete-modal').classList.replace('view-hidden', 'view-active');
+    }
+    
+    function closeDeleteModal() {
+      document.getElementById('delete-modal').classList.replace('view-active', 'view-hidden');
+      targetElementToDelete = null;
+    }
+
+    function confirmDeleteTask() {
+      if (!targetElementToDelete) return;
+      const el = targetElementToDelete;
+      const taskId = el.getAttribute('data-id');
+      
+      // 關閉視窗並開始縮小消失動畫
+      closeDeleteModal();
+      el.classList.add('deleting');
+
+      // 動畫結束後移除元素，重新排版，並呼叫 API
+      setTimeout(() => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+        initGridEngine(); 
+      }, 200);
+
+      if (taskId) {
+        callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {});
+      }
+    }
+
+    // =========================================
+    //   核心推擠引擎 (修復重疊 Bug 版本)
+    // =========================================
     function initGridEngine() {
       let oldContainer = document.getElementById('grid-container');
+      
+      // 【修復 Bug 關鍵 1】：深度複製容器，消滅所有舊的幽靈事件
       let container = oldContainer.cloneNode(true);
       oldContainer.parentNode.replaceChild(container, oldContainer);
+
       const cardElements = Array.from(container.children);
+      
+      // 【修復 Bug 關鍵 2】：解除複製過來的 bound 狀態，確保新引擎能接管
+      cardElements.forEach(el => el.removeAttribute('data-bound'));
+
       let cols = window.innerWidth <= 560 ? 2 : 4; 
       const gap = 16;
       const rowHeight = window.innerWidth <= 560 ? 88 : 92;
@@ -337,6 +389,7 @@
         container.style.height = `${maxRow * rowHeight + (maxRow - 1) * gap}px`;
       }
       renderGrid();
+      
       window.onresize = () => {
         const newCols = window.innerWidth <= 560 ? 2 : 4;
         if (cols !== newCols) { cols = newCols; cardsData.forEach(c => c.w = Math.min(parseInt(c.el.getAttribute('data-w')) || 1, cols)); }
@@ -355,7 +408,15 @@
           draggingCardIndex = cardsData.indexOf(card);
           startX = e.clientX; startY = e.clientY;
           initialLeft = parseInt(card.el.style.left || 0); initialTop = parseInt(card.el.style.top || 0);
-          longPressTimer = setTimeout(() => { draggingCardIndex = -1; handleDeleteTask(card); }, 700);
+          
+          // 長按觸發刪除確認 Modal
+          longPressTimer = setTimeout(() => { 
+            draggingCardIndex = -1; 
+            card.el.classList.remove('dragging');
+            card.el.releasePointerCapture(e.pointerId);
+            openDeleteModal(card.el); 
+          }, 700);
+
           card.el.classList.add('dragging'); card.el.setPointerCapture(e.pointerId);
         });
 
@@ -388,17 +449,6 @@
           draggingCardIndex = -1; renderGrid(); 
         });
       });
-
-      function handleDeleteTask(targetCard) {
-        if (navigator.vibrate) navigator.vibrate(50);
-        const el = targetCard.el;
-        const taskId = el.getAttribute('data-id');
-        el.classList.remove('dragging'); el.classList.add('deleting');
-        const index = cardsData.indexOf(targetCard);
-        if (index > -1) { cardsData.splice(index, 1); renderGrid(); }
-        setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 200);
-        if (taskId) { callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {}); }
-      }
     }
   </script>
 </body>
