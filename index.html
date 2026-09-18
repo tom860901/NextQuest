@@ -16,13 +16,14 @@
     body { 
       min-height: 100vh; 
       display: flex; 
-      justify-content: center; 
-      align-items: flex-start; 
+      flex-direction: column;
+      align-items: center; 
+      justify-content: flex-start;
       background-color: #F4F5F7; 
       color: var(--text-hi); 
       overflow-y: auto; 
       position: relative; 
-      padding: 30px 15px; 
+      padding: 40px 20px; 
       transition: background 0.3s ease; 
     }
 
@@ -44,7 +45,7 @@
     body.dark .shape-blue { background: #0c2340; } 
 
     .view-hidden { display: none !important; }
-    .view-active { display: block !important; width: 100%; max-width: 1080px; margin: auto; }
+    .view-active { display: block !important; }
 
     .window-shell, .modal-shell {
       background: rgba(255, 255, 255, 0.35); 
@@ -56,31 +57,32 @@
       box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
     }
     body.dark .window-shell, body.dark .modal-shell {
-      background: rgba(18, 18, 26, 0.75) !important; 
+      background: rgba(18, 18, 26, 0.82) !important; 
       border: 1px solid rgba(255, 255, 255, 0.12) !important;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255,255,255,0.02) !important;
     }
 
-    .login-shell { max-width: 400px; margin: 80px auto auto auto; }
+    .login-shell { width: 100%; max-width: 400px; margin: 80px auto; }
     
     #dashboard-view.view-active {
       display: grid !important;
       grid-template-columns: minmax(0, 1fr) 280px !important;
-      gap: 20px !important;
+      gap: 24px !important;
       align-items: start !important;
+      width: 100%;
+      max-width: 1060px !important;
+      margin: 0 auto !important;
     }
 
-    /* 主任務區：移除高度限制與內部滾輪，自然向下延展 */
     .dashboard-main { 
       min-width: 0; 
       height: auto;
       overflow: visible;
     }
 
-    /* 右側即將到來面板：設定 sticky 固定，跟隨主視窗滾動 */
     .upcoming-panel { 
       position: sticky;
-      top: 20px;
+      top: 30px;
       max-height: calc(100vh - 60px);
       overflow-y: auto; 
     }
@@ -113,7 +115,6 @@
     .form-footer { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-mid); cursor: pointer; text-decoration: underline; }
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
 
-    /* 月曆視圖 */
     .calendar-container { background: rgba(255, 255, 255, 0.2); padding: 14px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.4); margin-bottom: 20px; }
     body.dark .calendar-container { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.08); }
     .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 700; font-size: 0.95rem; color: var(--text-hi); }
@@ -130,7 +131,6 @@
     .cal-dot { width: 4px; height: 4px; background: #2A9D8F; border-radius: 50%; }
     .cal-dot.urgent { background: #E63946; }
 
-    /* 標籤選擇器 */
     .selector-group { margin-bottom: 16px; text-align: left; }
     .selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; margin-left: 4px; }
     .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -150,7 +150,6 @@
     .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 8px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
     .ai-btn { background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white; border: none; }
 
-    /* 任務網格與呼吸燈 */
     .grid-container { position: relative; width: 100%; transition: height 0.3s ease; perspective: 1200px; min-height: 120px; }
     .widget-card { position: absolute; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 8px 24px rgba(0,0,0,0.04); padding: 14px; color: var(--text-hi); }
     body.dark .widget-card { background: rgba(25, 25, 38, 0.65) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #F1F0F7; }
@@ -171,29 +170,34 @@
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
     body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
 
-    /* 彈跳視窗置中 */
     .modal-overlay { 
       position: fixed; 
       top: 0; 
       left: 0; 
       width: 100vw; 
       height: 100vh; 
-      background: rgba(0, 0, 0, 0.3); 
-      backdrop-filter: blur(8px); 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      z-index: 1000; 
+      background: transparent !important; 
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      display: grid !important; 
+      place-items: center !important; 
+      z-index: 2000; 
+      pointer-events: auto;
     }
-    body.dark .modal-overlay { background: rgba(0, 0, 0, 0.75); }
+    body.dark .modal-overlay { background: transparent !important; }
+
     .modal-shell { 
-      max-width: 440px; 
+      max-width: 480px; 
       width: 90%; 
       margin: auto; 
       padding: 28px; 
       max-height: 85vh; 
       overflow-y: auto; 
       color: var(--text-hi); 
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.6) !important;
+    }
+    body.dark .modal-shell {
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
     }
 
     .checklist-container { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; text-align: left; }
@@ -208,10 +212,13 @@
     .archive-item > div { flex: 1; min-width: 0; }
     .archive-item button { flex-shrink: 0; width: auto !important; padding: 6px 14px !important; font-size: 0.8rem !important; margin-top: 0 !important; }
     
-    /* 說明視窗專用樣式 */
-    .guide-box { text-align: left; line-height: 1.6; font-size: 0.9rem; }
-    .guide-item { margin-bottom: 14px; padding: 10px 14px; background: rgba(255,255,255,0.35); border-radius: 14px; }
+    /* 說明視窗專屬樣式 */
+    .guide-box { text-align: left; line-height: 1.6; font-size: 0.88rem; }
+    .guide-item { margin-bottom: 12px; padding: 10px 14px; background: rgba(255,255,255,0.35); border-radius: 14px; }
     body.dark .guide-item { background: rgba(255,255,255,0.05); }
+    .log-list { list-style: disc; margin-left: 20px; margin-top: 6px; color: var(--text-mid); font-size: 0.82rem; }
+    .version-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; background: rgba(108, 92, 231, 0.15); color: #6C5CE7; font-weight: 700; font-size: 0.75rem; margin-left: 6px; }
+    body.dark .version-tag { background: rgba(108, 92, 231, 0.3); color: #A29BFE; }
   </style>
 </head>
 <body>
@@ -233,10 +240,8 @@
     <div style="display: flex; justify-content: center; min-height: 45px; margin-top:24px;" id="google-btn-container"></div>
   </div>
 
-  <!-- VIEW 2: 控制中心 Dashboard (左側主控 + 右側未來提醒，雙欄並排) -->
+  <!-- VIEW 2: 控制中心 Dashboard -->
   <div id="dashboard-view" class="view-hidden">
-    
-    <!-- 左側主控制中心 (月曆與任務，直接向下延展) -->
     <div class="window-shell dashboard-main">
       <div class="titlebar">
         <h1>Planit</h1>
@@ -249,7 +254,6 @@
         </div>
       </div>
 
-      <!-- 月曆視圖 (含今天按鈕) -->
       <div class="calendar-container">
         <div class="cal-header">
           <div style="display: flex; gap: 4px;">
@@ -271,14 +275,12 @@
       </div>
     </div>
 
-    <!-- 右側視窗：即將到來的未來任務提醒 (Sticky 固定吸頂) -->
     <div class="window-shell upcoming-panel">
       <h3>🔔 即將到來</h3>
       <div id="upcoming-list" style="font-size: 0.85rem; color: var(--text-mid);">
         載入預告中...
       </div>
     </div>
-
   </div>
 
   <!-- VIEW 3: 新增任務 Modal -->
@@ -287,7 +289,7 @@
       <h2 style="font-size: 1.25rem; margin-bottom: 16px; text-align: center;">✨ 新增目標任務</h2>
       
       <div class="selector-group">
-        <div class="selector-title">任務類型 (點擊說明可查看詳情)</div>
+        <div class="selector-title">任務類型</div>
         <div class="tag-selector">
           <div class="tag-btn active" onclick="selectOpt('.tag-btn', this)" data-val="⚡️ 碎片 (<15m)">⚡️ 碎片 (&lt;15m)</div>
           <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🧠 深度專注">🧠 深度專注</div>
@@ -312,7 +314,7 @@
       </div>
 
       <div class="input-group" style="margin-top: 14px;">
-        <input type="text" id="new-task-input" placeholder="目標名稱 (例：準備期末報告)" autocomplete="off">
+        <input type="text" id="new-task-input" placeholder="目標名稱 (例：準備專題報告)" autocomplete="off">
       </div>
 
       <div class="selector-group">
@@ -361,29 +363,49 @@
     </div>
   </div>
 
-  <!-- VIEW 5: 💡 說明 Modal (標籤與操作指南) -->
+  <!-- VIEW 5: 💡 說明 Modal (整合版本號、更新日誌與核心定位) -->
   <div id="guide-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell">
-      <h2 style="font-size: 1.25rem; margin-bottom: 16px; text-align: center;">💡 Planit 任務指南</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">💡 關於 Planit</h2>
+        <span class="version-tag">v4.3 Stable</span>
+      </div>
+
       <div class="guide-box">
-        <div class="guide-item">
-          <strong>⚡️ 碎片 (&lt;15m)</strong><br>
-          瑣碎、雜項或可於 15 分鐘內快速完成的微型任務（如回信、繳費、預約）。
+        <!-- 核心定位 -->
+        <div class="guide-item" style="border-left: 3px solid #6C5CE7;">
+          <strong>🎯 核心精神</strong><br>
+          Planit 是一套融合<strong>子彈筆記哲學</strong>、<strong>AI 步驟拆解</strong>與<strong>2.5D 控制中心</strong>的協作調度系統。專為團隊消除拖延、清晰排程而生。
         </div>
+
+        <!-- 任務標籤說明 -->
         <div class="guide-item">
-          <strong>🧠 深度專注</strong><br>
-          需要高度專注、耗時較長的重點工作或學習專案（如寫論文、系統架構設計）。
+          <strong>🏷️ 任務標籤定義</strong><br>
+          • <strong>⚡️ 碎片 (&lt;15m)</strong>：15 分鐘內可處理的微型瑣事。<br>
+          • <strong>🧠 深度專注</strong>：需要長時間高度投入的核心專案。<br>
+          • <strong>🔄 例行重複</strong>：週期性執行的規律習慣。
         </div>
+
+        <!-- 機制說明 -->
         <div class="guide-item">
-          <strong>🔄 例行重複</strong><br>
-          週期性或規律執行的習慣事項（如每日閱讀、定期運動、每週週報）。
+          <strong>📌 智慧防呆與調度機制</strong><br>
+          • <strong>子任務防呆</strong>：若任務含有子步驟，須全數勾選才可標記完成。<br>
+          • <strong>移到明天 (Rollover)</strong>：今日未完事項一鍵延至次日並強制紅框警示。
         </div>
+
+        <!-- 更新日誌 -->
         <div class="guide-item">
-          <strong>📌 未完成防呆說明</strong><br>
-          若任務內建子步驟，必須勾選全部步驟，「完成」按鈕才會解鎖，防止未完成誤封存。
+          <strong>📜 更新歷程 (Changelog)</strong>
+          <ul class="log-list">
+            <li><strong>v4.3</strong>：全螢幕置中修復、獨立吸頂即將到來側欄、暗黑深色模式。</li>
+            <li><strong>v4.2</strong>：加入跨月份切換月曆、任務即時編輯、未完成防呆鎖定。</li>
+            <li><strong>v4.1</strong>：支援子彈筆記歸檔抽屜（完成區）、任務移到明天 (Rollover)。</li>
+            <li><strong>v4.0</strong>：品牌正名 Planit、Google SSO 驗證流暢度提升。</li>
+          </ul>
         </div>
       </div>
-      <button class="btn-main btn-secondary" style="margin-top: 16px;" onclick="closeGuideModal()">了解並關閉</button>
+
+      <button class="btn-main btn-secondary" style="margin-top: 14px;" onclick="closeGuideModal()">關閉說明</button>
     </div>
   </div>
 
@@ -961,6 +983,25 @@
       renderCalendar();
       renderUpcomingPanel();
       renderTasks();
+    }
+
+    function toggleCardSize() {
+      if(!currentDetailTaskId) return;
+      const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
+      if(taskIndex === -1) return;
+      
+      let w = parseInt(allTasksData[taskIndex].w);
+      let h = parseInt(allTasksData[taskIndex].h);
+      
+      if(w === 1 && h === 1) { w = 2; h = 1; }
+      else if(w === 2 && h === 1) { w = 2; h = 2; }
+      else { w = 1; h = 1; }
+      
+      allTasksData[taskIndex].w = w;
+      allTasksData[taskIndex].h = h;
+      
+      callGASAPI({ action: 'updateTaskSize', taskId: currentDetailTaskId, w: w, h: h }, () => {});
+      closeDetailModal();
     }
 
     function openDeleteModal(taskId) {
