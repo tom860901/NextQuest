@@ -23,7 +23,7 @@
       color: var(--text-hi); 
       overflow-y: auto; 
       position: relative; 
-      padding: 40px 20px; 
+      padding: 40px 16px; 
       transition: background 0.3s ease; 
     }
 
@@ -44,7 +44,6 @@
     body.dark .shape-orange { background: #12193b; } 
     body.dark .shape-blue { background: #0c2340; } 
 
-    /* 確保隱藏時最高優先級 */
     .view-hidden { display: none !important; }
     .view-active { display: block !important; }
 
@@ -65,6 +64,7 @@
 
     .login-shell { width: 100%; max-width: 400px; margin: 80px auto; }
     
+    /* 🎯 響應式雙欄配置：大螢幕 2 欄，視窗縮小時自動堆疊為單欄，絕不破版 */
     #dashboard-view.view-active {
       display: grid !important;
       grid-template-columns: minmax(0, 1fr) 280px !important;
@@ -73,6 +73,15 @@
       width: 100%;
       max-width: 1060px !important;
       margin: 0 auto !important;
+    }
+
+    @media (max-width: 840px) {
+      #dashboard-view.view-active {
+        grid-template-columns: 1fr !important;
+      }
+      .upcoming-panel {
+        position: static !important;
+      }
     }
 
     .dashboard-main { 
@@ -116,6 +125,7 @@
     .form-footer { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-mid); cursor: pointer; text-decoration: underline; }
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
 
+    /* 月曆視圖 */
     .calendar-container { background: rgba(255, 255, 255, 0.2); padding: 14px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.4); margin-bottom: 20px; }
     body.dark .calendar-container { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.08); }
     .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 700; font-size: 0.95rem; color: var(--text-hi); }
@@ -132,6 +142,7 @@
     .cal-dot { width: 4px; height: 4px; background: #2A9D8F; border-radius: 50%; }
     .cal-dot.urgent { background: #E63946; }
 
+    /* 標籤選擇器 */
     .selector-group { margin-bottom: 16px; text-align: left; }
     .selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; margin-left: 4px; }
     .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -151,8 +162,26 @@
     .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 8px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
     .ai-btn { background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white; border: none; }
 
+    /* 網格容器與卡片樣式 */
     .grid-container { position: relative; width: 100%; transition: height 0.3s ease; perspective: 1200px; min-height: 120px; }
-    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 8px 24px rgba(0,0,0,0.04); padding: 14px; color: var(--text-hi); }
+    .widget-card { 
+      position: absolute; 
+      background: rgba(255, 255, 255, 0.4); 
+      border: 1px solid rgba(255, 255, 255, 0.5); 
+      border-radius: 20px; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      align-items: center; 
+      font-weight: 600; 
+      overflow: hidden; 
+      user-select: none; 
+      touch-action: none; 
+      cursor: grab; 
+      box-shadow: 0 8px 24px rgba(0,0,0,0.04); 
+      padding: 10px 12px 8px 12px; 
+      color: var(--text-hi); 
+    }
     body.dark .widget-card { background: rgba(25, 25, 38, 0.65) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #F1F0F7; }
     .widget-card.dragging { z-index: 50; cursor: grabbing; transform: scale(1.04) !important; box-shadow: 0 20px 40px rgba(0,0,0,0.3) !important; }
     
@@ -163,15 +192,54 @@
     }
     .widget-card.urgent-glow { animation: urgentPulse 2s infinite ease-in-out; border-top: 3px solid #E63946; }
 
-    .card-tag { position: absolute; top: 8px; left: 12px; font-size: 0.65rem; color: var(--text-mid); font-weight: 500; }
-    .card-due { position: absolute; top: 8px; right: 12px; font-size: 0.65rem; color: #E63946; font-weight: 700; background: rgba(230, 57, 70, 0.1); padding: 2px 6px; border-radius: 6px; }
+    /* 🎯 解決文字覆蓋問題：頂部 Flex 撐開，防止標籤與日期撞字 */
+    .card-topbar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+    }
+    .card-tag-text {
+      flex: 1;
+      color: var(--text-mid);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+    .card-due-badge {
+      flex-shrink: 0;
+      color: #E63946;
+      font-weight: 700;
+      background: rgba(230, 57, 70, 0.1);
+      padding: 1px 5px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      white-space: nowrap;
+    }
+    
+    .card-title-text {
+      text-align: center;
+      width: 100%;
+      font-size: 0.95rem;
+      line-height: 1.25;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+      margin: auto 0;
+    }
     
     .progress-bar-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: rgba(0,0,0,0.05); }
     body.dark .progress-bar-bg { background: rgba(255,255,255,0.05); }
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
     body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
 
-    /* 🎯 關鍵修復：預設隱藏，只有在加上 .view-active 時才以 grid 居中顯示 */
+    /* 彈窗遮罩與外殼 */
     .modal-overlay { 
       position: fixed; 
       inset: 0;
@@ -451,6 +519,9 @@
     let currentCalendarYear = new Date().getFullYear();
     let currentCalendarMonth = new Date().getMonth();
 
+    // 儲存全域網格重排函數
+    let globalRenderGrid = null;
+
     window.onload = function () {
       initGoogleAuth();
       
@@ -462,6 +533,13 @@
         fetchTasks();
       }
     };
+
+    // 全域視窗縮放監聽：只要視窗大小變化，立即重算網格，不需重新整理
+    window.addEventListener('resize', () => {
+      if (globalRenderGrid) {
+        globalRenderGrid();
+      }
+    });
 
     function initGoogleAuth() {
       setTimeout(() => {
@@ -657,6 +735,7 @@
       });
     }
 
+    // 🎯 建立卡片：使用全新的 Flex Topbar 佈局，防止文字撞字
     function renderTasks() {
       const container = document.getElementById('grid-container');
       container.innerHTML = ""; 
@@ -695,19 +774,21 @@
          card.setAttribute('data-pri', task.priority);
          
          let progressHtml = total > 0 ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%"></div></div>` : '';
-         let subTaskHint = total > 0 ? `<div style="font-size:0.75rem; color:var(--text-mid); margin-top:4px;">${done}/${total} 步驟</div>` : '';
+         let subTaskHint = total > 0 ? `<div style="font-size:0.75rem; color:var(--text-mid); margin-top:2px;">${done}/${total} 步驟</div>` : '';
          
          let dueHtml = '';
          if (task.dueDate) {
            let cleanDate = task.dueDate.split('T')[0];
            let dateDisplay = cleanDate.slice(5); 
-           dueHtml = `<div class="card-due">📅 ${dateDisplay}</div>`;
+           dueHtml = `<div class="card-due-badge">📅 ${dateDisplay}</div>`;
          }
 
          card.innerHTML = `
-            <div class="card-tag" style="top: 8px; left: 12px; font-size: 0.65rem;">${task.tag}</div>
-            ${dueHtml}
-            <div style="text-align:center; width: 100%; margin-top: ${task.dueDate ? '16px' : '10px'}; font-size: 0.95rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">${task.title}</div>
+            <div class="card-topbar">
+              <span class="card-tag-text">${task.tag}</span>
+              ${dueHtml}
+            </div>
+            <div class="card-title-text">${task.title}</div>
             ${subTaskHint}
             ${progressHtml}
          `;
@@ -987,25 +1068,6 @@
       renderTasks();
     }
 
-    function toggleCardSize() {
-      if(!currentDetailTaskId) return;
-      const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
-      if(taskIndex === -1) return;
-      
-      let w = parseInt(allTasksData[taskIndex].w);
-      let h = parseInt(allTasksData[taskIndex].h);
-      
-      if(w === 1 && h === 1) { w = 2; h = 1; }
-      else if(w === 2 && h === 1) { w = 2; h = 2; }
-      else { w = 1; h = 1; }
-      
-      allTasksData[taskIndex].w = w;
-      allTasksData[taskIndex].h = h;
-      
-      callGASAPI({ action: 'updateTaskSize', taskId: currentDetailTaskId, w: w, h: h }, () => {});
-      closeDetailModal();
-    }
-
     function openDeleteModal(taskId) {
       if (navigator.vibrate) navigator.vibrate(50);
       targetElementToDelete = taskId;
@@ -1023,30 +1085,62 @@
       callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {});
     }
 
+    // 🎯 核心推擠引擎與全域動態 Resize 修正
     function initGridEngine() {
       let oldContainer = document.getElementById('grid-container');
       let container = oldContainer.cloneNode(true);
       oldContainer.parentNode.replaceChild(container, oldContainer);
       const cardElements = Array.from(container.children);
-      let cols = window.innerWidth <= 560 ? 2 : 3; 
-      const gap = 16; const rowHeight = 86;
+      
+      function getColCount() {
+        if (container.clientWidth <= 420) return 1;
+        if (container.clientWidth <= 640) return 2;
+        return 3;
+      }
 
-      let cardsData = cardElements.map(el => ({ el: el, w: Math.min(parseInt(el.getAttribute('data-w')) || 1, cols), h: parseInt(el.getAttribute('data-h')) || 1 }));
+      let cols = getColCount();
+      const gap = 16; 
+      const rowHeight = 86;
+
+      let cardsData = cardElements.map(el => ({ 
+        el: el, 
+        w: Math.min(parseInt(el.getAttribute('data-w')) || 1, cols), 
+        h: parseInt(el.getAttribute('data-h')) || 1 
+      }));
 
       function renderGrid() {
+        cols = getColCount();
+        cardsData.forEach(c => {
+          c.w = Math.min(parseInt(c.el.getAttribute('data-w')) || 1, cols);
+        });
+
         const cellWidth = (container.clientWidth - (cols - 1) * gap) / cols;
-        let gridMatrix = []; let maxRow = 0;
+        let gridMatrix = []; 
+        let maxRow = 0;
+
         cardsData.forEach(card => {
-          let placed = false; let r = 0;
+          let placed = false; 
+          let r = 0;
           while (!placed) {
             for (let c = 0; c <= cols - card.w; c++) {
               let isFree = true;
-              for (let y = 0; y < card.h; y++) for (let x = 0; x < card.w; x++) if (gridMatrix[r + y] && gridMatrix[r + y][c + x]) isFree = false;
+              for (let y = 0; y < card.h; y++) {
+                for (let x = 0; x < card.w; x++) {
+                  if (gridMatrix[r + y] && gridMatrix[r + y][c + x]) isFree = false;
+                }
+              }
               if (isFree) {
-                for (let y = 0; y < card.h; y++) { if (!gridMatrix[r + y]) gridMatrix[r + y] = []; for (let x = 0; x < card.w; x++) gridMatrix[r + y][c + x] = true; }
-                card.el.style.left = `${c * (cellWidth + gap)}px`; card.el.style.top = `${r * (rowHeight + gap)}px`;
-                card.el.style.width = `${card.w * cellWidth + (card.w - 1) * gap}px`; card.el.style.height = `${card.h * rowHeight + (card.h - 1) * gap}px`;
-                maxRow = Math.max(maxRow, r + card.h); placed = true; break;
+                for (let y = 0; y < card.h; y++) { 
+                  if (!gridMatrix[r + y]) gridMatrix[r + y] = []; 
+                  for (let x = 0; x < card.w; x++) gridMatrix[r + y][c + x] = true; 
+                }
+                card.el.style.left = `${c * (cellWidth + gap)}px`; 
+                card.el.style.top = `${r * (rowHeight + gap)}px`;
+                card.el.style.width = `${card.w * cellWidth + (card.w - 1) * gap}px`; 
+                card.el.style.height = `${card.h * rowHeight + (card.h - 1) * gap}px`;
+                maxRow = Math.max(maxRow, r + card.h); 
+                placed = true; 
+                break;
               }
             }
             if (!placed) r++; 
@@ -1054,15 +1148,15 @@
         });
         container.style.height = `${maxRow * rowHeight + (maxRow - 1) * gap}px`;
       }
-      renderGrid();
-      
-      window.onresize = () => {
-        const newCols = window.innerWidth <= 560 ? 2 : 3;
-        if (cols !== newCols) { cols = newCols; cardsData.forEach(c => c.w = Math.min(parseInt(c.el.getAttribute('data-w')) || 1, cols)); renderGrid(); }
-      };
 
-      let draggingCardIndex = -1; let startX, startY, initialLeft, initialTop;
-      let longPressTimer; let clickStartTime;
+      // 將排列函數登記到全域，供視窗縮放時隨時調用
+      globalRenderGrid = renderGrid;
+      renderGrid();
+
+      let draggingCardIndex = -1; 
+      let startX, startY, initialLeft, initialTop;
+      let longPressTimer; 
+      let clickStartTime;
 
       cardsData.forEach((card) => {
         card.el.addEventListener('pointerdown', (e) => {
@@ -1095,7 +1189,8 @@
             });
             if (targetIndex !== -1 && targetIndex !== draggingCardIndex) {
                cardsData.splice(targetIndex, 0, cardsData.splice(draggingCardIndex, 1)[0]);
-               draggingCardIndex = targetIndex; renderGrid(); 
+               draggingCardIndex = targetIndex; 
+               renderGrid(); 
                card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
             }
           }
