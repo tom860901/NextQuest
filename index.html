@@ -9,11 +9,22 @@
     :root { 
       --text-hi: #2B2543; 
       --text-mid: #7A758F; 
-      --card-radius: 32px; 
+      --card-radius: 28px; 
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
-    body { min-height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #F4F5F7; color: var(--text-hi); overflow-y: auto; position: relative; padding: 40px 0; transition: background 0.3s ease; }
+    body { 
+      min-height: 100vh; 
+      display: flex; 
+      justify-content: center; 
+      align-items: flex-start; 
+      background-color: #F4F5F7; 
+      color: var(--text-hi); 
+      overflow-y: auto; 
+      position: relative; 
+      padding: 30px 15px; 
+      transition: background 0.3s ease; 
+    }
 
     @keyframes cloudFloat {
       0% { transform: translate(0px, 0px) scale(1); }
@@ -22,7 +33,7 @@
       100% { transform: translate(0px, 0px) scale(1); }
     }
     
-    .bg-shape { position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.7; animation: cloudFloat 12s infinite alternate ease-in-out; }
+    .bg-shape { position: absolute; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.7; animation: cloudFloat 12s infinite alternate ease-in-out; pointer-events: none; }
     .shape-pink { top: -10%; left: -10%; width: 55vw; height: 55vw; background: #D1C4E9; animation-duration: 14s; }
     .shape-orange { bottom: -15%; left: 15%; width: 45vw; height: 45vw; background: #C5CAE9; animation-delay: -4s; animation-duration: 16s; }
     .shape-blue { top: 10%; right: -15%; width: 60vw; height: 60vw; background: #B3E5FC; animation-delay: -7s; animation-duration: 18s; }
@@ -32,40 +43,54 @@
     body.dark .shape-orange { background: #12193b; } 
     body.dark .shape-blue { background: #0c2340; } 
 
-    .view-container { width: 95%; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); transform-style: preserve-3d; }
-    .view-hidden { opacity: 0; transform: scale(0.92) !important; pointer-events: none; visibility: hidden; display: none !important; }
-    .view-active { opacity: 1; pointer-events: auto; visibility: visible; display: block !important; }
+    .view-hidden { display: none !important; }
+    .view-active { display: block !important; width: 100%; max-width: 1080px; margin: auto; }
 
     .window-shell, .modal-shell {
-      background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px) saturate(150%);
-      -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(255, 255, 255, 0.6);
-      border-radius: var(--card-radius); padding: 32px;
+      background: rgba(255, 255, 255, 0.35); 
+      backdrop-filter: blur(20px) saturate(150%);
+      -webkit-backdrop-filter: blur(20px) saturate(150%); 
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: var(--card-radius); 
+      padding: 24px;
       box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
     }
     body.dark .window-shell, body.dark .modal-shell {
-      background: rgba(18, 18, 26, 0.75) !important; border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      background: rgba(18, 18, 26, 0.75) !important; 
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255,255,255,0.02) !important;
     }
 
-    .login-shell { max-width: 400px; margin: auto; }
+    .login-shell { max-width: 400px; margin: 80px auto auto auto; }
     
-    /* 📌 強力修正：改用 CSS Grid 確保左側主控與右側面板嚴格左右並排，永不掉下去 */
-    .dashboard-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; max-width: 980px; width: 95%; margin: auto; align-items: start; }
-    .dashboard-main { min-width: 0; max-height: 90vh; overflow-y: auto; padding: 28px; }
+    /* 🚀 雙欄並排核心設定：強制 Grid 兩欄結構 */
+    #dashboard-view.view-active {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) 280px !important;
+      gap: 20px !important;
+      align-items: start !important;
+    }
+
+    .dashboard-main { 
+      min-width: 0; 
+      max-height: 88vh; 
+      overflow-y: auto; 
+    }
     .dashboard-main::-webkit-scrollbar { width: 4px; }
     .dashboard-main::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
 
-    /* 📌 右側即將到來面板 */
-    .upcoming-panel { max-height: 90vh; overflow-y: auto; padding: 24px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); border-radius: var(--card-radius); border: 1px solid rgba(255, 255, 255, 0.6); }
-    body.dark .upcoming-panel { background: rgba(18, 18, 26, 0.75) !important; border: 1px solid rgba(255, 255, 255, 0.12) !important; }
+    .upcoming-panel { 
+      height: fit-content;
+      max-height: 88vh; 
+      overflow-y: auto; 
+    }
     .upcoming-panel h3 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; color: var(--text-hi); }
-    .upcoming-item { padding: 10px 12px; background: rgba(255,255,255,0.3); border-radius: 12px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.4); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; color: var(--text-hi); }
+    .upcoming-item { padding: 10px 12px; background: rgba(255,255,255,0.4); border-radius: 14px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.4); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; color: var(--text-hi); }
     body.dark .upcoming-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #F1F0F7; }
-    .upcoming-item:hover { transform: translateY(-2px); background: rgba(255,255,255,0.5); }
-    body.dark .upcoming-item:hover { background: rgba(255,255,255,0.12); }
+    .upcoming-item:hover { transform: translateY(-2px); background: rgba(255,255,255,0.6); }
 
     .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .titlebar h1, #form-title { font-family: 'Brush Script MT', 'Lucida Handwriting', 'Segoe Script', cursive, sans-serif; font-size: 2rem !important; font-weight: 700; letter-spacing: 1px; margin: 0 auto; color: var(--text-hi); }
+    .titlebar h1, #form-title { font-family: 'Brush Script MT', 'Lucida Handwriting', 'Segoe Script', cursive, sans-serif; font-size: 2.2rem !important; font-weight: 700; letter-spacing: 1px; margin: 0; color: var(--text-hi); }
 
     .bubble-menu-btn { height: 36px; padding: 0 14px; border-radius: 18px; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-hi); cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
     body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: #F1F0F7; }
@@ -74,7 +99,7 @@
     .input-group input, .input-group select { width: 100%; padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.5); color: var(--text-hi); font-size: 1rem; outline: none; }
     body.dark .input-group input, body.dark .input-group select { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.15); color: #F1F0F7; }
 
-    .btn-main { width: 100%; padding: 16px; border-radius: 20px; border: none; background: #2D283E; color: #FFFFFF; font-size: 1.05rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); margin-top: 8px; }
+    .btn-main { width: 100%; padding: 14px; border-radius: 18px; border: none; background: #2D283E; color: #FFFFFF; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); margin-top: 8px; }
     body.dark .btn-main { background: #6C5CE7; color: #FFFFFF; box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4); }
     .btn-main:active { transform: scale(0.96); }
     .btn-secondary { background: rgba(255,255,255,0.3); color: var(--text-hi); border: 1px solid rgba(255,255,255,0.5); box-shadow: none; }
@@ -87,10 +112,10 @@
     .form-footer { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-mid); cursor: pointer; text-decoration: underline; }
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
 
-    /* --- 月曆視圖 --- */
-    .calendar-container { background: rgba(255, 255, 255, 0.2); padding: 16px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.4); margin-bottom: 20px; }
+    /* 月曆視圖 */
+    .calendar-container { background: rgba(255, 255, 255, 0.2); padding: 14px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.4); margin-bottom: 20px; }
     body.dark .calendar-container { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.08); }
-    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; font-size: 1rem; color: var(--text-hi); }
+    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 700; font-size: 0.95rem; color: var(--text-hi); }
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
     .cal-weekday { font-size: 0.75rem; color: var(--text-mid); font-weight: 600; padding-bottom: 4px; }
     .cal-day { padding: 8px 2px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; position: relative; color: var(--text-hi); }
@@ -104,11 +129,11 @@
     .cal-dot { width: 4px; height: 4px; background: #2A9D8F; border-radius: 50%; }
     .cal-dot.urgent { background: #E63946; }
 
-    /* --- 標籤與優先順序選擇器 --- */
-    .selector-group { margin-bottom: 20px; text-align: left; }
-    .selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; margin-left: 8px; }
+    /* 標籤選擇器 */
+    .selector-group { margin-bottom: 16px; text-align: left; }
+    .selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; margin-left: 4px; }
     .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tag-btn, .pri-btn { padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
+    .tag-btn, .pri-btn { padding: 6px 14px; border-radius: 16px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
     body.dark .tag-btn, body.dark .pri-btn { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: #F1F0F7; }
     .tag-btn.active { background: var(--text-hi); color: #FFF; border-color: transparent; }
     body.dark .tag-btn.active { background: #6C5CE7; color: #FFF; }
@@ -117,52 +142,70 @@
     .pri-btn[data-val="🟡 一般"].active { background: #E9C46A; color: #2B2543; border-color: transparent; }
     .pri-btn[data-val="🟢 輕鬆"].active { background: #2A9D8F; color: white; border-color: transparent; }
 
-    /* --- 子任務與 AI --- */
     .manual-subtasks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-    .subtask-input-row { display: flex; gap: 8px; animation: slideIn 0.3s ease; }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    .subtask-input-row input { flex: 1; padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.3); outline: none; }
+    .subtask-input-row { display: flex; gap: 8px; }
+    .subtask-input-row input { flex: 1; padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.3); outline: none; }
     body.dark .subtask-input-row input { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: white; }
-    .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 10px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-    .ai-btn { background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white; border: none; box-shadow: 0 4px 15px rgba(142, 45, 226, 0.25); }
+    .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 8px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+    .ai-btn { background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white; border: none; }
 
-    /* --- 網格卡片與緊急呼吸燈特效 --- */
+    /* 任務網格與呼吸燈 */
     .grid-container { position: relative; width: 100%; transition: height 0.3s ease; perspective: 1200px; }
-    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3); transform-style: preserve-3d; transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s ease-out, box-shadow 0.4s ease; padding: 16px; color: var(--text-hi); }
-    body.dark .widget-card { background: rgba(25, 25, 38, 0.6) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: 0 10px 30px rgba(0,0,0,0.7), inset 0 0 15px rgba(255,255,255,0.02); color: #F1F0F7; }
-    .widget-card.dragging { z-index: 50; cursor: grabbing; transform: translateZ(30px) scale(1.05) !important; box-shadow: 0 30px 60px rgba(0,0,0,0.4) !important; }
+    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 8px 24px rgba(0,0,0,0.04); padding: 14px; color: var(--text-hi); }
+    body.dark .widget-card { background: rgba(25, 25, 38, 0.65) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #F1F0F7; }
+    .widget-card.dragging { z-index: 50; cursor: grabbing; transform: scale(1.04) !important; box-shadow: 0 20px 40px rgba(0,0,0,0.3) !important; }
     
     @keyframes urgentPulse {
-      0% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.4), inset 0 0 15px rgba(255,255,255,0.3); border-color: rgba(230, 57, 70, 0.8); }
-      50% { box-shadow: 0 0 25px rgba(230, 57, 70, 0.8), inset 0 0 20px rgba(230, 57, 70, 0.2); border-color: #E63946; }
-      100% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.4), inset 0 0 15px rgba(255,255,255,0.3); border-color: rgba(230, 57, 70, 0.8); }
+      0% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.4); border-color: rgba(230, 57, 70, 0.8); }
+      50% { box-shadow: 0 0 22px rgba(230, 57, 70, 0.8); border-color: #E63946; }
+      100% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.4); border-color: rgba(230, 57, 70, 0.8); }
     }
     .widget-card.urgent-glow { animation: urgentPulse 2s infinite ease-in-out; border-top: 3px solid #E63946; }
 
-    .card-tag { position: absolute; top: 10px; left: 14px; font-size: 0.65rem; color: var(--text-mid); font-weight: 500; }
-    .card-due { position: absolute; top: 10px; right: 14px; font-size: 0.65rem; color: #E63946; font-weight: 700; background: rgba(230, 57, 70, 0.1); padding: 2px 6px; border-radius: 8px; }
+    .card-tag { position: absolute; top: 8px; left: 12px; font-size: 0.65rem; color: var(--text-mid); font-weight: 500; }
+    .card-due { position: absolute; top: 8px; right: 12px; font-size: 0.65rem; color: #E63946; font-weight: 700; background: rgba(230, 57, 70, 0.1); padding: 2px 6px; border-radius: 6px; }
     
-    .progress-bar-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(0,0,0,0.05); }
+    .progress-bar-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: rgba(0,0,0,0.05); }
     body.dark .progress-bar-bg { background: rgba(255,255,255,0.05); }
-    .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; border-radius: 0 4px 4px 0; }
+    .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
     body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
 
-    /* --- 彈跳視窗與抽屜共用 (置中) --- */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 100; transition: all 0.3s; }
+    /* 彈跳視窗完美置中 */
+    .modal-overlay { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100vw; 
+      height: 100vh; 
+      background: rgba(0, 0, 0, 0.3); 
+      backdrop-filter: blur(8px); 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      z-index: 1000; 
+    }
     body.dark .modal-overlay { background: rgba(0, 0, 0, 0.75); }
-    .modal-shell { max-width: 400px; width: 90%; margin: auto; padding: 32px 28px; max-height: 85vh; overflow-y: auto; color: var(--text-hi); }
+    .modal-shell { 
+      max-width: 440px; 
+      width: 90%; 
+      margin: auto; 
+      padding: 28px; 
+      max-height: 85vh; 
+      overflow-y: auto; 
+      color: var(--text-hi); 
+    }
 
-    .checklist-container { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; text-align: left; }
-    .check-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.4); border-radius: 16px; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.5); color: var(--text-hi); }
+    .checklist-container { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; text-align: left; }
+    .check-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255,255,255,0.4); border-radius: 14px; cursor: pointer; border: 1px solid rgba(255,255,255,0.5); color: var(--text-hi); }
     body.dark .check-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #F1F0F7; }
     .check-item.done { opacity: 0.6; text-decoration: line-through; }
-    .checkbox-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--text-mid); display: flex; justify-content: center; align-items: center; font-size: 14px; color: transparent; transition: all 0.2s; }
+    .checkbox-circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--text-mid); display: flex; justify-content: center; align-items: center; font-size: 12px; color: transparent; }
     .check-item.done .checkbox-circle { background: #2A9D8F; border-color: #2A9D8F; color: white; }
 
     .archive-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.3); border-radius: 14px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.4); color: var(--text-hi); }
     body.dark .archive-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #F1F0F7; }
     .archive-item > div { flex: 1; min-width: 0; }
-    .archive-item button { flex-shrink: 0; width: auto !important; padding: 6px 16px !important; font-size: 0.8rem !important; margin-top: 0 !important; }
+    .archive-item button { flex-shrink: 0; width: auto !important; padding: 6px 14px !important; font-size: 0.8rem !important; margin-top: 0 !important; }
   </style>
 </head>
 <body>
@@ -171,7 +214,7 @@
   <div class="bg-shape shape-blue"></div>
 
   <!-- VIEW 1: 登入畫面 -->
-  <div id="login-view" class="view-container view-active window-shell login-shell">
+  <div id="login-view" class="view-active window-shell login-shell">
     <div class="titlebar" style="position: relative;">
       <h1 id="form-title">Planit</h1>
       <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題" style="position: absolute; right: 0;">☾</button>
@@ -184,10 +227,10 @@
     <div style="display: flex; justify-content: center; min-height: 45px; margin-top:24px;" id="google-btn-container"></div>
   </div>
 
-  <!-- VIEW 2: 控制中心 Dashboard Layout (左側主控含月曆與任務，右側即將到來) -->
-  <div id="dashboard-view" class="view-container view-hidden dashboard-layout">
+  <!-- VIEW 2: 控制中心 Dashboard (左側主控 + 右側未來提醒，雙欄並排) -->
+  <div id="dashboard-view" class="view-hidden">
     
-    <!-- 左側主控制中心 -->
+    <!-- 左側主控制中心 (月曆與任務) -->
     <div class="window-shell dashboard-main">
       <div class="titlebar">
         <h1>Planit</h1>
@@ -199,7 +242,7 @@
         </div>
       </div>
 
-      <!-- 📅 完整月曆視圖 (含「今天」按鈕) -->
+      <!-- 月曆視圖 (含今天按鈕) -->
       <div class="calendar-container">
         <div class="cal-header">
           <div style="display: flex; gap: 4px;">
@@ -221,8 +264,8 @@
       </div>
     </div>
 
-    <!-- 📌 右側視窗：即將到來的未來任務提醒 -->
-    <div class="upcoming-panel">
+    <!-- 右側視窗：即將到來的未來任務提醒 -->
+    <div class="window-shell upcoming-panel">
       <h3>🔔 即將到來</h3>
       <div id="upcoming-list" style="font-size: 0.85rem; color: var(--text-mid);">
         載入預告中...
@@ -234,7 +277,7 @@
   <!-- VIEW 3: 新增任務 Modal -->
   <div id="task-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell">
-      <h2 style="font-size: 1.25rem; margin-bottom: 20px; text-align: center;">✨ 新增目標任務</h2>
+      <h2 style="font-size: 1.25rem; margin-bottom: 16px; text-align: center;">✨ 新增目標任務</h2>
       
       <div class="selector-group">
         <div class="selector-title">任務類型</div>
@@ -261,7 +304,7 @@
         </div>
       </div>
 
-      <div class="input-group" style="margin-top: 16px;">
+      <div class="input-group" style="margin-top: 14px;">
         <input type="text" id="new-task-input" placeholder="大目標名稱 (例：規劃12月專案)" autocomplete="off">
       </div>
 
@@ -274,7 +317,7 @@
         </div>
       </div>
 
-      <div style="display: flex; gap: 12px; margin-top: 24px;">
+      <div style="display: flex; gap: 12px; margin-top: 20px;">
         <button class="btn-main btn-secondary" onclick="closeTaskModal()">取消</button>
         <button class="btn-main" onclick="confirmAddTask()">建立卡片</button>
       </div>
@@ -284,7 +327,6 @@
   <!-- VIEW 4: 任務詳情與編輯 Modal -->
   <div id="detail-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
-      
       <div style="margin-bottom: 12px;">
         <input type="text" id="edit-task-title" style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.3); font-size: 1.1rem; font-weight: 700; text-align: center; color: var(--text-hi); outline: none;" placeholder="任務名稱">
       </div>
@@ -299,10 +341,9 @@
       </div>
 
       <div id="detail-progress-text" style="font-size: 0.85rem; font-weight: 600; color: #2A9D8F;"></div>
-      
       <div id="detail-checklist" class="checklist-container"></div>
       
-      <div style="display: flex; gap: 8px; margin-top: 20px;">
+      <div style="display: flex; gap: 8px; margin-top: 18px;">
         <button id="detail-complete-btn" class="btn-main btn-success" style="flex: 1; padding: 10px;" onclick="markTaskCompleted()">✅ 完成</button>
         <button class="btn-main btn-warning" style="flex: 1; padding: 10px;" onclick="rolloverTaskToTomorrow()">➡️ 移到明天</button>
       </div>
@@ -317,7 +358,7 @@
   <div id="delete-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       <h2 style="font-size: 1.25rem; margin-bottom: 16px;">⚠️ 刪除確認</h2>
-      <p style="color: var(--text-mid); margin-bottom: 28px; font-size: 0.95rem;">確定移除此任務嗎？</p>
+      <p style="color: var(--text-mid); margin-bottom: 24px; font-size: 0.95rem;">確定移除此任務嗎？</p>
       <div style="display: flex; gap: 12px;">
         <button class="btn-main btn-secondary" onclick="closeDeleteModal()">保留</button>
         <button class="btn-main btn-danger" onclick="confirmDeleteTask()">確定刪除</button>
@@ -331,7 +372,7 @@
       <h2 style="font-size: 1.25rem; margin-bottom: 16px;">📁 已完成任務完成區</h2>
       <p style="color: var(--text-mid); margin-bottom: 16px; font-size: 0.85rem;">子彈筆記歸檔：這裡存放所有已結案的成就！</p>
       
-      <div id="archive-list" style="max-height: 300px; overflow-y: auto; text-align: left; margin-bottom: 20px;">
+      <div id="archive-list" style="max-height: 300px; overflow-y: auto; text-align: left; margin-bottom: 18px;">
         <div style="text-align:center; color: var(--text-mid); padding: 20px;">目前沒有已完成的任務</div>
       </div>
 
@@ -340,9 +381,6 @@
   </div>
 
   <script>
-    // =========================================
-    //   系統設定 (⚠️ 請填入正確的 GAS API 網址)
-    // =========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw9130xk5gFZxkrtpIR-YQSClZaqW3IH0JxU-Ka4fRKsdaq9FFZZzxIEgvVBExnxXTVOQ/exec";
     const GOOGLE_CLIENT_ID = "867237692766-9o2nhlnrqlq00k75apvsbvl2r2u1jsqi.apps.googleusercontent.com";
     
@@ -358,7 +396,6 @@
 
     window.onload = function () {
       initGoogleAuth();
-      initGlobalTilt();
       
       const savedUser = localStorage.getItem('planit_user');
       if (savedUser) {
@@ -377,7 +414,7 @@
             google.accounts.id.renderButton(document.getElementById("google-btn-container"), { theme: "outline", size: "large", shape: "pill", width: 280 });
           }
         } catch(e) { console.error("Google Auth init error:", e); }
-      }, 300);
+      }, 200);
     }
 
     function fetchTasks() {
@@ -386,21 +423,6 @@
         renderCalendar();
         renderUpcomingPanel();
         renderTasks();
-      });
-    }
-
-    function initGlobalTilt() {
-      document.addEventListener('mousemove', (e) => {
-        const activeView = document.querySelector('.view-active');
-        if (!activeView) return;
-        activeView.style.transition = 'transform 0.1s ease-out';
-        const rotateX = ((e.clientY - window.innerHeight / 2) / (window.innerHeight / 2)) * -2; 
-        const rotateY = ((e.clientX - window.innerWidth / 2) / (window.innerWidth / 2)) * 2;
-        activeView.style.transform = `perspective(2000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1)`;
-      });
-      document.addEventListener('mouseleave', () => {
-        const activeView = document.querySelector('.view-active');
-        if (activeView) { activeView.style.transition = 'all 0.5s'; activeView.style.transform = ''; }
       });
     }
 
@@ -473,9 +495,6 @@
       });
     });
 
-    // =========================================
-    //   📅 完整月曆視圖 (左側)
-    // =========================================
     function changeMonth(direction) {
       currentCalendarMonth += direction;
       if (currentCalendarMonth > 11) {
@@ -551,9 +570,6 @@
       }
     }
 
-    // =========================================
-    //   📌 右側視窗：即將到來的未來任務提醒
-    // =========================================
     function renderUpcomingPanel() {
       const panel = document.getElementById('upcoming-list');
       panel.innerHTML = '';
@@ -584,9 +600,6 @@
       });
     }
 
-    // =========================================
-    //   UI 渲染 
-    // =========================================
     function renderTasks() {
       const container = document.getElementById('grid-container');
       container.innerHTML = ""; 
@@ -635,7 +648,7 @@
          }
 
          card.innerHTML = `
-            <div class="card-tag" style="top: 10px; left: 14px; font-size: 0.65rem;">${task.tag}</div>
+            <div class="card-tag" style="top: 8px; left: 12px; font-size: 0.65rem;">${task.tag}</div>
             ${dueHtml}
             <div style="text-align:center; width: 100%; margin-top: ${task.dueDate ? '16px' : '10px'}; font-size: 0.95rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">${task.title}</div>
             ${subTaskHint}
@@ -729,9 +742,6 @@
       });
     }
 
-    // =========================================
-    //   ✏️ 任務詳情與編輯功能
-    // =========================================
     function openTaskDetail(taskId) {
       const task = allTasksData.find(t => t.id === taskId);
       if(!task) return;
@@ -913,25 +923,6 @@
       renderTasks();
     }
 
-    function toggleCardSize() {
-      if(!currentDetailTaskId) return;
-      const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
-      if(taskIndex === -1) return;
-      
-      let w = parseInt(allTasksData[taskIndex].w);
-      let h = parseInt(allTasksData[taskIndex].h);
-      
-      if(w === 1 && h === 1) { w = 2; h = 1; }
-      else if(w === 2 && h === 1) { w = 2; h = 2; }
-      else { w = 1; h = 1; }
-      
-      allTasksData[taskIndex].w = w;
-      allTasksData[taskIndex].h = h;
-      
-      callGASAPI({ action: 'updateTaskSize', taskId: currentDetailTaskId, w: w, h: h }, () => {});
-      closeDetailModal();
-    }
-
     function openDeleteModal(taskId) {
       if (navigator.vibrate) navigator.vibrate(50);
       targetElementToDelete = taskId;
@@ -949,16 +940,13 @@
       callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {});
     }
 
-    // =========================================
-    //   核心推擠引擎與事件判定
-    // =========================================
     function initGridEngine() {
       let oldContainer = document.getElementById('grid-container');
       let container = oldContainer.cloneNode(true);
       oldContainer.parentNode.replaceChild(container, oldContainer);
       const cardElements = Array.from(container.children);
-      let cols = window.innerWidth <= 560 ? 2 : 4; 
-      const gap = 16; const rowHeight = window.innerWidth <= 560 ? 88 : 92;
+      let cols = window.innerWidth <= 560 ? 2 : 3; 
+      const gap = 16; const rowHeight = 86;
 
       let cardsData = cardElements.map(el => ({ el: el, w: Math.min(parseInt(el.getAttribute('data-w')) || 1, cols), h: parseInt(el.getAttribute('data-h')) || 1 }));
 
@@ -986,7 +974,7 @@
       renderGrid();
       
       window.onresize = () => {
-        const newCols = window.innerWidth <= 560 ? 2 : 4;
+        const newCols = window.innerWidth <= 560 ? 2 : 3;
         if (cols !== newCols) { cols = newCols; cardsData.forEach(c => c.w = Math.min(parseInt(c.el.getAttribute('data-w')) || 1, cols)); renderGrid(); }
       };
 
@@ -1006,7 +994,7 @@
             openDeleteModal(card.el.getAttribute('data-id')); 
           }, 700);
 
-          card.el.style.transform = ''; card.el.classList.add('dragging'); card.el.setPointerCapture(e.pointerId);
+          card.el.classList.add('dragging'); card.el.setPointerCapture(e.pointerId);
         });
 
         card.el.addEventListener('pointermove', (e) => {
@@ -1027,21 +1015,7 @@
                draggingCardIndex = targetIndex; renderGrid(); 
                card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
             }
-            return; 
           }
-          if (draggingCardIndex === -1) {
-            const rect = card.el.getBoundingClientRect();
-            const rotateX = (((e.clientY - rect.top) - rect.height / 2) / (rect.height / 2)) * -15; 
-            const rotateY = (((e.clientX - rect.left) - rect.width / 2) / (rect.width / 2)) * 15;
-            card.el.style.transition = 'none'; 
-            card.el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
-          }
-        });
-
-        card.el.addEventListener('pointerleave', () => {
-          if (draggingCardIndex !== -1) return;
-          card.el.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s ease';
-          card.el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)`;
         });
 
         card.el.addEventListener('pointerup', (e) => {
