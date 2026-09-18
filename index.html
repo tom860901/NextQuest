@@ -44,11 +44,12 @@
     body.dark .shape-orange { background: #12193b; } 
     body.dark .shape-blue { background: #0c2340; } 
 
+    /* 確保隱藏時最高優先級 */
     .view-hidden { display: none !important; }
     .view-active { display: block !important; }
 
     .window-shell, .modal-shell {
-      background: rgba(255, 255, 255, 0.35); 
+      background: rgba(255, 255, 255, 0.4); 
       backdrop-filter: blur(20px) saturate(150%);
       -webkit-backdrop-filter: blur(20px) saturate(150%); 
       border: 1px solid rgba(255, 255, 255, 0.6);
@@ -57,7 +58,7 @@
       box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
     }
     body.dark .window-shell, body.dark .modal-shell {
-      background: rgba(18, 18, 26, 0.82) !important; 
+      background: rgba(18, 18, 26, 0.85) !important; 
       border: 1px solid rgba(255, 255, 255, 0.12) !important;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255,255,255,0.02) !important;
     }
@@ -170,21 +171,27 @@
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
     body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
 
+    /* 🎯 關鍵修復：預設隱藏，只有在加上 .view-active 時才以 grid 居中顯示 */
     .modal-overlay { 
       position: fixed; 
-      top: 0; 
-      left: 0; 
+      inset: 0;
       width: 100vw; 
       height: 100vh; 
       background: transparent !important; 
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
-      display: grid !important; 
-      place-items: center !important; 
-      z-index: 2000; 
-      pointer-events: auto;
+      z-index: 3000; 
+      pointer-events: none;
     }
-    body.dark .modal-overlay { background: transparent !important; }
+    .modal-overlay.view-active {
+      display: grid !important;
+      place-items: center !important;
+      pointer-events: auto !important;
+    }
+    .modal-overlay.view-hidden {
+      display: none !important;
+      pointer-events: none !important;
+    }
 
     .modal-shell { 
       max-width: 480px; 
@@ -212,7 +219,6 @@
     .archive-item > div { flex: 1; min-width: 0; }
     .archive-item button { flex-shrink: 0; width: auto !important; padding: 6px 14px !important; font-size: 0.8rem !important; margin-top: 0 !important; }
     
-    /* 說明視窗專屬樣式 */
     .guide-box { text-align: left; line-height: 1.6; font-size: 0.88rem; }
     .guide-item { margin-bottom: 12px; padding: 10px 14px; background: rgba(255,255,255,0.35); border-radius: 14px; }
     body.dark .guide-item { background: rgba(255,255,255,0.05); }
@@ -363,7 +369,7 @@
     </div>
   </div>
 
-  <!-- VIEW 5: 💡 說明 Modal (整合版本號、更新日誌與核心定位) -->
+  <!-- VIEW 5: 💡 說明 Modal -->
   <div id="guide-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -372,13 +378,11 @@
       </div>
 
       <div class="guide-box">
-        <!-- 核心定位 -->
         <div class="guide-item" style="border-left: 3px solid #6C5CE7;">
           <strong>🎯 核心精神</strong><br>
           Planit 是一套融合<strong>子彈筆記哲學</strong>、<strong>AI 步驟拆解</strong>與<strong>2.5D 控制中心</strong>的協作調度系統。專為團隊消除拖延、清晰排程而生。
         </div>
 
-        <!-- 任務標籤說明 -->
         <div class="guide-item">
           <strong>🏷️ 任務標籤定義</strong><br>
           • <strong>⚡️ 碎片 (&lt;15m)</strong>：15 分鐘內可處理的微型瑣事。<br>
@@ -386,14 +390,12 @@
           • <strong>🔄 例行重複</strong>：週期性執行的規律習慣。
         </div>
 
-        <!-- 機制說明 -->
         <div class="guide-item">
           <strong>📌 智慧防呆與調度機制</strong><br>
           • <strong>子任務防呆</strong>：若任務含有子步驟，須全數勾選才可標記完成。<br>
           • <strong>移到明天 (Rollover)</strong>：今日未完事項一鍵延至次日並強制紅框警示。
         </div>
 
-        <!-- 更新日誌 -->
         <div class="guide-item">
           <strong>📜 更新歷程 (Changelog)</strong>
           <ul class="log-list">
