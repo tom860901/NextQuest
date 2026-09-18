@@ -30,10 +30,10 @@
       overflow-y: auto; 
       position: relative; 
       padding: 40px 16px; 
-      perspective: 1600px; /* 🎯 提供全視窗 2.5D 透視景深 */
+      perspective: 1600px;
     }
 
-    /* ☁️ 夢幻浮動雲容器 */
+    /* ☁️ 夢幻浮動雲背景 */
     .sky-container {
       position: fixed;
       inset: 0;
@@ -105,12 +105,12 @@
     .view-hidden { display: none !important; }
     .view-active { display: block !important; }
 
-    /* 💎 經典清透毛玻璃質感 (Glassmorphism) */
+    /* 💎 毛玻璃視窗 */
     .window-shell, .modal-shell {
-      background: rgba(255, 255, 255, 0.28) !important; 
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%); 
-      border: 1px solid rgba(255, 255, 255, 0.75) !important;
+      background: rgba(255, 255, 255, 0.35) !important; 
+      backdrop-filter: blur(22px) saturate(160%);
+      -webkit-backdrop-filter: blur(22px) saturate(160%); 
+      border: 1px solid rgba(255, 255, 255, 0.8) !important;
       border-radius: var(--card-radius); 
       padding: 26px;
       box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
@@ -123,12 +123,12 @@
 
     .login-shell { width: 100%; max-width: 400px; margin: 80px auto; z-index: 2; position: relative; }
     
-    /* 🎯 2.5D 控制中心主佈局 */
+    /* 🎯 2.5D 控制中心 */
     #dashboard-view {
       position: relative;
       z-index: 2;
       transform-style: preserve-3d;
-      transition: transform 0.12s ease-out; /* 搖晃傾斜平滑過渡 */
+      transition: transform 0.12s ease-out;
     }
     #dashboard-view.view-active {
       display: grid !important;
@@ -156,17 +156,17 @@
     .upcoming-panel h3 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; color: var(--text-hi); }
     .upcoming-item { 
       padding: 11px 14px; 
-      background: rgba(255,255,255,0.4); 
+      background: rgba(255,255,255,0.45); 
       border-radius: 16px; 
       margin-bottom: 9px; 
-      border: 1px solid rgba(255,255,255,0.6); 
+      border: 1px solid rgba(255,255,255,0.7); 
       font-size: 0.85rem; 
       cursor: pointer; 
       transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); 
       color: var(--text-hi); 
     }
     body.dark .upcoming-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #F1F0F7; }
-    .upcoming-item:hover { transform: translateY(-2px) scale(1.02); background: rgba(255,255,255,0.65); }
+    .upcoming-item:hover { transform: translateY(-2px) scale(1.02); background: rgba(255,255,255,0.7); }
 
     .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
     .titlebar h1, #form-title { font-family: 'Brush Script MT', 'Lucida Handwriting', 'Segoe Script', cursive, sans-serif; font-size: 2.2rem !important; font-weight: 700; letter-spacing: 1px; margin: 0; color: var(--text-hi); }
@@ -176,8 +176,8 @@
       height: 36px; 
       padding: 0 13px; 
       border-radius: 18px; 
-      background: rgba(255, 255, 255, 0.45); 
-      border: 1px solid rgba(255, 255, 255, 0.7); 
+      background: rgba(255, 255, 255, 0.5); 
+      border: 1px solid rgba(255, 255, 255, 0.75); 
       color: var(--text-hi); 
       cursor: pointer; 
       font-size: 0.85rem; 
@@ -221,7 +221,7 @@
     }
     body.dark .btn-main { background: #6C5CE7; color: #FFFFFF; box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4); }
     .btn-main:active { transform: scale(0.97); }
-    .btn-secondary { background: rgba(255,255,255,0.35); color: var(--text-hi); border: 1px solid rgba(255,255,255,0.6); box-shadow: none; }
+    .btn-secondary { background: rgba(255,255,255,0.4); color: var(--text-hi); border: 1px solid rgba(255,255,255,0.7); box-shadow: none; }
     body.dark .btn-secondary { background: rgba(255,255,255,0.08); color: #F1F0F7; border-color: rgba(255,255,255,0.15); }
     .btn-danger { background: #E63946 !important; color: #FFFFFF !important; }
     .btn-success { background: #2A9D8F !important; color: #FFFFFF !important; }
@@ -258,7 +258,7 @@
     .selector-group { margin-bottom: 16px; text-align: left; }
     .selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; margin-left: 4px; }
     .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tag-btn, .pri-btn { padding: 7px 15px; border-radius: 16px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
+    .tag-btn, .pri-btn { padding: 7px 15px; border-radius: 16px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(255, 255, 255, 0.7); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
     body.dark .tag-btn, body.dark .pri-btn { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: #F1F0F7; }
     .tag-btn.active { background: var(--text-hi); color: #FFF; border-color: transparent; }
     body.dark .tag-btn.active { background: #6C5CE7; color: #FFF; }
@@ -274,20 +274,20 @@
     .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 8px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
     .ai-btn { background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white; border: none; box-shadow: 0 4px 15px rgba(142, 45, 226, 0.25); }
 
-    /* 🎯 任務網格與單卡 2.5D 微翹浮凸效果 */
+    /* 網格卡片 */
     .grid-container { 
       position: relative; 
       width: 100%; 
       transition: height 0.3s ease; 
       min-height: 120px; 
-      perspective: 1000px; /* 卡片個別景深 */
+      perspective: 1000px; 
     }
     .widget-card { 
       position: absolute; 
-      background: rgba(255, 255, 255, 0.45); 
+      background: rgba(255, 255, 255, 0.52); 
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.7); 
+      border: 1px solid rgba(255, 255, 255, 0.8); 
       border-radius: 22px; 
       display: flex; 
       flex-direction: column; 
@@ -313,6 +313,11 @@
       100% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.45); border-color: rgba(230, 57, 70, 0.85); }
     }
     .widget-card.urgent-glow { animation: urgentPulse 2s infinite ease-in-out; border-top: 3.5px solid #E63946; }
+    
+    /* 🔁 例行重複專屬標記 */
+    .widget-card.routine-card {
+      border-bottom: 3px solid #4A90E2;
+    }
 
     .card-topbar { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 4px; font-size: 0.68rem; }
     .card-tag-text { flex: 1; color: var(--text-mid); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
@@ -373,7 +378,6 @@
   </style>
 </head>
 <body>
-  <!-- ☁️ 獨立背景浮動雲 -->
   <div class="sky-container">
     <div class="cloud-orb orb-peach"></div>
     <div class="cloud-orb orb-purple"></div>
@@ -394,7 +398,7 @@
     <div style="display: flex; justify-content: center; min-height: 45px; margin-top:24px;" id="google-btn-container"></div>
   </div>
 
-  <!-- VIEW 2: 控制中心 Dashboard (具備 2.5D 傾斜感) -->
+  <!-- VIEW 2: 控制中心 Dashboard -->
   <div id="dashboard-view" class="view-hidden">
     <div class="window-shell dashboard-main">
       <div class="titlebar">
@@ -447,7 +451,8 @@
         <div class="tag-selector">
           <div class="tag-btn active" onclick="selectOpt('.tag-btn', this)" data-val="⚡️ 碎片 (<15m)">⚡️ 碎片 (&lt;15m)</div>
           <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🧠 深度專注">🧠 深度專注</div>
-          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🔄 例行重複">🔄 例行重複</div>
+          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🔁 例行重複">🔁 例行重複</div>
+          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="☕️ 生活/社交">☕️ 生活/社交</div>
         </div>
       </div>
 
@@ -468,7 +473,7 @@
       </div>
 
       <div class="input-group" style="margin-top: 14px;">
-        <input type="text" id="new-task-input" placeholder="目標名稱 (例：準備專題報告)" autocomplete="off">
+        <input type="text" id="new-task-input" placeholder="目標名稱 (例：與朋友聚餐 / 專案簡報)" autocomplete="off">
       </div>
 
       <div class="selector-group">
@@ -522,7 +527,7 @@
     <div class="window-shell modal-shell">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">💡 關於 Planit</h2>
-        <span class="version-tag">v4.3 Stable</span>
+        <span class="version-tag">v4.4 Stable</span>
       </div>
 
       <div class="guide-box">
@@ -535,23 +540,14 @@
           <strong>🏷️ 任務標籤定義</strong><br>
           • <strong>⚡️ 碎片 (&lt;15m)</strong>：15 分鐘內可處理的微型瑣事。<br>
           • <strong>🧠 深度專注</strong>：需要長時間高度投入的核心專案。<br>
-          • <strong>🔄 例行重複</strong>：週期性執行的規律習慣。
+          • <strong>🔁 例行重複</strong>：每週固定習慣或週期工作（底部專屬標記）。<br>
+          • <strong>☕️ 生活/社交</strong>：聚餐、看診、生活採購等休閒事項。
         </div>
 
         <div class="guide-item">
-          <strong>📌 智慧防呆與調度機制</strong><br>
-          • <strong>子任務防呆</strong>：若任務含有子步驟，須全數勾選才可標記完成。<br>
-          • <strong>移到明天 (Rollover)</strong>：今日未完事項一鍵延至次日並強制紅框警示。
-        </div>
-
-        <div class="guide-item">
-          <strong>📜 更新歷程 (Changelog)</strong>
-          <ul class="log-list">
-            <li><strong>v4.3</strong>：2.5D 動態傾斜回歸、純粹毛玻璃質感復原、自適應響應式防覆蓋。</li>
-            <li><strong>v4.2</strong>：加入跨月份切換月曆、任務即時編輯、未完成防呆鎖定。</li>
-            <li><strong>v4.1</strong>：支援子彈筆記歸檔抽屜（完成區）、任務移到明天 (Rollover)。</li>
-            <li><strong>v4.0</strong>：品牌正名 Planit、Google SSO 驗證流暢度提升。</li>
-          </ul>
+          <strong>📌 智慧調度機制</strong><br>
+          • <strong>優先級排序</strong>：矩陣強制按「🔴 緊急 &gt; 🟡 一般 &gt; 🟢 輕鬆」智慧排程。<br>
+          • <strong>移到明天 (Rollover)</strong>：本地精準計算隔日並直接升級為緊急紅框任務。
         </div>
       </div>
 
@@ -601,9 +597,17 @@
 
     let globalRenderGrid = null;
 
+    // 🎯 本地時間字串格式化（避免時區差造成日期偏差）
+    function getLocalDateString(dateObj = new Date()) {
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
     window.onload = function () {
       initGoogleAuth();
-      initGlobalTilt(); // 🎯 啟動 2.5D 控制中心跟隨傾斜
+      initGlobalTilt();
       
       const savedUser = localStorage.getItem('planit_user');
       if (savedUser) {
@@ -614,7 +618,6 @@
       }
     };
 
-    // 🎯 核心復原：全視窗跟隨滑鼠的 2.5D 微傾斜物理晃動
     function initGlobalTilt() {
       document.addEventListener('mousemove', (e) => {
         const activeView = document.getElementById('dashboard-view');
@@ -623,24 +626,20 @@
         const xOffset = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
         const yOffset = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
         
-        const rotateX = -yOffset * 3.5; // X軸傾斜角度
-        const rotateY = xOffset * 3.5;  // Y軸傾斜角度
+        const rotateX = -yOffset * 3.5;
+        const rotateY = xOffset * 3.5;
         
         activeView.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       });
 
       document.addEventListener('mouseleave', () => {
         const activeView = document.getElementById('dashboard-view');
-        if (activeView) {
-          activeView.style.transform = `rotateX(0deg) rotateY(0deg)`;
-        }
+        if (activeView) activeView.style.transform = `rotateX(0deg) rotateY(0deg)`;
       });
     }
 
     window.addEventListener('resize', () => {
-      if (globalRenderGrid) {
-        globalRenderGrid();
-      }
+      if (globalRenderGrid) globalRenderGrid();
     });
 
     function initGoogleAuth() {
@@ -748,7 +747,7 @@
       const today = new Date();
       currentCalendarYear = today.getFullYear();
       currentCalendarMonth = today.getMonth();
-      selectedDateFilter = today.toISOString().split('T')[0];
+      selectedDateFilter = getLocalDateString(today);
       renderCalendar();
       renderTasks();
     }
@@ -764,7 +763,7 @@
       let startDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
       const totalDays = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
 
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = getLocalDateString();
       const activeTasks = allTasksData.filter(t => t.status !== 'completed');
 
       for (let i = 0; i < startDay; i++) {
@@ -811,7 +810,7 @@
       const panel = document.getElementById('upcoming-list');
       panel.innerHTML = '';
 
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = getLocalDateString();
       const activeTasks = allTasksData.filter(t => t.status !== 'completed' && t.dueDate && t.dueDate.split('T')[0] >= todayStr);
       
       activeTasks.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
@@ -841,12 +840,21 @@
       const container = document.getElementById('grid-container');
       container.innerHTML = ""; 
       
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = getLocalDateString();
       
       let activeTasks = allTasksData.filter(t => t.status !== 'completed');
       if (selectedDateFilter) {
         activeTasks = activeTasks.filter(t => t.dueDate && t.dueDate.split('T')[0] === selectedDateFilter);
       }
+
+      // 優先級排序：🔴 緊急 (3) > 🟡 一般 (2) > 🟢 輕鬆 (1)
+      const priorityWeight = { '🔴 緊急': 3, '🟡 一般': 2, '🟢 輕鬆': 1 };
+      activeTasks.sort((a, b) => {
+        let wA = priorityWeight[a.priority] || 2;
+        let wB = priorityWeight[b.priority] || 2;
+        if (wA !== wB) return wB - wA;
+        return (a.dueDate || "9999").localeCompare(b.dueDate || "9999");
+      });
 
       if (activeTasks.length === 0) {
         let msg = selectedDateFilter ? `📅 ${selectedDateFilter} 沒有進行中的任務` : `目前沒有進行中的任務，點擊 ＋ 新增！`;
@@ -869,7 +877,9 @@
            isUrgent = true;
          }
 
-         card.className = `widget-card ${isUrgent ? 'urgent-glow' : ''}`;
+         let isRoutine = task.tag && task.tag.includes('例行重複');
+
+         card.className = `widget-card ${isUrgent ? 'urgent-glow' : ''} ${isRoutine ? 'routine-card' : ''}`;
          card.setAttribute('data-id', task.id); 
          card.setAttribute('data-w', task.w); card.setAttribute('data-h', task.h);
          card.setAttribute('data-pri', task.priority);
@@ -936,7 +946,7 @@
       document.getElementById('task-modal').classList.replace('view-hidden', 'view-active'); 
       document.getElementById('manual-subtasks-container').innerHTML = ''; 
       document.getElementById('new-task-input').value = "";
-      document.getElementById('new-task-duedate').value = "";
+      document.getElementById('new-task-duedate').value = getLocalDateString();
     }
     
     function closeTaskModal() { 
@@ -1052,6 +1062,7 @@
       }
     }
 
+    // 🎯 儲存編輯（原列覆蓋，絕不重複新增）
     function saveTaskEdits() {
       if(!currentDetailTaskId) return;
       const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
@@ -1068,15 +1079,14 @@
       allTasksData[taskIndex].priority = newPriority;
 
       callGASAPI({ 
-        action: 'addTask', 
-        account: currentUser,
+        action: 'updateTaskDetails', 
         taskId: currentDetailTaskId,
         title: newTitle,
         dueDate: newDueDate,
-        priority: newPriority,
-        subTasks: allTasksData[taskIndex].subTasks,
-        tag: allTasksData[taskIndex].tag
-      }, () => {});
+        priority: newPriority
+      }, (res) => {
+        if(!res.success) alert("後端儲存異常，請檢查網路連線。");
+      });
 
       alert("✨ 任務修改已儲存！");
       closeDetailModal();
@@ -1109,19 +1119,24 @@
       closeDetailModal();
     }
 
+    // 🎯 移到明天（精準隔日本地日期）
     function rolloverTaskToTomorrow() {
       if(!currentDetailTaskId) return;
       const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
       if(taskIndex === -1) return;
 
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      const now = new Date();
+      now.setDate(now.getDate() + 1);
+      const tomorrowStr = getLocalDateString(now);
 
       allTasksData[taskIndex].dueDate = tomorrowStr;
       allTasksData[taskIndex].priority = '🔴 緊急';
 
-      callGASAPI({ action: 'rolloverTask', taskId: currentDetailTaskId }, () => {});
+      callGASAPI({ 
+        action: 'rolloverTask', 
+        taskId: currentDetailTaskId,
+        tomorrowDate: tomorrowStr
+      }, () => {});
       
       closeDetailModal();
     }
@@ -1186,7 +1201,6 @@
       callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {});
     }
 
-    // 🎯 推擠引擎 + 單卡 2.5D 微翹晃動
     function initGridEngine() {
       let oldContainer = document.getElementById('grid-container');
       let container = oldContainer.cloneNode(true);
@@ -1279,7 +1293,6 @@
         card.el.addEventListener('pointermove', (e) => {
           if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) clearTimeout(longPressTimer);
           
-          // 拖曳狀態中
           if (draggingCardIndex !== -1 && draggingCardIndex === cardsData.indexOf(card)) {
             const dx = e.clientX - startX; const dy = e.clientY - startY;
             card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
@@ -1300,7 +1313,6 @@
             return;
           }
 
-          // 🎯 2.5D 單卡微翹浮凸視差效果
           if (draggingCardIndex === -1) {
             const rect = card.el.getBoundingClientRect();
             const rotX = (((e.clientY - rect.top) - rect.height / 2) / (rect.height / 2)) * -14; 
