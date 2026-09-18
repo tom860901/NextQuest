@@ -33,7 +33,6 @@
       perspective: 1600px;
     }
 
-    /* ☁️ 浮動雲背景 */
     .sky-container {
       position: fixed;
       inset: 0;
@@ -105,7 +104,6 @@
     .view-hidden { display: none !important; }
     .view-active { display: block !important; }
 
-    /* 💎 毛玻璃外殼 */
     .window-shell, .modal-shell {
       background: rgba(255, 255, 255, 0.35) !important; 
       backdrop-filter: blur(22px) saturate(160%);
@@ -191,7 +189,6 @@
     .bubble-menu-btn:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-1px); }
     body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: #F1F0F7; }
     
-    /* 圓形頭像按鈕 */
     .profile-avatar-btn {
       width: 36px;
       height: 36px;
@@ -209,7 +206,6 @@
       user-select: none;
     }
 
-    /* 密碼眼睛按鈕樣式 */
     .input-group { margin-bottom: 16px; position: relative; }
     .input-group input, .input-group select { 
       width: 100%; 
@@ -266,7 +262,6 @@
     .form-links span { cursor: pointer; text-decoration: underline; }
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
 
-    /* 月曆視圖 */
     .calendar-container { 
       background: rgba(255, 255, 255, 0.25); 
       padding: 16px; 
@@ -289,7 +284,6 @@
     .cal-dot { width: 4px; height: 4px; background: #2A9D8F; border-radius: 50%; }
     .cal-dot.urgent { background: #E63946; }
 
-    /* 標籤選擇器 */
     .selector-group { margin-bottom: 16px; text-align: left; }
     .selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; margin-left: 4px; }
     .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -309,7 +303,6 @@
     .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 8px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
     .ai-btn { background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white; border: none; box-shadow: 0 4px 15px rgba(142, 45, 226, 0.25); }
 
-    /* 網格卡片 */
     .grid-container { 
       position: relative; 
       width: 100%; 
@@ -353,7 +346,6 @@
     .card-topbar { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 4px; font-size: 0.68rem; }
     .card-tag-text { flex: 1; color: var(--text-mid); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
     .card-due-badge { flex-shrink: 0; color: #E63946; font-weight: 700; background: rgba(230, 57, 70, 0.12); padding: 2px 6px; border-radius: 8px; font-size: 0.65rem; white-space: nowrap; }
-    
     .card-title-text { text-align: center; width: 100%; font-size: 0.95rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; margin: auto 0; }
     
     .progress-bar-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: rgba(0,0,0,0.05); }
@@ -361,7 +353,6 @@
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
     body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
 
-    /* 彈跳視窗 */
     .modal-overlay { 
       position: fixed; 
       inset: 0; 
@@ -595,17 +586,26 @@
 
       <div class="profile-info-row"><span>帳號 ID</span><strong id="p-acc">-</strong></div>
       <div class="profile-info-row"><span>綁定信箱</span><strong id="p-email">-</strong></div>
-      <div class="profile-info-row"><span>註冊時間</span><span id="p-created" style="color:var(--text-mid); font-size:0.82rem;">-</span></div>
-      <div class="profile-info-row"><span>上次登入</span><span id="p-login" style="color:var(--text-mid); font-size:0.82rem;">-</span></div>
+      <div class="profile-info-row"><span>註冊時間</span><span id="p-created" style="color:var(--text-mid); font-size:0.85rem; font-weight:600;">-</span></div>
+      <div class="profile-info-row"><span>上次登入</span><span id="p-login" style="color:var(--text-mid); font-size:0.85rem; font-weight:600;">-</span></div>
 
       <div style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed rgba(0,0,0,0.1);">
         <h4 style="font-size: 0.9rem; margin-bottom: 10px;">🔐 修改密碼</h4>
+        
         <div class="input-group" style="margin-bottom: 8px;">
-          <input type="password" id="reset-old-pwd" placeholder="目前密碼">
+          <div class="pwd-wrapper">
+            <input type="password" id="reset-old-pwd" placeholder="目前密碼">
+            <button class="eye-toggle-btn" type="button" onclick="togglePasswordVisibility('reset-old-pwd', this)">👁️</button>
+          </div>
         </div>
+
         <div class="input-group" style="margin-bottom: 8px;">
-          <input type="password" id="reset-new-pwd" placeholder="新密碼">
+          <div class="pwd-wrapper">
+            <input type="password" id="reset-new-pwd" placeholder="新密碼">
+            <button class="eye-toggle-btn" type="button" onclick="togglePasswordVisibility('reset-new-pwd', this)">👁️</button>
+          </div>
         </div>
+
         <button class="btn-main btn-secondary" style="padding: 10px; font-size: 0.85rem;" onclick="submitPasswordReset()">確認變更密碼</button>
       </div>
 
@@ -618,7 +618,7 @@
     <div class="window-shell modal-shell">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">💡 關於 Planit</h2>
-        <span class="version-tag">v4.5 Stable</span>
+        <span class="version-tag">v4.6 Stable</span>
       </div>
 
       <div class="guide-box">
@@ -634,9 +634,8 @@
           • <strong>☕️ 生活/社交</strong>：聚會與日常採購。
         </div>
         <div class="guide-item">
-          <strong>🛡️ 身分與簽到體系</strong><br>
-          • 支援 Email 註冊確認信、忘記密碼臨時碼。<br>
-          • 個人中心每日簽到記錄連續天數。
+          <strong>📌 智慧排序規則</strong><br>
+          任務卡片強制按「🔴 緊急 &gt; 🟡 一般 &gt; 🟢 輕鬆」順序排列，無指定日期項目自動作為「常駐項目」顯示於清單。
         </div>
       </div>
 
@@ -684,11 +683,30 @@
 
     let globalRenderGrid = null;
 
+    // 格式化日期為 YYYY-MM-DD
     function getLocalDateString(dateObj = new Date()) {
       const year = dateObj.getFullYear();
       const month = String(dateObj.getMonth() + 1).padStart(2, '0');
       const day = String(dateObj.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
+    }
+
+    // 🎯 核心修復：清理 UTC 時間亂碼 (轉換 T / Z 為正常時間格式)
+    function formatFriendlyDateTime(str) {
+      if (!str) return "無紀錄";
+      // 若包含 T，代表為 ISO 字串，轉為本地時間
+      if (str.includes("T")) {
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) {
+          const yr = d.getFullYear();
+          const mo = String(d.getMonth() + 1).padStart(2, '0');
+          const da = String(d.getDate()).padStart(2, '0');
+          const hr = String(d.getHours()).padStart(2, '0');
+          const mi = String(d.getMinutes()).padStart(2, '0');
+          return `${yr}/${mo}/${da} ${hr}:${mi}`;
+        }
+      }
+      return str.replace(/'/g, "");
     }
 
     window.onload = function () {
@@ -871,8 +889,8 @@
       callGASAPI({ action: 'getUserProfile', account: currentUser }, (res) => {
         if (res.success) {
           document.getElementById('p-email').innerText = res.profile.email;
-          document.getElementById('p-created').innerText = res.profile.createdAt;
-          document.getElementById('p-login').innerText = res.profile.lastLoginAt;
+          document.getElementById('p-created').innerText = formatFriendlyDateTime(res.profile.createdAt);
+          document.getElementById('p-login').innerText = formatFriendlyDateTime(res.profile.lastLoginAt);
           document.getElementById('profile-streak-days').innerText = res.profile.checkinStreak;
           
           const todayStr = getLocalDateString();
@@ -1027,23 +1045,35 @@
       });
     }
 
+    // 🎯 核心修復：無日期常駐顯示 + 嚴格三階層優先級排序
     function renderTasks() {
       const container = document.getElementById('grid-container');
       container.innerHTML = ""; 
       
       const todayStr = getLocalDateString();
       let activeTasks = allTasksData.filter(t => t.status !== 'completed');
+
+      // 🎯 修復點：如果選擇了日期，除了當天任務，未填日期的任務永遠當作常駐待辦顯示！
       if (selectedDateFilter) {
-        activeTasks = activeTasks.filter(t => t.dueDate && t.dueDate.split('T')[0] === selectedDateFilter);
+        activeTasks = activeTasks.filter(t => {
+          let taskDate = t.dueDate ? t.dueDate.split('T')[0] : "";
+          return taskDate === selectedDateFilter || taskDate === "";
+        });
       }
 
-      // 優先級智慧排序
+      // 🎯 清楚的排序邏輯：
+      // 1. 優先級高排前 (🔴 3 > 🟡 2 > 🟢 1)
+      // 2. 同優先級下，有日期的越早越前
+      // 3. 無日期的排在同優先級最後
       const priorityWeight = { '🔴 緊急': 3, '🟡 一般': 2, '🟢 輕鬆': 1 };
       activeTasks.sort((a, b) => {
         let wA = priorityWeight[a.priority] || 2;
         let wB = priorityWeight[b.priority] || 2;
         if (wA !== wB) return wB - wA;
-        return (a.dueDate || "9999").localeCompare(b.dueDate || "9999");
+
+        let dateA = a.dueDate ? a.dueDate.split('T')[0] : "9999-99-99";
+        let dateB = b.dueDate ? b.dueDate.split('T')[0] : "9999-99-99";
+        return dateA.localeCompare(dateB);
       });
 
       if (activeTasks.length === 0) {
@@ -1073,9 +1103,11 @@
          let subTaskHint = total > 0 ? `<div style="font-size:0.72rem; color:var(--text-mid); margin-top:2px;">${done}/${total} 步驟</div>` : '';
          
          let dueHtml = '';
-         if (task.dueDate) {
+         if (task.dueDate && task.dueDate.trim() !== "") {
            let cleanDate = task.dueDate.split('T')[0];
            dueHtml = `<div class="card-due-badge">📅 ${cleanDate.slice(5)}</div>`;
+         } else {
+           dueHtml = `<div class="card-due-badge" style="color:var(--text-mid); background:rgba(0,0,0,0.05);">常駐</div>`;
          }
 
          card.innerHTML = `
