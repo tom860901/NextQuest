@@ -63,7 +63,6 @@
 
     .login-shell { max-width: 400px; margin: 80px auto auto auto; }
     
-    /* 🚀 雙欄並排核心設定：強制 Grid 兩欄結構 */
     #dashboard-view.view-active {
       display: grid !important;
       grid-template-columns: minmax(0, 1fr) 280px !important;
@@ -71,17 +70,18 @@
       align-items: start !important;
     }
 
+    /* 主任務區：移除高度限制與內部滾輪，自然向下延展 */
     .dashboard-main { 
       min-width: 0; 
-      max-height: 88vh; 
-      overflow-y: auto; 
+      height: auto;
+      overflow: visible;
     }
-    .dashboard-main::-webkit-scrollbar { width: 4px; }
-    .dashboard-main::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
 
+    /* 右側即將到來面板：設定 sticky 固定，跟隨主視窗滾動 */
     .upcoming-panel { 
-      height: fit-content;
-      max-height: 88vh; 
+      position: sticky;
+      top: 20px;
+      max-height: calc(100vh - 60px);
       overflow-y: auto; 
     }
     .upcoming-panel h3 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; color: var(--text-hi); }
@@ -89,10 +89,11 @@
     body.dark .upcoming-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #F1F0F7; }
     .upcoming-item:hover { transform: translateY(-2px); background: rgba(255,255,255,0.6); }
 
-    .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
     .titlebar h1, #form-title { font-family: 'Brush Script MT', 'Lucida Handwriting', 'Segoe Script', cursive, sans-serif; font-size: 2.2rem !important; font-weight: 700; letter-spacing: 1px; margin: 0; color: var(--text-hi); }
 
-    .bubble-menu-btn { height: 36px; padding: 0 14px; border-radius: 18px; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-hi); cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .action-button-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .bubble-menu-btn { height: 36px; padding: 0 12px; border-radius: 18px; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6); color: var(--text-hi); cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
     body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: #F1F0F7; }
     
     .input-group { margin-bottom: 20px; }
@@ -150,7 +151,7 @@
     .ai-btn { background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white; border: none; }
 
     /* 任務網格與呼吸燈 */
-    .grid-container { position: relative; width: 100%; transition: height 0.3s ease; perspective: 1200px; }
+    .grid-container { position: relative; width: 100%; transition: height 0.3s ease; perspective: 1200px; min-height: 120px; }
     .widget-card { position: absolute; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 8px 24px rgba(0,0,0,0.04); padding: 14px; color: var(--text-hi); }
     body.dark .widget-card { background: rgba(25, 25, 38, 0.65) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #F1F0F7; }
     .widget-card.dragging { z-index: 50; cursor: grabbing; transform: scale(1.04) !important; box-shadow: 0 20px 40px rgba(0,0,0,0.3) !important; }
@@ -170,7 +171,7 @@
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
     body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
 
-    /* 彈跳視窗完美置中 */
+    /* 彈跳視窗置中 */
     .modal-overlay { 
       position: fixed; 
       top: 0; 
@@ -206,6 +207,11 @@
     body.dark .archive-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #F1F0F7; }
     .archive-item > div { flex: 1; min-width: 0; }
     .archive-item button { flex-shrink: 0; width: auto !important; padding: 6px 14px !important; font-size: 0.8rem !important; margin-top: 0 !important; }
+    
+    /* 說明視窗專用樣式 */
+    .guide-box { text-align: left; line-height: 1.6; font-size: 0.9rem; }
+    .guide-item { margin-bottom: 14px; padding: 10px 14px; background: rgba(255,255,255,0.35); border-radius: 14px; }
+    body.dark .guide-item { background: rgba(255,255,255,0.05); }
   </style>
 </head>
 <body>
@@ -230,13 +236,14 @@
   <!-- VIEW 2: 控制中心 Dashboard (左側主控 + 右側未來提醒，雙欄並排) -->
   <div id="dashboard-view" class="view-hidden">
     
-    <!-- 左側主控制中心 (月曆與任務) -->
+    <!-- 左側主控制中心 (月曆與任務，直接向下延展) -->
     <div class="window-shell dashboard-main">
       <div class="titlebar">
         <h1>Planit</h1>
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div class="action-button-group">
           <button class="bubble-menu-btn" onclick="openTaskModal()" title="新增任務">＋ 新增</button>
           <button class="bubble-menu-btn" onclick="openArchiveModal()" title="已完成完成區">📁 完成區</button>
+          <button class="bubble-menu-btn" onclick="openGuideModal()" title="功能說明">💡 說明</button>
           <button class="bubble-menu-btn theme-toggle-btn" title="切換主題">☾</button>
           <button class="bubble-menu-btn" onclick="logout()" title="登出">🚪 登出</button>
         </div>
@@ -264,7 +271,7 @@
       </div>
     </div>
 
-    <!-- 右側視窗：即將到來的未來任務提醒 -->
+    <!-- 右側視窗：即將到來的未來任務提醒 (Sticky 固定吸頂) -->
     <div class="window-shell upcoming-panel">
       <h3>🔔 即將到來</h3>
       <div id="upcoming-list" style="font-size: 0.85rem; color: var(--text-mid);">
@@ -280,11 +287,11 @@
       <h2 style="font-size: 1.25rem; margin-bottom: 16px; text-align: center;">✨ 新增目標任務</h2>
       
       <div class="selector-group">
-        <div class="selector-title">任務類型</div>
+        <div class="selector-title">任務類型 (點擊說明可查看詳情)</div>
         <div class="tag-selector">
-          <div class="tag-btn active" onclick="selectOpt('.tag-btn', this)" data-val="⚡️ 碎片">⚡️ 碎片</div>
-          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🧪 試錯">🧪 試錯</div>
-          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🧠 深度">🧠 深度</div>
+          <div class="tag-btn active" onclick="selectOpt('.tag-btn', this)" data-val="⚡️ 碎片 (<15m)">⚡️ 碎片 (&lt;15m)</div>
+          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🧠 深度專注">🧠 深度專注</div>
+          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🔄 例行重複">🔄 例行重複</div>
         </div>
       </div>
 
@@ -305,7 +312,7 @@
       </div>
 
       <div class="input-group" style="margin-top: 14px;">
-        <input type="text" id="new-task-input" placeholder="大目標名稱 (例：規劃12月專案)" autocomplete="off">
+        <input type="text" id="new-task-input" placeholder="目標名稱 (例：準備期末報告)" autocomplete="off">
       </div>
 
       <div class="selector-group">
@@ -354,7 +361,33 @@
     </div>
   </div>
 
-  <!-- VIEW 5: 刪除確認 Modal -->
+  <!-- VIEW 5: 💡 說明 Modal (標籤與操作指南) -->
+  <div id="guide-modal" class="modal-overlay view-hidden">
+    <div class="window-shell modal-shell">
+      <h2 style="font-size: 1.25rem; margin-bottom: 16px; text-align: center;">💡 Planit 任務指南</h2>
+      <div class="guide-box">
+        <div class="guide-item">
+          <strong>⚡️ 碎片 (&lt;15m)</strong><br>
+          瑣碎、雜項或可於 15 分鐘內快速完成的微型任務（如回信、繳費、預約）。
+        </div>
+        <div class="guide-item">
+          <strong>🧠 深度專注</strong><br>
+          需要高度專注、耗時較長的重點工作或學習專案（如寫論文、系統架構設計）。
+        </div>
+        <div class="guide-item">
+          <strong>🔄 例行重複</strong><br>
+          週期性或規律執行的習慣事項（如每日閱讀、定期運動、每週週報）。
+        </div>
+        <div class="guide-item">
+          <strong>📌 未完成防呆說明</strong><br>
+          若任務內建子步驟，必須勾選全部步驟，「完成」按鈕才會解鎖，防止未完成誤封存。
+        </div>
+      </div>
+      <button class="btn-main btn-secondary" style="margin-top: 16px;" onclick="closeGuideModal()">了解並關閉</button>
+    </div>
+  </div>
+
+  <!-- VIEW 6: 刪除確認 Modal -->
   <div id="delete-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       <h2 style="font-size: 1.25rem; margin-bottom: 16px;">⚠️ 刪除確認</h2>
@@ -366,7 +399,7 @@
     </div>
   </div>
 
-  <!-- VIEW 6: 📁 已完成完成區 Modal -->
+  <!-- VIEW 7: 📁 已完成完成區 Modal -->
   <div id="archive-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       <h2 style="font-size: 1.25rem; margin-bottom: 16px;">📁 已完成任務完成區</h2>
@@ -584,7 +617,7 @@
         return;
       }
 
-      activeTasks.slice(0, 6).forEach(task => {
+      activeTasks.slice(0, 8).forEach(task => {
         let cleanDate = task.dueDate.split('T')[0];
         const item = document.createElement('div');
         item.className = 'upcoming-item';
@@ -702,6 +735,13 @@
     
     function closeTaskModal() { 
       document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); 
+    }
+
+    function openGuideModal() {
+      document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active');
+    }
+    function closeGuideModal() {
+      document.getElementById('guide-modal').classList.replace('view-active', 'view-hidden');
     }
 
     function confirmAddTask() {
