@@ -139,7 +139,7 @@
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
     body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
 
-    /* 彈窗樣式修復：保證不被 3D 傾角穿透，能穩定點擊 */
+    /* 彈窗樣式加固：確保點擊層級最高，不被背景 3D 傾角穿透 */
     .modal-overlay { 
       position: fixed; inset: 0; width: 100vw; height: 100vh; 
       background: rgba(0, 0, 0, 0.28) !important; 
@@ -389,7 +389,7 @@
     </div>
   </div>
 
-  <!-- VIEW 7: 說明 Modal (修復：補回完整版本紀錄與點擊穿透問題) -->
+  <!-- VIEW 7: 說明 Modal -->
   <div id="guide-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeGuideModal()">
     <div class="window-shell modal-shell">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -416,11 +416,10 @@
           任務卡片強制按「🔴 緊急 &gt; 🟡 一般 &gt; 🟢 輕鬆」順序排列，無指定日期項目自動作為「常駐項目」顯示於清單。
         </div>
 
-        <!-- 🎯 完整更新紀錄與修復說明 -->
         <div class="guide-item" style="border-left: 3.5px solid #2A9D8F;">
           <strong>🚀 最新版本更新亮點 (v4.9)</strong><br>
           • <strong>純數字帳號防呆</strong>：完整支援純數字（如 1234）相容讀寫，防止自動轉型中斷。<br>
-          • <strong>隔日延期 (Rollover)</strong>：一鍵順延至明天，並自動升級為「🔴 緊急」紅框警示。<br>
+          • <strong>隔日延期 (Rollover)</strong>：以任務原本截止日為基準精準 +1 天，並自動升級為「🔴 緊急」紅框呼吸發光。<br>
           • <strong>時區防偏差</strong>：強制鎖定 Asia/Taipei 台北標準時區，杜絕跨日換算倒退 1 天。<br>
           • <strong>安全強型態</strong>：全站寫入強制前綴純文字格式，避免 Google Sheets 格式污染。
         </div>
@@ -721,7 +720,7 @@
     }
 
     function closeProfileModal() {
-      document.getElementById('profile-modal').classList.replace('view-active', 'view-hidden');
+      document.getElementById('profile-modal').classList.replace('view-hidden', 'view-active');
     }
 
     function triggerDailyCheckin() {
@@ -892,6 +891,7 @@
          let progress = total === 0 ? 0 : Math.round((done / total) * 100);
 
          const card = document.createElement('div');
+         // 🎯 判斷緊急狀態：只要優先度為「🔴 緊急」或過期，立即套用 urgent-glow 紅框呼吸發光動效
          let isUrgent = task.priority === '🔴 緊急' || (task.dueDate && task.dueDate <= todayStr);
          let isRoutine = task.tag && task.tag.includes('例行重複');
 
@@ -969,14 +969,8 @@
     }
     
     function closeTaskModal() { document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); }
-    
-    // 說明彈窗開關
-    function openGuideModal() { 
-      document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active'); 
-    }
-    function closeGuideModal() { 
-      document.getElementById('guide-modal').classList.replace('view-active', 'view-hidden'); 
-    }
+    function openGuideModal() { document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active'); }
+    function closeGuideModal() { document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active'); }
 
     function confirmAddTask() {
       const input = document.getElementById('new-task-input');
@@ -1116,20 +1110,49 @@
       closeDetailModal();
     }
 
+    // 🎯 核心修復：真正的「該任務原有截止日期 + 1 天」延期邏輯
     function rolloverTaskToTomorrow() {
       if(!currentDetailTaskId) return;
       const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
       if(taskIndex === -1) return;
 
-      const now = new Date();
-      now.setDate(now.getDate() + 1);
-      const tomorrowStr = getLocalDateString(now);
+      const currentTask = allTasksData[taskIndex];
+      let nextDateStr = "";
 
-      allTasksData[taskIndex].dueDate = tomorrowStr;
+      // 1. 若任務本身有日期 (YYYY-MM-DD)，以該日期精準加 1 天
+      if (currentTask.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(currentTask.dueDate)) {
+        const parts = currentTask.dueDate.split('-');
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const d = parseInt(parts[2], 10);
+        
+        const nextDate = new Date(y, m, d + 1);
+        nextDateStr = getLocalDateString(nextDate);
+      } else {
+        // 若為常駐無日期任務，順延為今天 + 1 天
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        nextDateStr = getLocalDateString(tomorrow);
+      }
+
+      // 2. 本地狀態即時更新：日期變更、強制升級為「🔴 緊急」
+      allTasksData[taskIndex].dueDate = nextDateStr;
       allTasksData[taskIndex].priority = '🔴 緊急';
 
-      callGASAPI({ action: 'rolloverTask', taskId: currentDetailTaskId, tomorrowDate: tomorrowStr }, () => {});
+      // 3. 立即關閉視窗並重新渲染畫面（卡片立即跳出呼吸紅光與上方紅邊）
       closeDetailModal();
+      renderCalendar();
+      renderUpcomingPanel();
+      renderTasks();
+
+      // 4. 背景非同步同步至 Google Sheets
+      callGASAPI({ 
+        action: 'rolloverTask', 
+        taskId: currentDetailTaskId, 
+        tomorrowDate: nextDateStr 
+      }, (res) => {}, (err) => {
+        console.error("順延同步異常:", err);
+      });
     }
 
     function openArchiveModal() {
