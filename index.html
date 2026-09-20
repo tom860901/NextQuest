@@ -6,95 +6,24 @@
   <title>Planit - Control Center</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    :root { 
-      --text-hi: #2B213A; 
-      --text-mid: #7D738A; 
-      --card-radius: 26px; 
-    }
+    :root { --text-hi: #2B213A; --text-mid: #7D738A; --card-radius: 26px; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
-    html {
-      min-height: 100vh;
-      background: #FDF9FC;
-    }
-
+    html { min-height: 100vh; background: #FDF9FC; }
     body { 
-      min-height: 100vh;
-      width: 100%;
-      display: flex; 
-      flex-direction: column;
-      align-items: center; 
-      justify-content: flex-start;
-      background: transparent !important;
-      color: var(--text-hi); 
-      overflow-y: auto; 
-      position: relative; 
-      padding: 40px 16px; 
-      perspective: 1600px;
+      min-height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      background: transparent !important; color: var(--text-hi); overflow-y: auto; position: relative; padding: 40px 16px; perspective: 1600px;
     }
 
-    .sky-container {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    @keyframes driftPeach {
-      0% { transform: translate(0px, 0px) scale(1); }
-      50% { transform: translate(80px, -60px) scale(1.18); }
-      100% { transform: translate(-50px, 50px) scale(0.92); }
-    }
-    @keyframes driftPurple {
-      0% { transform: translate(0px, 0px) scale(1); }
-      50% { transform: translate(-70px, 70px) scale(1.15); }
-      100% { transform: translate(60px, -50px) scale(0.9); }
-    }
-    @keyframes driftOrange {
-      0% { transform: translate(0px, 0px) scale(1); }
-      50% { transform: translate(60px, 80px) scale(1.22); }
-      100% { transform: translate(-70px, -40px) scale(0.85); }
-    }
+    .sky-container { position: fixed; inset: 0; width: 100vw; height: 100vh; overflow: hidden; z-index: 0; pointer-events: none; }
+    @keyframes driftPeach { 0% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(80px, -60px) scale(1.18); } 100% { transform: translate(-50px, 50px) scale(0.92); } }
+    @keyframes driftPurple { 0% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(-70px, 70px) scale(1.15); } 100% { transform: translate(60px, -50px) scale(0.9); } }
+    @keyframes driftOrange { 0% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(60px, 80px) scale(1.22); } 100% { transform: translate(-70px, -40px) scale(0.85); } }
     
-    .cloud-orb { 
-      position: absolute; 
-      border-radius: 50%; 
-      filter: blur(55px);
-      opacity: 0.85; 
-      animation-iteration-count: infinite;
-      animation-direction: alternate;
-      animation-timing-function: ease-in-out;
-    }
-
-    .orb-peach { 
-      top: -100px; 
-      left: 5%; 
-      width: 520px; 
-      height: 520px; 
-      background: radial-gradient(circle, #FF477E 10%, #FFA8B6 80%); 
-      animation: driftPeach 14s infinite alternate ease-in-out; 
-    }
-    .orb-purple { 
-      bottom: -80px; 
-      left: 10%; 
-      width: 580px; 
-      height: 580px; 
-      background: radial-gradient(circle, #7B2CBF 0%, #C77DFF 65%, rgba(224, 170, 255, 0) 100%); 
-      animation: driftPurple 18s infinite alternate ease-in-out; 
-      animation-delay: -3s; 
-    }
-    .orb-orange { 
-      top: 50px; 
-      right: -100px; 
-      width: 540px; 
-      height: 540px; 
-      background: radial-gradient(circle, #FF9E00 0%, #FFD000 65%, rgba(255, 234, 167, 0) 100%); 
-      animation: driftOrange 16s infinite alternate ease-in-out; 
-      animation-delay: -6s; 
-    }
+    .cloud-orb { position: absolute; border-radius: 50%; filter: blur(55px); opacity: 0.85; animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: ease-in-out; }
+    .orb-peach { top: -100px; left: 5%; width: 520px; height: 520px; background: radial-gradient(circle, #FF477E 10%, #FFA8B6 80%); animation: driftPeach 14s infinite alternate ease-in-out; }
+    .orb-purple { bottom: -80px; left: 10%; width: 580px; height: 580px; background: radial-gradient(circle, #7B2CBF 0%, #C77DFF 65%, rgba(224, 170, 255, 0) 100%); animation: driftPurple 18s infinite alternate ease-in-out; animation-delay: -3s; }
+    .orb-orange { top: 50px; right: -100px; width: 540px; height: 540px; background: radial-gradient(circle, #FF9E00 0%, #FFD000 65%, rgba(255, 234, 167, 0) 100%); animation: driftOrange 16s infinite alternate ease-in-out; animation-delay: -6s; }
     
     body.dark { background-color: #0A0A12 !important; color: #F1F0F7 !important; --text-hi: #F1F0F7; --text-mid: #9E9AA8; }
     body.dark .orb-peach { background: radial-gradient(circle, #2E1065 0%, #0A0A12 80%) !important; opacity: 0.5; } 
@@ -105,63 +34,21 @@
     .view-active { display: block !important; }
 
     .window-shell, .modal-shell {
-      background: rgba(255, 255, 255, 0.35) !important; 
-      backdrop-filter: blur(22px) saturate(160%);
-      -webkit-backdrop-filter: blur(22px) saturate(160%); 
-      border: 1px solid rgba(255, 255, 255, 0.8) !important;
-      border-radius: var(--card-radius); 
-      padding: 26px;
-      box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
+      background: rgba(255, 255, 255, 0.35) !important; backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); 
+      border: 1px solid rgba(255, 255, 255, 0.8) !important; border-radius: var(--card-radius); padding: 26px; box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
     }
-    body.dark .window-shell, body.dark .modal-shell {
-      background: rgba(18, 18, 26, 0.78) !important; 
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255,255,255,0.02) !important;
-    }
+    body.dark .window-shell, body.dark .modal-shell { background: rgba(18, 18, 26, 0.78) !important; border: 1px solid rgba(255, 255, 255, 0.12) !important; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255,255,255,0.02) !important; }
 
     .login-shell { width: 100%; max-width: 400px; margin: 80px auto; z-index: 2; position: relative; }
     
-    #dashboard-view {
-      position: relative;
-      z-index: 2;
-      transform-style: preserve-3d;
-      transition: transform 0.12s ease-out;
-    }
-    #dashboard-view.view-active {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) 280px !important;
-      gap: 24px !important;
-      align-items: start !important;
-      width: 100%;
-      max-width: 1060px !important;
-      margin: 0 auto !important;
-    }
-
-    @media (max-width: 840px) {
-      #dashboard-view.view-active { grid-template-columns: 1fr !important; }
-      .upcoming-panel { position: static !important; }
-    }
+    #dashboard-view { position: relative; z-index: 2; transform-style: preserve-3d; transition: transform 0.12s ease-out; }
+    #dashboard-view.view-active { display: grid !important; grid-template-columns: minmax(0, 1fr) 280px !important; gap: 24px !important; align-items: start !important; width: 100%; max-width: 1060px !important; margin: 0 auto !important; }
+    @media (max-width: 840px) { #dashboard-view.view-active { grid-template-columns: 1fr !important; } .upcoming-panel { position: static !important; } }
 
     .dashboard-main { min-width: 0; height: auto; overflow: visible; }
-
-    .upcoming-panel { 
-      position: sticky;
-      top: 30px;
-      max-height: calc(100vh - 60px);
-      overflow-y: auto; 
-    }
+    .upcoming-panel { position: sticky; top: 30px; max-height: calc(100vh - 60px); overflow-y: auto; }
     .upcoming-panel h3 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; color: var(--text-hi); }
-    .upcoming-item { 
-      padding: 11px 14px; 
-      background: rgba(255,255,255,0.45); 
-      border-radius: 16px; 
-      margin-bottom: 9px; 
-      border: 1px solid rgba(255,255,255,0.7); 
-      font-size: 0.85rem; 
-      cursor: pointer; 
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); 
-      color: var(--text-hi); 
-    }
+    .upcoming-item { padding: 11px 14px; background: rgba(255,255,255,0.45); border-radius: 16px; margin-bottom: 9px; border: 1px solid rgba(255,255,255,0.7); font-size: 0.85rem; cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: var(--text-hi); }
     body.dark .upcoming-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #F1F0F7; }
     .upcoming-item:hover { transform: translateY(-2px) scale(1.02); background: rgba(255,255,255,0.7); }
 
@@ -169,86 +56,22 @@
     .titlebar h1, #form-title { font-family: 'Brush Script MT', 'Lucida Handwriting', 'Segoe Script', cursive, sans-serif; font-size: 2.2rem !important; font-weight: 700; letter-spacing: 1px; margin: 0; color: var(--text-hi); }
 
     .action-button-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-    .bubble-menu-btn { 
-      height: 36px; 
-      padding: 0 13px; 
-      border-radius: 18px; 
-      background: rgba(255, 255, 255, 0.5); 
-      border: 1px solid rgba(255, 255, 255, 0.75); 
-      color: var(--text-hi); 
-      cursor: pointer; 
-      font-size: 0.85rem; 
-      font-weight: 600; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      gap: 4px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
-      transition: all 0.2s ease;
-    }
+    .bubble-menu-btn { height: 36px; padding: 0 13px; border-radius: 18px; background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.75); color: var(--text-hi); cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: all 0.2s ease; }
     .bubble-menu-btn:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-1px); }
     body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: #F1F0F7; }
     
-    .profile-avatar-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #6C5CE7, #8E78FF);
-      color: white;
-      font-weight: 700;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      border: 1.5px solid rgba(255,255,255,0.9);
-      box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
-      font-size: 0.85rem;
-      user-select: none;
-    }
+    .profile-avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #6C5CE7, #8E78FF); color: white; font-weight: 700; display: flex; justify-content: center; align-items: center; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.9); box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3); font-size: 0.85rem; user-select: none; }
 
     .input-group { margin-bottom: 16px; position: relative; }
-    .input-group input, .input-group select { 
-      width: 100%; 
-      padding: 14px 20px; 
-      border-radius: 16px; 
-      border: 1px solid rgba(255, 255, 255, 0.7); 
-      background: rgba(255, 255, 255, 0.5); 
-      color: var(--text-hi); 
-      font-size: 1rem; 
-      outline: none; 
-    }
+    .input-group input, .input-group select { width: 100%; padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.5); color: var(--text-hi); font-size: 1rem; outline: none; }
     body.dark .input-group input, body.dark .input-group select { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.15); color: #F1F0F7; }
     
     .pwd-wrapper { position: relative; width: 100%; }
     .pwd-wrapper input { padding-right: 48px; }
-    .eye-toggle-btn {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1.1rem;
-      opacity: 0.65;
-      padding: 4px;
-    }
+    .eye-toggle-btn { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.65; padding: 4px; }
     .eye-toggle-btn:hover { opacity: 1; }
 
-    .btn-main { 
-      width: 100%; 
-      padding: 14px; 
-      border-radius: 20px; 
-      border: none; 
-      background: #2D283E; 
-      color: #FFFFFF; 
-      font-size: 1rem; 
-      font-weight: 600; 
-      cursor: pointer; 
-      box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); 
-      margin-top: 8px; 
-      transition: all 0.2s;
-    }
+    .btn-main { width: 100%; padding: 14px; border-radius: 20px; border: none; background: #2D283E; color: #FFFFFF; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); margin-top: 8px; transition: all 0.2s; }
     body.dark .btn-main { background: #6C5CE7; color: #FFFFFF; box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4); }
     .btn-main:active { transform: scale(0.97); }
     .btn-secondary { background: rgba(255,255,255,0.4); color: var(--text-hi); border: 1px solid rgba(255,255,255,0.7); box-shadow: none; }
@@ -262,13 +85,7 @@
     .form-links span { cursor: pointer; text-decoration: underline; }
     #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
 
-    .calendar-container { 
-      background: rgba(255, 255, 255, 0.25); 
-      padding: 16px; 
-      border-radius: 22px; 
-      border: 1px solid rgba(255, 255, 255, 0.6); 
-      margin-bottom: 20px; 
-    }
+    .calendar-container { background: rgba(255, 255, 255, 0.25); padding: 16px; border-radius: 22px; border: 1px solid rgba(255, 255, 255, 0.6); margin-bottom: 20px; }
     body.dark .calendar-container { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.08); }
     .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; font-size: 0.95rem; color: var(--text-hi); }
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
@@ -303,80 +120,29 @@
     .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 8px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
     .ai-btn { background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white; border: none; box-shadow: 0 4px 15px rgba(142, 45, 226, 0.25); }
 
-    .grid-container { 
-      position: relative; 
-      width: 100%; 
-      transition: height 0.3s ease; 
-      min-height: 120px; 
-      perspective: 1000px; 
-    }
-    .widget-card { 
-      position: absolute; 
-      background: rgba(255, 255, 255, 0.52); 
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.8); 
-      border-radius: 22px; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: space-between; 
-      align-items: center; 
-      font-weight: 600; 
-      overflow: hidden; 
-      user-select: none; 
-      touch-action: none; 
-      cursor: grab; 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3); 
-      padding: 12px 14px 9px 14px; 
-      color: var(--text-hi); 
-      transform-style: preserve-3d;
-      transition: top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.2s ease-out, box-shadow 0.2s ease;
-    }
+    .grid-container { position: relative; width: 100%; transition: height 0.3s ease; min-height: 120px; perspective: 1000px; }
+    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.52); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 22px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3); padding: 12px 14px 9px 14px; color: var(--text-hi); transform-style: preserve-3d; transition: top 0.25s ease-out, left 0.25s ease-out, transform 0.15s ease-out, box-shadow 0.2s ease; }
     body.dark .widget-card { background: rgba(25, 25, 38, 0.65) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #F1F0F7; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-    .widget-card.dragging { z-index: 50; cursor: grabbing; transform: translateZ(30px) scale(1.06) !important; box-shadow: 0 30px 60px rgba(0,0,0,0.3) !important; }
+    .widget-card.dragging { z-index: 100 !important; cursor: grabbing !important; transform: scale(1.05) !important; box-shadow: 0 20px 45px rgba(0,0,0,0.25) !important; transition: none !important; }
     
-    @keyframes urgentPulse {
-      0% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.45); border-color: rgba(230, 57, 70, 0.85); }
-      50% { box-shadow: 0 0 24px rgba(230, 57, 70, 0.75); border-color: #E63946; }
-      100% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.45); border-color: rgba(230, 57, 70, 0.85); }
-    }
+    @keyframes urgentPulse { 0% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.45); border-color: rgba(230, 57, 70, 0.85); } 50% { box-shadow: 0 0 24px rgba(230, 57, 70, 0.75); border-color: #E63946; } 100% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.45); border-color: rgba(230, 57, 70, 0.85); } }
     .widget-card.urgent-glow { animation: urgentPulse 2s infinite ease-in-out; border-top: 3.5px solid #E63946; }
-    .widget-card.routine-card { border-bottom: 3px solid #4A90E2; }
+    .widget-card.routine-card { border-bottom: 3.5px solid #4A90E2; }
 
-    .card-topbar { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 4px; font-size: 0.68rem; }
+    .card-topbar { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 4px; font-size: 0.68rem; pointer-events: none; }
     .card-tag-text { flex: 1; color: var(--text-mid); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
     .card-due-badge { flex-shrink: 0; color: #E63946; font-weight: 700; background: rgba(230, 57, 70, 0.12); padding: 2px 6px; border-radius: 8px; font-size: 0.65rem; white-space: nowrap; }
-    .card-title-text { text-align: center; width: 100%; font-size: 0.95rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; margin: auto 0; }
+    .card-title-text { text-align: center; width: 100%; font-size: 0.95rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; margin: auto 0; pointer-events: none; }
     
-    .progress-bar-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: rgba(0,0,0,0.05); }
+    .progress-bar-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: rgba(0,0,0,0.05); pointer-events: none; }
     body.dark .progress-bar-bg { background: rgba(255,255,255,0.05); }
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
     body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
 
-    .modal-overlay { 
-      position: fixed; 
-      inset: 0; 
-      width: 100vw; 
-      height: 100vh; 
-      background: transparent !important; 
-      backdrop-filter: none !important; 
-      -webkit-backdrop-filter: none !important; 
-      z-index: 3000 !important; 
-      pointer-events: none; 
-    }
+    .modal-overlay { position: fixed; inset: 0; width: 100vw; height: 100vh; background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; z-index: 3000 !important; pointer-events: none; }
     .modal-overlay.view-active { display: grid !important; place-items: center !important; pointer-events: auto !important; }
     .modal-overlay.view-hidden { display: none !important; pointer-events: none !important; }
-
-    .modal-shell { 
-      max-width: 480px; 
-      width: 90%; 
-      margin: auto; 
-      padding: 28px; 
-      max-height: 85vh; 
-      overflow-y: auto; 
-      color: var(--text-hi); 
-      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.8) !important;
-    }
+    .modal-shell { max-width: 480px; width: 90%; margin: auto; padding: 28px; max-height: 85vh; overflow-y: auto; color: var(--text-hi); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.8) !important; }
     body.dark .modal-shell { box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.15) !important; }
 
     .profile-info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
@@ -565,7 +331,7 @@
   <div id="forgot-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       <h2 style="font-size: 1.25rem; margin-bottom: 12px;">🔑 忘記密碼</h2>
-      <p style="font-size: 0.85rem; color: var(--text-mid); margin-bottom: 16px;">輸入註冊時填寫的信箱，系統將寄送一組臨時密碼供登入。</p>
+      <p style="font-size: 0.85rem; color: var(--text-mid); margin-bottom: 16px;">輸入註冊信箱，系統將寄送一組臨時密碼供登入。</p>
       <div class="input-group">
         <input type="email" id="forgot-email-input" placeholder="註冊電子信箱">
       </div>
@@ -613,12 +379,12 @@
     </div>
   </div>
 
-  <!-- VIEW 7: 💡 說明 Modal -->
+  <!-- VIEW 7: 說明 Modal -->
   <div id="guide-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">💡 關於 Planit</h2>
-        <span class="version-tag">v4.6 Stable</span>
+        <span class="version-tag">v4.9 Stable</span>
       </div>
 
       <div class="guide-box">
@@ -655,7 +421,7 @@
     </div>
   </div>
 
-  <!-- VIEW 9: 📁 已完成完成區 Modal -->
+  <!-- VIEW 9: 📁 已完成區 Modal -->
   <div id="archive-modal" class="modal-overlay view-hidden">
     <div class="window-shell modal-shell" style="text-align: center;">
       <h2 style="font-size: 1.25rem; margin-bottom: 16px;">📁 已完成任務完成區</h2>
@@ -668,7 +434,7 @@
   </div>
 
   <script>
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw9130xk5gFZxkrtpIR-YQSClZaqW3IH0JxU-Ka4fRKsdaq9FFZZzxIEgvVBExnxXTVOQ/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycby-724Yf_2YQO70u57v4bBff9vL15y6b26o0qC7d5YVqC4l3B3w/exec"; // 如果這是你最新的網址，請保留不動
     const GOOGLE_CLIENT_ID = "867237692766-9o2nhlnrqlq00k75apvsbvl2r2u1jsqi.apps.googleusercontent.com";
     
     let isLoginMode = true;
@@ -683,30 +449,11 @@
 
     let globalRenderGrid = null;
 
-    // 格式化日期為 YYYY-MM-DD
     function getLocalDateString(dateObj = new Date()) {
       const year = dateObj.getFullYear();
       const month = String(dateObj.getMonth() + 1).padStart(2, '0');
       const day = String(dateObj.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
-    }
-
-    // 🎯 核心修復：清理 UTC 時間亂碼 (轉換 T / Z 為正常時間格式)
-    function formatFriendlyDateTime(str) {
-      if (!str) return "無紀錄";
-      // 若包含 T，代表為 ISO 字串，轉為本地時間
-      if (str.includes("T")) {
-        const d = new Date(str);
-        if (!isNaN(d.getTime())) {
-          const yr = d.getFullYear();
-          const mo = String(d.getMonth() + 1).padStart(2, '0');
-          const da = String(d.getDate()).padStart(2, '0');
-          const hr = String(d.getHours()).padStart(2, '0');
-          const mi = String(d.getMinutes()).padStart(2, '0');
-          return `${yr}/${mo}/${da} ${hr}:${mi}`;
-        }
-      }
-      return str.replace(/'/g, "");
     }
 
     window.onload = function () {
@@ -766,7 +513,7 @@
             google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse, auto_select: false });
             google.accounts.id.renderButton(document.getElementById("google-btn-container"), { theme: "outline", size: "large", shape: "pill", width: 280 });
           }
-        } catch(e) { console.error(e); }
+        } catch(e) {}
       }, 200);
     }
 
@@ -812,25 +559,12 @@
       const pwd = document.getElementById('password').value.trim();
       const email = document.getElementById('email').value.trim();
 
-      if (!acc || !pwd) {
-        document.getElementById('message').innerText = "請輸入帳號與密碼！";
-        return;
-      }
-      if (!isLoginMode && !email) {
-        document.getElementById('message').innerText = "註冊請填寫電子信箱！";
-        return;
-      }
+      if (!acc || !pwd) { document.getElementById('message').innerText = "請輸入帳號與密碼！"; return; }
+      if (!isLoginMode && !email) { document.getElementById('message').innerText = "註冊請填寫電子信箱！"; return; }
 
       document.getElementById('message').innerText = "連線驗證中...";
       
-      const payload = { 
-        action: isLoginMode ? 'login' : 'register', 
-        account: acc, 
-        password: pwd,
-        email: email
-      };
-
-      callGASAPI(payload, (res) => {
+      callGASAPI({ action: isLoginMode ? 'login' : 'register', account: acc, password: pwd, email: email }, (res) => {
          document.getElementById('message').innerText = res.msg;
          if (res.success) {
            if (!isLoginMode) { 
@@ -889,8 +623,8 @@
       callGASAPI({ action: 'getUserProfile', account: currentUser }, (res) => {
         if (res.success) {
           document.getElementById('p-email').innerText = res.profile.email;
-          document.getElementById('p-created').innerText = formatFriendlyDateTime(res.profile.createdAt);
-          document.getElementById('p-login').innerText = formatFriendlyDateTime(res.profile.lastLoginAt);
+          document.getElementById('p-created').innerText = res.profile.createdAt || "無紀錄";
+          document.getElementById('p-login').innerText = res.profile.lastLoginAt || "無紀錄";
           document.getElementById('profile-streak-days').innerText = res.profile.checkinStreak;
           
           const todayStr = getLocalDateString();
@@ -994,10 +728,10 @@
         const dateStr = `${currentCalendarYear}-${mStr}-${dStr}`;
         const isToday = dateStr === todayStr;
 
-        const tasksOnThisDay = activeTasks.filter(t => t.dueDate && t.dueDate.split('T')[0] === dateStr);
+        const tasksOnThisDay = activeTasks.filter(t => t.dueDate === dateStr);
         let dotsHtml = '';
         tasksOnThisDay.forEach(t => {
-          let isUrgent = t.priority === '🔴 緊急' || t.dueDate.split('T')[0] <= todayStr;
+          let isUrgent = t.priority === '🔴 緊急' || t.dueDate <= todayStr;
           dotsHtml += `<div class="cal-dot ${isUrgent ? 'urgent' : ''}"></div>`;
         });
 
@@ -1020,7 +754,7 @@
       panel.innerHTML = '';
 
       const todayStr = getLocalDateString();
-      const activeTasks = allTasksData.filter(t => t.status !== 'completed' && t.dueDate && t.dueDate.split('T')[0] >= todayStr);
+      const activeTasks = allTasksData.filter(t => t.status !== 'completed' && t.dueDate && t.dueDate >= todayStr);
       
       activeTasks.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
 
@@ -1030,14 +764,13 @@
       }
 
       activeTasks.slice(0, 8).forEach(task => {
-        let cleanDate = task.dueDate.split('T')[0];
         const item = document.createElement('div');
         item.className = 'upcoming-item';
         item.innerHTML = `
           <div style="font-weight: 700; margin-bottom: 2px;">📌 ${task.title}</div>
           <div style="font-size: 0.75rem; color: var(--text-mid); display: flex; justify-content: space-between;">
             <span>${task.tag}</span>
-            <span style="color: #E63946; font-weight: 700;">${cleanDate}</span>
+            <span style="color: #E63946; font-weight: 700;">${task.dueDate}</span>
           </div>
         `;
         item.onclick = () => openTaskDetail(task.id);
@@ -1045,7 +778,6 @@
       });
     }
 
-    // 🎯 核心修復：無日期常駐顯示 + 嚴格三階層優先級排序
     function renderTasks() {
       const container = document.getElementById('grid-container');
       container.innerHTML = ""; 
@@ -1053,26 +785,18 @@
       const todayStr = getLocalDateString();
       let activeTasks = allTasksData.filter(t => t.status !== 'completed');
 
-      // 🎯 修復點：如果選擇了日期，除了當天任務，未填日期的任務永遠當作常駐待辦顯示！
       if (selectedDateFilter) {
-        activeTasks = activeTasks.filter(t => {
-          let taskDate = t.dueDate ? t.dueDate.split('T')[0] : "";
-          return taskDate === selectedDateFilter || taskDate === "";
-        });
+        activeTasks = activeTasks.filter(t => t.dueDate === selectedDateFilter || !t.dueDate);
       }
 
-      // 🎯 清楚的排序邏輯：
-      // 1. 優先級高排前 (🔴 3 > 🟡 2 > 🟢 1)
-      // 2. 同優先級下，有日期的越早越前
-      // 3. 無日期的排在同優先級最後
       const priorityWeight = { '🔴 緊急': 3, '🟡 一般': 2, '🟢 輕鬆': 1 };
       activeTasks.sort((a, b) => {
         let wA = priorityWeight[a.priority] || 2;
         let wB = priorityWeight[b.priority] || 2;
         if (wA !== wB) return wB - wA;
 
-        let dateA = a.dueDate ? a.dueDate.split('T')[0] : "9999-99-99";
-        let dateB = b.dueDate ? b.dueDate.split('T')[0] : "9999-99-99";
+        let dateA = a.dueDate || "9999-99-99";
+        let dateB = b.dueDate || "9999-99-99";
         return dateA.localeCompare(dateB);
       });
 
@@ -1091,7 +815,7 @@
          let progress = total === 0 ? 0 : Math.round((done / total) * 100);
 
          const card = document.createElement('div');
-         let isUrgent = task.priority === '🔴 緊急' || (task.dueDate && task.dueDate.split('T')[0] <= todayStr);
+         let isUrgent = task.priority === '🔴 緊急' || (task.dueDate && task.dueDate <= todayStr);
          let isRoutine = task.tag && task.tag.includes('例行重複');
 
          card.className = `widget-card ${isUrgent ? 'urgent-glow' : ''} ${isRoutine ? 'routine-card' : ''}`;
@@ -1100,12 +824,11 @@
          card.setAttribute('data-pri', task.priority);
          
          let progressHtml = total > 0 ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%"></div></div>` : '';
-         let subTaskHint = total > 0 ? `<div style="font-size:0.72rem; color:var(--text-mid); margin-top:2px;">${done}/${total} 步驟</div>` : '';
+         let subTaskHint = total > 0 ? `<div style="font-size:0.72rem; color:var(--text-mid); margin-top:2px; pointer-events:none;">${done}/${total} 步驟</div>` : '';
          
          let dueHtml = '';
-         if (task.dueDate && task.dueDate.trim() !== "") {
-           let cleanDate = task.dueDate.split('T')[0];
-           dueHtml = `<div class="card-due-badge">📅 ${cleanDate.slice(5)}</div>`;
+         if (task.dueDate) {
+           dueHtml = `<div class="card-due-badge">📅 ${task.dueDate.slice(5)}</div>`;
          } else {
            dueHtml = `<div class="card-due-badge" style="color:var(--text-mid); background:rgba(0,0,0,0.05);">常駐</div>`;
          }
@@ -1121,7 +844,7 @@
          `;
          container.appendChild(card);
       });
-      setTimeout(() => { initGridEngine(); }, 50);
+      setTimeout(() => { initGridEngine(); }, 40);
     }
 
     function selectOpt(groupClass, btn) { 
@@ -1165,16 +888,9 @@
       document.getElementById('new-task-duedate').value = getLocalDateString();
     }
     
-    function closeTaskModal() { 
-      document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); 
-    }
-
-    function openGuideModal() {
-      document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active');
-    }
-    function closeGuideModal() {
-      document.getElementById('guide-modal').classList.replace('view-active', 'view-hidden');
-    }
+    function closeTaskModal() { document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); }
+    function openGuideModal() { document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active'); }
+    function closeGuideModal() { document.getElementById('guide-modal').classList.replace('view-active', 'view-hidden'); }
 
     function confirmAddTask() {
       const input = document.getElementById('new-task-input');
@@ -1194,13 +910,7 @@
       const autoWidth = ((dueDate && dueDate.trim() !== "") || subTasks.length > 0) ? 2 : 1; 
 
       callGASAPI({ 
-        action: 'addTask', 
-        account: currentUser, 
-        title: title, 
-        tag: tag, 
-        priority: pri, 
-        subTasks: JSON.stringify(subTasks),
-        dueDate: dueDate 
+        action: 'addTask', account: currentUser, title: title, tag: tag, priority: pri, subTasks: JSON.stringify(subTasks), dueDate: dueDate 
       }, (res) => {
         if(res.success) {
           res.task.w = autoWidth;
@@ -1218,7 +928,7 @@
       currentDetailTaskId = taskId;
 
       document.getElementById('edit-task-title').value = task.title;
-      document.getElementById('edit-task-duedate').value = task.dueDate ? task.dueDate.split('T')[0] : '';
+      document.getElementById('edit-task-duedate').value = task.dueDate || '';
       document.getElementById('edit-task-priority').value = task.priority || '🟡 一般';
 
       const listContainer = document.getElementById('detail-checklist');
@@ -1287,11 +997,7 @@
       allTasksData[taskIndex].priority = newPriority;
 
       callGASAPI({ 
-        action: 'updateTaskDetails', 
-        taskId: currentDetailTaskId,
-        title: newTitle,
-        dueDate: newDueDate,
-        priority: newPriority
+        action: 'updateTaskDetails', taskId: currentDetailTaskId, title: newTitle, dueDate: newDueDate, priority: newPriority
       }, () => {});
 
       alert("✨ 任務修改已儲存！");
@@ -1336,11 +1042,7 @@
       allTasksData[taskIndex].dueDate = tomorrowStr;
       allTasksData[taskIndex].priority = '🔴 緊急';
 
-      callGASAPI({ 
-        action: 'rolloverTask', 
-        taskId: currentDetailTaskId,
-        tomorrowDate: tomorrowStr
-      }, () => {});
+      callGASAPI({ action: 'rolloverTask', taskId: currentDetailTaskId, tomorrowDate: tomorrowStr }, () => {});
       closeDetailModal();
     }
 
@@ -1355,7 +1057,7 @@
         completedTasks.forEach(task => {
           const item = document.createElement('div');
           item.className = 'archive-item';
-          let cleanDate = task.dueDate ? task.dueDate.split('T')[0] : '無';
+          let cleanDate = task.dueDate || '常駐';
           item.innerHTML = `
             <div>
               <div style="font-weight: 700; font-size: 0.95rem;">✅ ${task.title}</div>
@@ -1369,9 +1071,7 @@
       document.getElementById('archive-modal').classList.replace('view-hidden', 'view-active');
     }
 
-    function closeArchiveModal() {
-      document.getElementById('archive-modal').classList.replace('view-active', 'view-hidden');
-    }
+    function closeArchiveModal() { document.getElementById('archive-modal').classList.replace('view-active', 'view-hidden'); }
 
     function restoreTask(taskId) {
       const taskIndex = allTasksData.findIndex(t => t.id === taskId);
@@ -1390,6 +1090,7 @@
       document.getElementById('delete-modal').classList.replace('view-hidden', 'view-active');
     }
     function closeDeleteModal() { document.getElementById('delete-modal').classList.replace('view-active', 'view-hidden'); targetElementToDelete = null; }
+    
     function confirmDeleteTask() {
       if (!targetElementToDelete) return;
       const taskId = targetElementToDelete;
@@ -1407,35 +1108,24 @@
       oldContainer.parentNode.replaceChild(container, oldContainer);
       const cardElements = Array.from(container.children);
       
-      function getColCount() {
-        if (container.clientWidth <= 420) return 1;
-        if (container.clientWidth <= 640) return 2;
-        return 3;
-      }
+      function getColCount() { return container.clientWidth <= 420 ? 1 : container.clientWidth <= 640 ? 2 : 3; }
 
       let cols = getColCount();
-      const gap = 16; 
-      const rowHeight = 86;
+      const gap = 16; const rowHeight = 86;
 
       let cardsData = cardElements.map(el => ({ 
-        el: el, 
-        w: Math.min(parseInt(el.getAttribute('data-w')) || 1, cols), 
-        h: parseInt(el.getAttribute('data-h')) || 1 
+        el: el, w: Math.min(parseInt(el.getAttribute('data-w')) || 1, cols), h: parseInt(el.getAttribute('data-h')) || 1 
       }));
 
       function renderGrid() {
         cols = getColCount();
-        cardsData.forEach(c => {
-          c.w = Math.min(parseInt(c.el.getAttribute('data-w')) || 1, cols);
-        });
+        cardsData.forEach(c => c.w = Math.min(parseInt(c.el.getAttribute('data-w')) || 1, cols));
 
         const cellWidth = (container.clientWidth - (cols - 1) * gap) / cols;
-        let gridMatrix = []; 
-        let maxRow = 0;
+        let gridMatrix = []; let maxRow = 0;
 
         cardsData.forEach(card => {
-          let placed = false; 
-          let r = 0;
+          let placed = false; let r = 0;
           while (!placed) {
             for (let c = 0; c <= cols - card.w; c++) {
               let isFree = true;
@@ -1467,79 +1157,76 @@
       globalRenderGrid = renderGrid;
       renderGrid();
 
-      let draggingCardIndex = -1; 
-      let startX, startY, initialLeft, initialTop;
-      let longPressTimer; 
-      let clickStartTime;
+      let draggingIndex = -1; let startX, startY, initialLeft, initialTop;
+      let longPressTimer; let clickStartTime;
 
       cardsData.forEach((card) => {
         card.el.addEventListener('pointerdown', (e) => {
-          if (e.target.tagName === 'BUTTON') return; 
-          draggingCardIndex = cardsData.indexOf(card);
+          if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return; 
+          e.preventDefault(); 
+          draggingIndex = cardsData.indexOf(card);
           startX = e.clientX; startY = e.clientY;
           clickStartTime = new Date().getTime(); 
-          initialLeft = parseInt(card.el.style.left || 0); initialTop = parseInt(card.el.style.top || 0);
+          initialLeft = parseFloat(card.el.style.left || 0); initialTop = parseFloat(card.el.style.top || 0);
           
           longPressTimer = setTimeout(() => { 
-            draggingCardIndex = -1; card.el.classList.remove('dragging'); card.el.releasePointerCapture(e.pointerId);
+            draggingIndex = -1; card.el.classList.remove('dragging'); 
+            try { card.el.releasePointerCapture(e.pointerId); } catch(e){}
             openDeleteModal(card.el.getAttribute('data-id')); 
           }, 700);
 
-          card.el.style.transform = '';
           card.el.classList.add('dragging'); 
           card.el.setPointerCapture(e.pointerId);
         });
 
         card.el.addEventListener('pointermove', (e) => {
-          if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) clearTimeout(longPressTimer);
+          if (Math.abs(e.clientX - startX) > 6 || Math.abs(e.clientY - startY) > 6) clearTimeout(longPressTimer);
           
-          if (draggingCardIndex !== -1 && draggingCardIndex === cardsData.indexOf(card)) {
+          if (draggingIndex !== -1 && draggingIndex === cardsData.indexOf(card)) {
             const dx = e.clientX - startX; const dy = e.clientY - startY;
             card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
-            const containerRect = container.getBoundingClientRect();
-            const mouseX = e.clientX - containerRect.left; const mouseY = e.clientY - containerRect.top;
+
+            const currentRect = card.el.getBoundingClientRect();
+            const currentCenterX = currentRect.left + currentRect.width / 2;
+            const currentCenterY = currentRect.top + currentRect.height / 2;
+
             let targetIndex = -1;
             cardsData.forEach((otherCard, i) => {
-               if (i === draggingCardIndex) return;
+               if (i === draggingIndex) return;
                const rect = otherCard.el.getBoundingClientRect();
-               if (mouseX > rect.left - containerRect.left && mouseX < rect.right - containerRect.left && mouseY > rect.top - containerRect.top && mouseY < rect.bottom - containerRect.top) targetIndex = i;
+               if (currentCenterX >= rect.left && currentCenterX <= rect.right && currentCenterY >= rect.top && currentCenterY <= rect.bottom) targetIndex = i;
             });
-            if (targetIndex !== -1 && targetIndex !== draggingCardIndex) {
-               cardsData.splice(targetIndex, 0, cardsData.splice(draggingCardIndex, 1)[0]);
-               draggingCardIndex = targetIndex; 
+
+            if (targetIndex !== -1 && targetIndex !== draggingIndex) {
+               cardsData.splice(targetIndex, 0, cardsData.splice(draggingIndex, 1)[0]);
+               draggingIndex = targetIndex; 
                renderGrid(); 
                card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
             }
-            return;
           }
-
-          if (draggingCardIndex === -1) {
-            const rect = card.el.getBoundingClientRect();
-            const rotX = (((e.clientY - rect.top) - rect.height / 2) / (rect.height / 2)) * -14; 
-            const rotY = (((e.clientX - rect.left) - rect.width / 2) / (rect.width / 2)) * 14;
-            card.el.style.transition = 'none'; 
-            card.el.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(12px)`;
-          }
-        });
-
-        card.el.addEventListener('pointerleave', () => {
-          if (draggingCardIndex !== -1) return;
-          card.el.style.transition = 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)';
-          card.el.style.transform = `rotateX(0deg) rotateY(0deg) translateZ(0px)`;
         });
 
         card.el.addEventListener('pointerup', (e) => {
           clearTimeout(longPressTimer); 
           const timeElapsed = new Date().getTime() - clickStartTime;
-          const moved = Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5;
+          const moved = Math.abs(e.clientX - startX) > 6 || Math.abs(e.clientY - startY) > 6;
           
-          if (draggingCardIndex !== -1) {
-            card.el.classList.remove('dragging'); card.el.releasePointerCapture(e.pointerId);
-            draggingCardIndex = -1; renderGrid(); 
+          if (draggingIndex !== -1) {
+            card.el.classList.remove('dragging'); 
+            try { card.el.releasePointerCapture(e.pointerId); } catch(err){}
+            draggingIndex = -1; 
+            renderGrid(); 
           }
+          if (!moved && timeElapsed < 300) openTaskDetail(card.el.getAttribute('data-id'));
+        });
 
-          if (!moved && timeElapsed < 300) {
-            openTaskDetail(card.el.getAttribute('data-id'));
+        card.el.addEventListener('pointercancel', (e) => {
+          clearTimeout(longPressTimer);
+          if (draggingIndex !== -1) {
+            card.el.classList.remove('dragging');
+            try { card.el.releasePointerCapture(e.pointerId); } catch(err){}
+            draggingIndex = -1;
+            renderGrid();
           }
         });
       });
