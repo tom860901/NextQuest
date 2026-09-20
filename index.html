@@ -434,7 +434,8 @@
   </div>
 
   <script>
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycby-724Yf_2YQO70u57v4bBff9vL15y6b26o0qC7d5YVqC4l3B3w/exec"; // 如果這是你最新的網址，請保留不動
+    // 💡 請確保此 URL 為最新版 GAS 部署網址（設定為：所有人 Anyone 均可存取）
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw9130xk5gFZxkrtpIR-YQSClZaqW3IH0JxU-Ka4fRKsdaq9FFZZzxIEgvVBExnxXTVOQ/exec"; 
     const GOOGLE_CLIENT_ID = "867237692766-9o2nhlnrqlq00k75apvsbvl2r2u1jsqi.apps.googleusercontent.com";
     
     let isLoginMode = true;
@@ -517,12 +518,40 @@
       }, 200);
     }
 
+    // 🎯 核心強化：API 請求發送器（含超時防卡死機制與純文字傳輸）
+    function callGASAPI(payload, callback, onError) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 秒連線超時防護
+
+      fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      })
+      .then(res => {
+        clearTimeout(timeoutId);
+        return res.json();
+      })
+      .then(data => {
+        if (callback) callback(data);
+      })
+      .catch(err => {
+        clearTimeout(timeoutId);
+        console.error("API 連線異常:", err);
+        const errorMsg = err.name === 'AbortError' ? "連線逾時，請檢查網路或 GAS 權限" : "無法連線至雲端服務";
+        if (onError) onError(errorMsg);
+      });
+    }
+
     function fetchTasks() {
       callGASAPI({ action: 'getTasks', account: currentUser }, (data) => {
-        allTasksData = data || [];
+        allTasksData = Array.isArray(data) ? data : [];
         renderCalendar();
         renderUpcomingPanel();
         renderTasks();
+      }, () => {
+        document.getElementById('grid-container').innerHTML = `<div style="text-align:center; padding: 40px; color: #E63946;">任務載入失敗，請重新整理頁面。</div>`;
       });
     }
 
@@ -541,6 +570,8 @@
           document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
           document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
           fetchTasks();
+       }, (err) => {
+          document.getElementById('message').innerText = err;
        });
     }
 
@@ -554,31 +585,58 @@
       document.getElementById('message').innerText = ''; 
     }
 
+    // 🎯 核心修復：登入與註冊提交
     function submitManualForm() {
       const acc = document.getElementById('account').value.trim(); 
       const pwd = document.getElementById('password').value.trim();
       const email = document.getElementById('email').value.trim();
+      const actionBtn = document.getElementById('action-btn');
 
-      if (!acc || !pwd) { document.getElementById('message').innerText = "請輸入帳號與密碼！"; return; }
-      if (!isLoginMode && !email) { document.getElementById('message').innerText = "註冊請填寫電子信箱！"; return; }
+      if (!acc || !pwd) { 
+        document.getElementById('message').innerText = "請輸入帳號與密碼！"; 
+        return; 
+      }
+      if (!isLoginMode && !email) { 
+        document.getElementById('message').innerText = "註冊請填寫電子信箱！"; 
+        return; 
+      }
 
       document.getElementById('message').innerText = "連線驗證中...";
+      actionBtn.disabled = true;
+      actionBtn.classList.add('btn-disabled');
       
-      callGASAPI({ action: isLoginMode ? 'login' : 'register', account: acc, password: pwd, email: email }, (res) => {
-         document.getElementById('message').innerText = res.msg;
-         if (res.success) {
-           if (!isLoginMode) { 
-             setTimeout(toggleMode, 1500); 
-           } else { 
-             currentUser = res.account; 
-             localStorage.setItem('planit_user', currentUser); 
-             updateAvatarBadge();
-             document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
-             document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
-             fetchTasks();
-           }
-         }
-      });
+      callGASAPI(
+        { action: isLoginMode ? 'login' : 'register', account: acc, password: pwd, email: email },
+        (res) => {
+          actionBtn.disabled = false;
+          actionBtn.classList.remove('btn-disabled');
+
+          if (!res) {
+            document.getElementById('message').innerText = "伺服器未回傳有效狀態！";
+            return;
+          }
+
+          document.getElementById('message').innerText = res.msg || (res.success ? "成功" : "驗證失敗");
+
+          if (res.success) {
+            if (!isLoginMode) { 
+              setTimeout(toggleMode, 1500); 
+            } else { 
+              currentUser = String(res.account); 
+              localStorage.setItem('planit_user', currentUser); 
+              updateAvatarBadge();
+              document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
+              document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
+              fetchTasks();
+            }
+          }
+        },
+        (errMsg) => {
+          actionBtn.disabled = false;
+          actionBtn.classList.remove('btn-disabled');
+          document.getElementById('message').innerText = errMsg;
+        }
+      );
     }
 
     function logout() {
@@ -610,8 +668,11 @@
 
       callGASAPI({ action: 'forgotPassword', email: email }, (res) => {
         btn.innerText = "發送臨時密碼"; btn.disabled = false;
-        alert(res.msg);
+        alert(res.msg || "信件已發送");
         if (res.success) closeForgotPasswordModal();
+      }, (err) => {
+        btn.innerText = "發送臨時密碼"; btn.disabled = false;
+        alert(err);
       });
     }
 
@@ -621,7 +682,7 @@
       document.getElementById('p-email').innerText = "載入中...";
 
       callGASAPI({ action: 'getUserProfile', account: currentUser }, (res) => {
-        if (res.success) {
+        if (res && res.success && res.profile) {
           document.getElementById('p-email').innerText = res.profile.email;
           document.getElementById('p-created').innerText = res.profile.createdAt || "無紀錄";
           document.getElementById('p-login').innerText = res.profile.lastLoginAt || "無紀錄";
@@ -646,6 +707,7 @@
 
     function triggerDailyCheckin() {
       callGASAPI({ action: 'checkIn', account: currentUser }, (res) => {
+        if (!res) return;
         alert(res.msg);
         if (res.success) {
           document.getElementById('profile-streak-days').innerText = res.streak;
@@ -662,17 +724,13 @@
       if (!oldPwd || !newPwd) { alert("請完整填寫新舊密碼！"); return; }
 
       callGASAPI({ action: 'resetPassword', account: currentUser, oldPassword: oldPwd, newPassword: newPwd }, (res) => {
+        if (!res) return;
         alert(res.msg);
         if (res.success) {
           document.getElementById('reset-old-pwd').value = "";
           document.getElementById('reset-new-pwd').value = "";
         }
       });
-    }
-
-    function callGASAPI(payload, callback) {
-      fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(payload) })
-      .then(res => res.json()).then(data => callback(data)).catch(err => console.error(err));
     }
 
     document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
@@ -878,6 +936,9 @@
         } else {
           alert(res.msg || "AI 拆解失敗！");
         }
+      }, (err) => {
+        aiBtn.innerHTML = originalText; aiBtn.disabled = false;
+        alert(err);
       });
     }
 
@@ -890,7 +951,7 @@
     
     function closeTaskModal() { document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); }
     function openGuideModal() { document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active'); }
-    function closeGuideModal() { document.getElementById('guide-modal').classList.replace('view-active', 'view-hidden'); }
+    function closeGuideModal() { document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active'); }
 
     function confirmAddTask() {
       const input = document.getElementById('new-task-input');
@@ -912,7 +973,7 @@
       callGASAPI({ 
         action: 'addTask', account: currentUser, title: title, tag: tag, priority: pri, subTasks: JSON.stringify(subTasks), dueDate: dueDate 
       }, (res) => {
-        if(res.success) {
+        if(res && res.success) {
           res.task.w = autoWidth;
           allTasksData.push(res.task);
           renderCalendar();
@@ -997,7 +1058,7 @@
       allTasksData[taskIndex].priority = newPriority;
 
       callGASAPI({ 
-        action: 'updateTaskDetails', taskId: currentDetailTaskId, title: newTitle, dueDate: newDueDate, priority: newPriority
+        action: 'updateTaskDetails', taskId: currentDetailTaskId, title: newTitle, dueDate: newDueDate, priority: newPriority 
       }, () => {});
 
       alert("✨ 任務修改已儲存！");
@@ -1223,7 +1284,7 @@
         card.el.addEventListener('pointercancel', (e) => {
           clearTimeout(longPressTimer);
           if (draggingIndex !== -1) {
-            card.el.classList.remove('dragging');
+            card.el.classList.remove('dragging'); 
             try { card.el.releasePointerCapture(e.pointerId); } catch(err){}
             draggingIndex = -1;
             renderGrid();
