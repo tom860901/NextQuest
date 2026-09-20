@@ -34,10 +34,10 @@
     .view-active { display: block !important; }
 
     .window-shell, .modal-shell {
-      background: rgba(255, 255, 255, 0.35) !important; backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); 
+      background: rgba(255, 255, 255, 0.4) !important; backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); 
       border: 1px solid rgba(255, 255, 255, 0.8) !important; border-radius: var(--card-radius); padding: 26px; box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
     }
-    body.dark .window-shell, body.dark .modal-shell { background: rgba(18, 18, 26, 0.78) !important; border: 1px solid rgba(255, 255, 255, 0.12) !important; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255,255,255,0.02) !important; }
+    body.dark .window-shell, body.dark .modal-shell { background: rgba(18, 18, 26, 0.85) !important; border: 1px solid rgba(255, 255, 255, 0.14) !important; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255,255,255,0.02) !important; }
 
     .login-shell { width: 100%; max-width: 400px; margin: 80px auto; z-index: 2; position: relative; }
     
@@ -139,10 +139,20 @@
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
     body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
 
-    .modal-overlay { position: fixed; inset: 0; width: 100vw; height: 100vh; background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; z-index: 3000 !important; pointer-events: none; }
+    /* 彈窗樣式修復：保證不被 3D 傾角穿透，能穩定點擊 */
+    .modal-overlay { 
+      position: fixed; inset: 0; width: 100vw; height: 100vh; 
+      background: rgba(0, 0, 0, 0.28) !important; 
+      backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; 
+      z-index: 9000 !important; pointer-events: none; 
+    }
     .modal-overlay.view-active { display: grid !important; place-items: center !important; pointer-events: auto !important; }
     .modal-overlay.view-hidden { display: none !important; pointer-events: none !important; }
-    .modal-shell { max-width: 480px; width: 90%; margin: auto; padding: 28px; max-height: 85vh; overflow-y: auto; color: var(--text-hi); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.8) !important; }
+    .modal-shell { 
+      max-width: 480px; width: 90%; margin: auto; padding: 28px; max-height: 85vh; overflow-y: auto; 
+      color: var(--text-hi); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.8) !important; 
+      position: relative; z-index: 9001 !important; pointer-events: auto !important;
+    }
     body.dark .modal-shell { box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.15) !important; }
 
     .profile-info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
@@ -162,7 +172,7 @@
     .archive-item button { flex-shrink: 0; width: auto !important; padding: 6px 14px !important; font-size: 0.8rem !important; margin-top: 0 !important; }
     
     .guide-box { text-align: left; line-height: 1.6; font-size: 0.88rem; }
-    .guide-item { margin-bottom: 12px; padding: 12px 16px; background: rgba(255,255,255,0.35); border-radius: 16px; border: 1px solid rgba(255,255,255,0.5); }
+    .guide-item { margin-bottom: 12px; padding: 12px 16px; background: rgba(255,255,255,0.45); border-radius: 16px; border: 1px solid rgba(255,255,255,0.6); }
     body.dark .guide-item { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
     .version-tag { display: inline-block; padding: 3px 10px; border-radius: 12px; background: rgba(108, 92, 231, 0.15); color: #6C5CE7; font-weight: 700; font-size: 0.75rem; margin-left: 6px; }
   </style>
@@ -247,7 +257,7 @@
   </div>
 
   <!-- VIEW 3: 新增任務 Modal -->
-  <div id="task-modal" class="modal-overlay view-hidden">
+  <div id="task-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeTaskModal()">
     <div class="window-shell modal-shell">
       <h2 style="font-size: 1.25rem; margin-bottom: 16px; text-align: center;">✨ 新增目標任務</h2>
       
@@ -298,7 +308,7 @@
   </div>
 
   <!-- VIEW 4: 任務詳情與編輯 Modal -->
-  <div id="detail-modal" class="modal-overlay view-hidden">
+  <div id="detail-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeDetailModal()">
     <div class="window-shell modal-shell" style="text-align: center;">
       <div style="margin-bottom: 12px;">
         <input type="text" id="edit-task-title" style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.5); font-size: 1.1rem; font-weight: 700; text-align: center; color: var(--text-hi); outline: none;" placeholder="任務名稱">
@@ -328,7 +338,7 @@
   </div>
 
   <!-- VIEW 5: 忘記密碼 Modal -->
-  <div id="forgot-modal" class="modal-overlay view-hidden">
+  <div id="forgot-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeForgotPasswordModal()">
     <div class="window-shell modal-shell" style="text-align: center;">
       <h2 style="font-size: 1.25rem; margin-bottom: 12px;">🔑 忘記密碼</h2>
       <p style="font-size: 0.85rem; color: var(--text-mid); margin-bottom: 16px;">輸入註冊信箱，系統將寄送一組臨時密碼供登入。</p>
@@ -341,7 +351,7 @@
   </div>
 
   <!-- VIEW 6: 個人中心與簽到 Modal -->
-  <div id="profile-modal" class="modal-overlay view-hidden">
+  <div id="profile-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeProfileModal()">
     <div class="window-shell modal-shell">
       <h2 style="font-size: 1.25rem; margin-bottom: 14px; text-align: center;">👤 個人控制檔案</h2>
 
@@ -379,10 +389,10 @@
     </div>
   </div>
 
-  <!-- VIEW 7: 說明 Modal -->
-  <div id="guide-modal" class="modal-overlay view-hidden">
+  <!-- VIEW 7: 說明 Modal (修復：補回完整版本紀錄與點擊穿透問題) -->
+  <div id="guide-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeGuideModal()">
     <div class="window-shell modal-shell">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
         <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">💡 關於 Planit</h2>
         <span class="version-tag">v4.9 Stable</span>
       </div>
@@ -392,6 +402,7 @@
           <strong>🎯 核心精神</strong><br>
           融合子彈筆記、AI 拆解與 2.5D 控制中心的輕量敏捷任務協調工具。
         </div>
+
         <div class="guide-item">
           <strong>🏷️ 標籤定義</strong><br>
           • <strong>⚡️ 碎片 (&lt;15m)</strong>：15 分鐘瑣事。<br>
@@ -399,18 +410,28 @@
           • <strong>🔁 例行重複</strong>：藍線固定工作。<br>
           • <strong>☕️ 生活/社交</strong>：聚會與日常採購。
         </div>
+
         <div class="guide-item">
           <strong>📌 智慧排序規則</strong><br>
           任務卡片強制按「🔴 緊急 &gt; 🟡 一般 &gt; 🟢 輕鬆」順序排列，無指定日期項目自動作為「常駐項目」顯示於清單。
         </div>
+
+        <!-- 🎯 完整更新紀錄與修復說明 -->
+        <div class="guide-item" style="border-left: 3.5px solid #2A9D8F;">
+          <strong>🚀 最新版本更新亮點 (v4.9)</strong><br>
+          • <strong>純數字帳號防呆</strong>：完整支援純數字（如 1234）相容讀寫，防止自動轉型中斷。<br>
+          • <strong>隔日延期 (Rollover)</strong>：一鍵順延至明天，並自動升級為「🔴 緊急」紅框警示。<br>
+          • <strong>時區防偏差</strong>：強制鎖定 Asia/Taipei 台北標準時區，杜絕跨日換算倒退 1 天。<br>
+          • <strong>安全強型態</strong>：全站寫入強制前綴純文字格式，避免 Google Sheets 格式污染。
+        </div>
       </div>
 
-      <button class="btn-main btn-secondary" style="margin-top: 14px;" onclick="closeGuideModal()">關閉說明</button>
+      <button type="button" class="btn-main btn-secondary" style="margin-top: 14px;" onclick="closeGuideModal()">關閉說明</button>
     </div>
   </div>
 
   <!-- VIEW 8: 刪除確認 Modal -->
-  <div id="delete-modal" class="modal-overlay view-hidden">
+  <div id="delete-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeDeleteModal()">
     <div class="window-shell modal-shell" style="text-align: center;">
       <h2 style="font-size: 1.25rem; margin-bottom: 16px;">⚠️ 刪除確認</h2>
       <p style="color: var(--text-mid); margin-bottom: 24px; font-size: 0.95rem;">確定移除此任務嗎？</p>
@@ -422,7 +443,7 @@
   </div>
 
   <!-- VIEW 9: 📁 已完成區 Modal -->
-  <div id="archive-modal" class="modal-overlay view-hidden">
+  <div id="archive-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeArchiveModal()">
     <div class="window-shell modal-shell" style="text-align: center;">
       <h2 style="font-size: 1.25rem; margin-bottom: 16px;">📁 已完成任務完成區</h2>
       <p style="color: var(--text-mid); margin-bottom: 16px; font-size: 0.85rem;">這裡存放所有已結案的成就！</p>
@@ -434,7 +455,6 @@
   </div>
 
   <script>
-    // 💡 請確保此 URL 為最新版 GAS 部署網址（設定為：所有人 Anyone 均可存取）
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw9130xk5gFZxkrtpIR-YQSClZaqW3IH0JxU-Ka4fRKsdaq9FFZZzxIEgvVBExnxXTVOQ/exec"; 
     const GOOGLE_CLIENT_ID = "867237692766-9o2nhlnrqlq00k75apvsbvl2r2u1jsqi.apps.googleusercontent.com";
     
@@ -518,10 +538,10 @@
       }, 200);
     }
 
-    // 🎯 核心強化：API 請求發送器（含超時防卡死機制與純文字傳輸）
+    // 🎯 核心連線工具：防卡死超時攔截機制
     function callGASAPI(payload, callback, onError) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 秒連線超時防護
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
 
       fetch(GAS_API_URL, {
         method: 'POST',
@@ -585,7 +605,6 @@
       document.getElementById('message').innerText = ''; 
     }
 
-    // 🎯 核心修復：登入與註冊提交
     function submitManualForm() {
       const acc = document.getElementById('account').value.trim(); 
       const pwd = document.getElementById('password').value.trim();
@@ -950,8 +969,14 @@
     }
     
     function closeTaskModal() { document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); }
-    function openGuideModal() { document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active'); }
-    function closeGuideModal() { document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active'); }
+    
+    // 說明彈窗開關
+    function openGuideModal() { 
+      document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active'); 
+    }
+    function closeGuideModal() { 
+      document.getElementById('guide-modal').classList.replace('view-active', 'view-hidden'); 
+    }
 
     function confirmAddTask() {
       const input = document.getElementById('new-task-input');
