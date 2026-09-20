@@ -12,7 +12,8 @@
     html { min-height: 100vh; background: #FDF9FC; }
     body { 
       min-height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-      background: transparent !important; color: var(--text-hi); overflow-y: auto; position: relative; padding: 40px 16px; perspective: 1600px;
+      background: transparent !important; color: var(--text-hi); overflow-y: auto; position: relative; padding: 40px 16px;
+      perspective: 1600px;
     }
 
     .sky-container { position: fixed; inset: 0; width: 100vw; height: 100vh; overflow: hidden; z-index: 0; pointer-events: none; }
@@ -139,21 +140,44 @@
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
     body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
 
-    /* 彈窗樣式加固：確保點擊層級最高，不被背景 3D 傾角穿透 */
+    /* 🎯 核心修復：徹底解決 3D 穿透與點擊失效的 Modal 樣式 */
     .modal-overlay { 
-      position: fixed; inset: 0; width: 100vw; height: 100vh; 
-      background: rgba(0, 0, 0, 0.28) !important; 
-      backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; 
-      z-index: 9000 !important; pointer-events: none; 
+      position: fixed !important; 
+      inset: 0 !important; 
+      width: 100vw !important; 
+      height: 100vh !important; 
+      background: rgba(10, 10, 20, 0.45) !important; 
+      backdrop-filter: blur(14px) !important; 
+      -webkit-backdrop-filter: blur(14px) !important; 
+      z-index: 99999 !important; 
+      transform: translateZ(9999px) !important; /* 確保在 3D 視差座標系永遠處於最頂層 */
+      isolation: isolate;
     }
-    .modal-overlay.view-active { display: grid !important; place-items: center !important; pointer-events: auto !important; }
-    .modal-overlay.view-hidden { display: none !important; pointer-events: none !important; }
+    .modal-overlay.view-active { 
+      display: grid !important; 
+      place-items: center !important; 
+      pointer-events: auto !important; 
+      cursor: pointer; /* 點擊暗底時顯示可點擊指標 */
+    }
+    .modal-overlay.view-hidden { 
+      display: none !important; 
+      pointer-events: none !important; 
+    }
     .modal-shell { 
       max-width: 480px; width: 90%; margin: auto; padding: 28px; max-height: 85vh; overflow-y: auto; 
-      color: var(--text-hi); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.8) !important; 
-      position: relative; z-index: 9001 !important; pointer-events: auto !important;
+      color: var(--text-hi); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.8) !important; 
+      position: relative; z-index: 100000 !important; pointer-events: auto !important; cursor: default;
     }
     body.dark .modal-shell { box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.15) !important; }
+
+    .modal-close-corner-btn {
+      position: absolute; top: 18px; right: 18px; width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.4); color: var(--text-hi);
+      font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; z-index: 100001;
+    }
+    .modal-close-corner-btn:hover { background: rgba(255,255,255,0.8); transform: scale(1.08); }
+    body.dark .modal-close-corner-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #F1F0F7; }
 
     .profile-info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
     body.dark .profile-info-row { border-color: rgba(255,255,255,0.08); }
@@ -229,7 +253,7 @@
 
       <div class="calendar-container">
         <div class="cal-header">
-          <div style="display: flex; gap: 4px;">
+          <div style="display: gap: 4px;">
             <button class="bubble-menu-btn" onclick="changeMonth(-1)">◀</button>
             <button class="bubble-menu-btn" onclick="jumpToToday()">今天</button>
             <button class="bubble-menu-btn" onclick="changeMonth(1)">▶</button>
@@ -257,8 +281,9 @@
   </div>
 
   <!-- VIEW 3: 新增任務 Modal -->
-  <div id="task-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeTaskModal()">
+  <div id="task-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'task-modal')">
     <div class="window-shell modal-shell">
+      <button class="modal-close-corner-btn" onclick="closeTaskModal()" title="關閉">✕</button>
       <h2 style="font-size: 1.25rem; margin-bottom: 16px; text-align: center;">✨ 新增目標任務</h2>
       
       <div class="selector-group">
@@ -308,8 +333,9 @@
   </div>
 
   <!-- VIEW 4: 任務詳情與編輯 Modal -->
-  <div id="detail-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeDetailModal()">
+  <div id="detail-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'detail-modal')">
     <div class="window-shell modal-shell" style="text-align: center;">
+      <button class="modal-close-corner-btn" onclick="closeDetailModal()" title="關閉">✕</button>
       <div style="margin-bottom: 12px;">
         <input type="text" id="edit-task-title" style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.5); font-size: 1.1rem; font-weight: 700; text-align: center; color: var(--text-hi); outline: none;" placeholder="任務名稱">
       </div>
@@ -338,8 +364,9 @@
   </div>
 
   <!-- VIEW 5: 忘記密碼 Modal -->
-  <div id="forgot-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeForgotPasswordModal()">
+  <div id="forgot-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'forgot-modal')">
     <div class="window-shell modal-shell" style="text-align: center;">
+      <button class="modal-close-corner-btn" onclick="closeForgotPasswordModal()" title="關閉">✕</button>
       <h2 style="font-size: 1.25rem; margin-bottom: 12px;">🔑 忘記密碼</h2>
       <p style="font-size: 0.85rem; color: var(--text-mid); margin-bottom: 16px;">輸入註冊信箱，系統將寄送一組臨時密碼供登入。</p>
       <div class="input-group">
@@ -351,8 +378,9 @@
   </div>
 
   <!-- VIEW 6: 個人中心與簽到 Modal -->
-  <div id="profile-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeProfileModal()">
+  <div id="profile-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'profile-modal')">
     <div class="window-shell modal-shell">
+      <button class="modal-close-corner-btn" onclick="closeProfileModal()" title="關閉">✕</button>
       <h2 style="font-size: 1.25rem; margin-bottom: 14px; text-align: center;">👤 個人控制檔案</h2>
 
       <div class="streak-banner" id="profile-streak-box">
@@ -389,10 +417,12 @@
     </div>
   </div>
 
-  <!-- VIEW 7: 說明 Modal -->
-  <div id="guide-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeGuideModal()">
+  <!-- VIEW 7: 說明 Modal (🎯 核心防穿透修復) -->
+  <div id="guide-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'guide-modal')">
     <div class="window-shell modal-shell">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <button class="modal-close-corner-btn" onclick="closeGuideModal()" title="關閉說明">✕</button>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-right: 36px;">
         <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">💡 關於 Planit</h2>
         <span class="version-tag">v4.9 Stable</span>
       </div>
@@ -425,12 +455,12 @@
         </div>
       </div>
 
-      <button type="button" class="btn-main btn-secondary" style="margin-top: 14px;" onclick="closeGuideModal()">關閉說明</button>
+      <button id="guide-modal-close-btn" type="button" class="btn-main btn-secondary" style="margin-top: 14px; position: relative; z-index: 100002;" onclick="closeGuideModal()">關閉說明</button>
     </div>
   </div>
 
   <!-- VIEW 8: 刪除確認 Modal -->
-  <div id="delete-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeDeleteModal()">
+  <div id="delete-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'delete-modal')">
     <div class="window-shell modal-shell" style="text-align: center;">
       <h2 style="font-size: 1.25rem; margin-bottom: 16px;">⚠️ 刪除確認</h2>
       <p style="color: var(--text-mid); margin-bottom: 24px; font-size: 0.95rem;">確定移除此任務嗎？</p>
@@ -442,8 +472,9 @@
   </div>
 
   <!-- VIEW 9: 📁 已完成區 Modal -->
-  <div id="archive-modal" class="modal-overlay view-hidden" onclick="if(event.target===this) closeArchiveModal()">
+  <div id="archive-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'archive-modal')">
     <div class="window-shell modal-shell" style="text-align: center;">
+      <button class="modal-close-corner-btn" onclick="closeArchiveModal()" title="關閉">✕</button>
       <h2 style="font-size: 1.25rem; margin-bottom: 16px;">📁 已完成任務完成區</h2>
       <p style="color: var(--text-mid); margin-bottom: 16px; font-size: 0.85rem;">這裡存放所有已結案的成就！</p>
       <div id="archive-list" style="max-height: 300px; overflow-y: auto; text-align: left; margin-bottom: 18px;">
@@ -475,6 +506,27 @@
       const day = String(dateObj.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     }
+
+    // 🎯 通用點擊遮罩外圍關閉邏輯
+    function handleModalOverlayClick(e, modalId) {
+      if (e.target.id === modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          modal.classList.remove('view-active');
+          modal.classList.add('view-hidden');
+        }
+      }
+    }
+
+    // 🎯 鍵盤 Esc 鍵一鍵關閉所有開啟的彈窗
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.view-active').forEach(m => {
+          m.classList.remove('view-active');
+          m.classList.add('view-hidden');
+        });
+      }
+    });
 
     window.onload = function () {
       initGoogleAuth();
@@ -510,6 +562,9 @@
 
     function initGlobalTilt() {
       document.addEventListener('mousemove', (e) => {
+        // 若有任何彈窗開啟中，自動暫停 3D tilt，避免圖層偏移干擾滑鼠點擊
+        if (document.querySelector('.modal-overlay.view-active')) return;
+
         const activeView = document.getElementById('dashboard-view');
         if (!activeView || !activeView.classList.contains('view-active')) return;
         const xOffset = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
@@ -537,7 +592,6 @@
       }, 200);
     }
 
-    // 🎯 核心連線工具：防卡死超時攔截機制
     function callGASAPI(payload, callback, onError) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -672,11 +726,13 @@
     }
 
     function openForgotPasswordModal() {
-      document.getElementById('forgot-modal').classList.replace('view-hidden', 'view-active');
+      const m = document.getElementById('forgot-modal');
+      m.classList.remove('view-hidden'); m.classList.add('view-active');
       document.getElementById('forgot-email-input').value = "";
     }
     function closeForgotPasswordModal() {
-      document.getElementById('forgot-modal').classList.replace('view-active', 'view-hidden');
+      const m = document.getElementById('forgot-modal');
+      m.classList.remove('view-active'); m.classList.add('view-hidden');
     }
     function submitForgotPassword() {
       const email = document.getElementById('forgot-email-input').value.trim();
@@ -695,7 +751,8 @@
     }
 
     function openProfileModal() {
-      document.getElementById('profile-modal').classList.replace('view-hidden', 'view-active');
+      const m = document.getElementById('profile-modal');
+      m.classList.remove('view-hidden'); m.classList.add('view-active');
       document.getElementById('p-acc').innerText = currentUser;
       document.getElementById('p-email').innerText = "載入中...";
 
@@ -720,7 +777,8 @@
     }
 
     function closeProfileModal() {
-      document.getElementById('profile-modal').classList.replace('view-hidden', 'view-active');
+      const m = document.getElementById('profile-modal');
+      m.classList.remove('view-active'); m.classList.add('view-hidden');
     }
 
     function triggerDailyCheckin() {
@@ -891,7 +949,6 @@
          let progress = total === 0 ? 0 : Math.round((done / total) * 100);
 
          const card = document.createElement('div');
-         // 🎯 判斷緊急狀態：只要優先度為「🔴 緊急」或過期，立即套用 urgent-glow 紅框呼吸發光動效
          let isUrgent = task.priority === '🔴 緊急' || (task.dueDate && task.dueDate <= todayStr);
          let isRoutine = task.tag && task.tag.includes('例行重複');
 
@@ -962,15 +1019,34 @@
     }
 
     function openTaskModal() { 
-      document.getElementById('task-modal').classList.replace('view-hidden', 'view-active'); 
+      const m = document.getElementById('task-modal');
+      m.classList.remove('view-hidden'); m.classList.add('view-active');
       document.getElementById('manual-subtasks-container').innerHTML = ''; 
       document.getElementById('new-task-input').value = "";
       document.getElementById('new-task-duedate').value = getLocalDateString();
     }
     
-    function closeTaskModal() { document.getElementById('task-modal').classList.replace('view-active', 'view-hidden'); }
-    function openGuideModal() { document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active'); }
-    function closeGuideModal() { document.getElementById('guide-modal').classList.replace('view-hidden', 'view-active'); }
+    function closeTaskModal() { 
+      const m = document.getElementById('task-modal');
+      m.classList.remove('view-active'); m.classList.add('view-hidden');
+    }
+    
+    // 🎯 說明 Modal 開關（保證即時關閉並復原視差）
+    function openGuideModal() { 
+      const m = document.getElementById('guide-modal');
+      m.classList.remove('view-hidden');
+      m.classList.add('view-active');
+      const dash = document.getElementById('dashboard-view');
+      if (dash) dash.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    }
+
+    function closeGuideModal() { 
+      const m = document.getElementById('guide-modal');
+      if (m) {
+        m.classList.remove('view-active');
+        m.classList.add('view-hidden');
+      }
+    }
 
     function confirmAddTask() {
       const input = document.getElementById('new-task-input');
@@ -1024,7 +1100,8 @@
       }
       
       updateCompleteButtonState(subTasksArr);
-      document.getElementById('detail-modal').classList.replace('view-hidden', 'view-active');
+      const m = document.getElementById('detail-modal');
+      m.classList.remove('view-hidden'); m.classList.add('view-active');
     }
 
     function renderChecklist(subTasksArr) {
@@ -1085,7 +1162,8 @@
     }
 
     function closeDetailModal() {
-      document.getElementById('detail-modal').classList.replace('view-active', 'view-hidden');
+      const m = document.getElementById('detail-modal');
+      m.classList.remove('view-active'); m.classList.add('view-hidden');
       currentDetailTaskId = null;
       renderCalendar();
       renderUpcomingPanel();
@@ -1110,7 +1188,6 @@
       closeDetailModal();
     }
 
-    // 🎯 核心修復：真正的「該任務原有截止日期 + 1 天」延期邏輯
     function rolloverTaskToTomorrow() {
       if(!currentDetailTaskId) return;
       const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
@@ -1119,7 +1196,6 @@
       const currentTask = allTasksData[taskIndex];
       let nextDateStr = "";
 
-      // 1. 若任務本身有日期 (YYYY-MM-DD)，以該日期精準加 1 天
       if (currentTask.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(currentTask.dueDate)) {
         const parts = currentTask.dueDate.split('-');
         const y = parseInt(parts[0], 10);
@@ -1129,23 +1205,19 @@
         const nextDate = new Date(y, m, d + 1);
         nextDateStr = getLocalDateString(nextDate);
       } else {
-        // 若為常駐無日期任務，順延為今天 + 1 天
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         nextDateStr = getLocalDateString(tomorrow);
       }
 
-      // 2. 本地狀態即時更新：日期變更、強制升級為「🔴 緊急」
       allTasksData[taskIndex].dueDate = nextDateStr;
       allTasksData[taskIndex].priority = '🔴 緊急';
 
-      // 3. 立即關閉視窗並重新渲染畫面（卡片立即跳出呼吸紅光與上方紅邊）
       closeDetailModal();
       renderCalendar();
       renderUpcomingPanel();
       renderTasks();
 
-      // 4. 背景非同步同步至 Google Sheets
       callGASAPI({ 
         action: 'rolloverTask', 
         taskId: currentDetailTaskId, 
@@ -1177,10 +1249,14 @@
           archiveList.appendChild(item);
         });
       }
-      document.getElementById('archive-modal').classList.replace('view-hidden', 'view-active');
+      const m = document.getElementById('archive-modal');
+      m.classList.remove('view-hidden'); m.classList.add('view-active');
     }
 
-    function closeArchiveModal() { document.getElementById('archive-modal').classList.replace('view-active', 'view-hidden'); }
+    function closeArchiveModal() { 
+      const m = document.getElementById('archive-modal');
+      m.classList.remove('view-active'); m.classList.add('view-hidden');
+    }
 
     function restoreTask(taskId) {
       const taskIndex = allTasksData.findIndex(t => t.id === taskId);
@@ -1196,9 +1272,14 @@
     function openDeleteModal(taskId) {
       if (navigator.vibrate) navigator.vibrate(50);
       targetElementToDelete = taskId;
-      document.getElementById('delete-modal').classList.replace('view-hidden', 'view-active');
+      const m = document.getElementById('delete-modal');
+      m.classList.remove('view-hidden'); m.classList.add('view-active');
     }
-    function closeDeleteModal() { document.getElementById('delete-modal').classList.replace('view-active', 'view-hidden'); targetElementToDelete = null; }
+    function closeDeleteModal() { 
+      const m = document.getElementById('delete-modal');
+      m.classList.remove('view-active'); m.classList.add('view-hidden');
+      targetElementToDelete = null; 
+    }
     
     function confirmDeleteTask() {
       if (!targetElementToDelete) return;
