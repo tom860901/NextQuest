@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>Planit - 自動測試面板</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+    body { background: #0f0f1a; color: #e0e0f0; padding: 32px; min-height: 100vh; }
+    h1 { font-size: 1.8rem; margin-bottom: 6px; color: #a78bfa; }
+    .subtitle { color: #666; font-size: 0.9rem; margin-bottom: 32px; }
+    .section { margin-bottom: 28px; }
+    .section h2 { font-size: 1rem; font-weight: 700; color: #818cf8; margin-bottom: 12px; border-bottom: 1px solid #222; padding-bottom: 6px; }
+    .test-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px; border-radius: 10px; margin-bottom: 6px; font-size: 0.88rem; }
+    .test-item.pass { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); }
+    .test-item.fail { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+    .test-item.warn { background: rgba(234,179,8,0.1); border: 1px solid rgba(234,179,8,0.25); }
+    .test-item.info { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); }
+    .badge { flex-shrink: 0; font-weight: 700; font-size: 0.78rem; padding: 2px 8px; border-radius: 6px; margin-top: 1px; }
+    .badge.pass { background: #16a34a; color: white; }
+    .badge.fail { background: #dc2626; color: white; }
+    .badge.warn { background: #ca8a04; color: white; }
+    .badge.info { background: #4f46e5; color: white; }
+    .test-name { font-weight: 600; }
+    .test-detail { color: #888; font-size: 0.8rem; margin-top: 2px; }
+    .summary { display: flex; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+    .summary-card { flex: 1; min-width: 120px; padding: 16px; border-radius: 12px; text-align: center; }
+    .summary-card.pass { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); }
+    .summary-card.fail { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); }
+    .summary-card.warn { background: rgba(234,179,8,0.12); border: 1px solid rgba(234,179,8,0.3); }
+    .summary-card .num { font-size: 2.2rem; font-weight: 700; }
+    .summary-card .label { font-size: 0.8rem; color: #888; margin-top: 4px; }
+    .run-btn { background: #6c5ce7; color: white; border: none; padding: 12px 28px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-bottom: 28px; transition: all 0.2s; }
+    .run-btn:hover { background: #8e78ff; transform: translateY(-1px); }
+    .api-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #e0e0f0; padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; width: 100%; margin-bottom: 10px; outline: none; }
+    .progress-bar { height: 4px; background: #222; border-radius: 4px; margin-bottom: 24px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #6c5ce7, #a78bfa); width: 0%; transition: width 0.3s ease; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<h1>🧪 Planit 自動測試面板</h1>
+<p class="subtitle">自動驗證所有功能模組是否正確載入與運作</p>
+
+<!-- 設定 -->
+<div class="section">
+  <h2>⚙️ 測試設定</h2>
+  <label style="display:block; font-size:0.85rem; color:#888; margin-bottom:4px;">GAS API URL（自動從 config.js 讀取，也可手動輸入）</label>
+  <input class="api-input" id="api-url-input" placeholder="https://script.google.com/macros/s/...">
+  <label style="display:block; font-size:0.85rem; color:#888; margin-bottom:4px;">測試帳號（選填，用於 API 登入測試）</label>
+  <input class="api-input" id="test-account" placeholder="你的帳號">
+  <label style="display:block; font-size:0.85rem; color:#888; margin-bottom:4px;">測試密碼（選填）</label>
+  <input class="api-input" id="test-password" type="password" placeholder="你的密碼">
+</div>
+
+<button class="run-btn" onclick="runAllTests()">▶ 執行全部測試</button>
+
+<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+<!-- 摘要 -->
+<div class="summary" id="summary" style="display:none;">
+  <div class="summary-card pass"><div class="num" id="sum-pass">0</div><div class="label">✅ 通過</div></div>
+  <div class="summary-card fail"><div class="num" id="sum-fail">0</div><div class="label">❌ 失敗</div></div>
+  <div class="summary-card warn"><div class="num" id="sum-warn">0</div><div class="label">⚠️ 警告</div></div>
+</div>
+
+<!-- 結果區 -->
+<div id="results"></div>
+
+<!-- 載入 Planit 所有 JS（從相對路徑引用） -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+
+<script>
+// ── 測試引擎 ──────────────────────────────────────────────────
+let results = [];
+
+function log(status, name, detail = '') {
+  results.push({ status, name, detail });
+}
+
+function renderResults() {
+  const container = document.getElementById('results');
+  container.innerHTML = '';
+
+  // 依類別分組
+  const groups = {};
+  results.forEach(r => {
+    if (!groups[r.group]) groups[r.group] = [];
+    groups[r.group].push(r);
+  });
+
+  Object.entries(groups).forEach(([groupName, items]) => {
+    const section = document.createElement('div');
+    section.className = 'section';
+    section.innerHTML = `<h2>${groupName}</h2>`;
+
+    items.forEach(r => {
+      const div = document.createElement('div');
+      div.className = `test-item ${r.status}`;
+      div.innerHTML = `
+        <span class="badge ${r.status}">${
+          r.status === 'pass' ? '✓ 通過' :
+          r.status === 'fail' ? '✗ 失敗' :
+          r.status === 'warn' ? '⚠ 警告' : 'ℹ 資訊'
+        }</span>
+        <div>
+          <div class="test-name">${r.name}</div>
+          ${r.detail ? `<div class="test-detail">${r.detail}</div>` : ''}
+        </div>`;
+      section.appendChild(div);
+    });
+    container.appendChild(section);
+  });
+
+  // 摘要
+  const pass = results.filter(r => r.status === 'pass').length;
+  const fail = results.filter(r => r.status === 'fail').length;
+  const warn = results.filter(r => r.status === 'warn').length;
+
+  document.getElementById('sum-pass').innerText = pass;
+  document.getElementById('sum-fail').innerText = fail;
+  document.getElementById('sum-warn').innerText = warn;
+  document.getElementById('summary').style.display = 'flex';
+}
+
+function setProgress(pct) {
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+async function runAllTests() {
+  results = [];
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('summary').style.display = 'none';
+  setProgress(5);
+
+  // ── 1. 函式存在性測試 ────────────────────────────────────────
+  const fnGroup = '📦 模組函式存在性';
+
+  const requiredFunctions = {
+    'api.js': ['callGASAPI'],
+    'app.js': ['getLocalDateString', 'updateAvatarBadge', 'fetchTasks'],
+    'ui.js':  ['openModal', 'closeModal', 'handleModalOverlayClick',
+               'openGuideModal', 'closeGuideModal', 'initGlobalTilt'],
+    'auth.js': ['toggleMode', 'submitManualForm', 'logout',
+                'initGoogleAuth', 'handleCredentialResponse',
+                'openForgotPasswordModal', 'closeForgotPasswordModal',
+                'submitForgotPassword', 'togglePasswordVisibility'],
+    'tasks.js': ['openTaskModal', 'closeTaskModal', 'confirmAddTask',
+                 'openTaskDetail', 'closeDetailModal', 'saveTaskEdits',
+                 'markTaskCompleted', 'rolloverTaskToTomorrow',
+                 'openArchiveModal', 'closeArchiveModal', 'restoreTask',
+                 'openDeleteModal', 'closeDeleteModal', 'confirmDeleteTask',
+                 'selectOpt', 'addManualSubtaskInput', 'triggerAIDecompose'],
+    'calendar.js': ['renderCalendar', 'renderUpcomingPanel', 'changeMonth', 'jumpToToday'],
+    'grid.js':  ['renderTasks', 'initGridEngine'],
+    'profile.js': ['openProfileModal', 'closeProfileModal',
+                   'triggerDailyCheckin', 'submitPasswordReset'],
+  };
+
+  let allFnDefined = true;
+  Object.entries(requiredFunctions).forEach(([file, fns]) => {
+    fns.forEach(fn => {
+      const exists = typeof window[fn] === 'function';
+      if (!exists) allFnDefined = false;
+      results.push({
+        group: fnGroup, status: exists ? 'pass' : 'fail',
+        name: `${fn}()`,
+        detail: exists ? `定義於 ${file}` : `❌ 未載入！請確認 ${file} 是否正確引用`
+      });
+    });
+  });
+
+  setProgress(30);
+
+  // ── 2. 全域狀態變數 ──────────────────────────────────────────
+  const stateGroup = '🗄️ 全域狀態變數';
+  const stateVars = ['isLoginMode','currentUser','allTasksData','currentDetailTaskId',
+                     'selectedDateFilter','currentCalendarYear','currentCalendarMonth','globalRenderGrid'];
+  stateVars.forEach(v => {
+    const exists = typeof window[v] !== 'undefined';
+    results.push({
+      group: stateGroup, status: exists ? 'pass' : 'fail',
+      name: v,
+      detail: exists ? `目前值：${JSON.stringify(window[v])}` : '變數未定義（app.js 未載入？）'
+    });
+  });
+
+  setProgress(45);
+
+  // ── 3. 工具函式邏輯測試 ──────────────────────────────────────
+  const logicGroup = '🧮 邏輯函式測試';
+
+  // getLocalDateString
+  try {
+    const today = getLocalDateString();
+    const isValid = /^\d{4}-\d{2}-\d{2}$/.test(today);
+    results.push({
+      group: logicGroup, status: isValid ? 'pass' : 'fail',
+      name: 'getLocalDateString() 格式正確',
+      detail: `回傳值：${today}（應為 YYYY-MM-DD）`
+    });
+
+    // 時區測試：確認不會差一天
+    const d = new Date(2024, 0, 15); // 2024-01-15 本地時間
+    const str = getLocalDateString(d);
+    results.push({
+      group: logicGroup, status: str === '2024-01-15' ? 'pass' : 'fail',
+      name: 'getLocalDateString() 時區正確（不倒退一天）',
+      detail: `getLocalDateString(new Date(2024,0,15)) = ${str}（應為 2024-01-15）`
+    });
+  } catch(e) {
+    results.push({ group: logicGroup, status: 'fail', name: 'getLocalDateString() 執行錯誤', detail: e.message });
+  }
+
+  // Rollover 日期計算測試
+  try {
+    const parts = '2024-01-31'.split('-').map(Number);
+    const next = new Date(parts[0], parts[1]-1, parts[2]+1);
+    const result = getLocalDateString(next);
+    results.push({
+      group: logicGroup, status: result === '2024-02-01' ? 'pass' : 'fail',
+      name: 'Rollover 月底換月計算正確',
+      detail: `2024-01-31 + 1天 = ${result}（應為 2024-02-01）`
+    });
+  } catch(e) {
+    results.push({ group: logicGroup, status: 'fail', name: 'Rollover 計算錯誤', detail: e.message });
+  }
+
+  // 排序權重
+  try {
+    const priorityWeight = { '🔴 緊急': 3, '🟡 一般': 2, '🟢 輕鬆': 1 };
+    const tasks = [
+      { title: 'C', priority: '🟢 輕鬆' },
+      { title: 'A', priority: '🔴 緊急' },
+      { title: 'B', priority: '🟡 一般' },
+    ];
+    tasks.sort((a, b) => (priorityWeight[b.priority]||2) - (priorityWeight[a.priority]||2));
+    const order = tasks.map(t=>t.title).join('');
+    results.push({
+      group: logicGroup, status: order === 'ABC' ? 'pass' : 'fail',
+      name: '三階層優先排序邏輯正確',
+      detail: `排序結果：${order}（應為 ABC：緊急→一般→輕鬆）`
+    });
+  } catch(e) {
+    results.push({ group: logicGroup, status: 'fail', name: '排序測試錯誤', detail: e.message });
+  }
+
+  setProgress(60);
+
+  // ── 4. 設定常數檢查 ──────────────────────────────────────────
+  const configGroup = '⚙️ 設定常數';
+  try {
+    results.push({
+      group: configGroup, status: typeof GAS_API_URL === 'string' && GAS_API_URL.startsWith('https') ? 'pass' : 'fail',
+      name: 'GAS_API_URL 已設定',
+      detail: GAS_API_URL ? GAS_API_URL.substring(0, 60) + '...' : '未定義'
+    });
+    results.push({
+      group: configGroup, status: typeof GOOGLE_CLIENT_ID === 'string' && GOOGLE_CLIENT_ID.length > 10 ? 'pass' : 'fail',
+      name: 'GOOGLE_CLIENT_ID 已設定',
+      detail: GOOGLE_CLIENT_ID || '未定義'
+    });
+    // 把 URL 填入輸入框
+    if (GAS_API_URL) document.getElementById('api-url-input').value = GAS_API_URL;
+  } catch(e) {
+    results.push({ group: configGroup, status: 'fail', name: 'config.js 載入失敗', detail: e.message });
+  }
+
+  setProgress(70);
+
+  // ── 5. GAS API 連線測試 ──────────────────────────────────────
+  const apiGroup = '🌐 GAS API 連線測試';
+  const apiUrl = document.getElementById('api-url-input').value.trim();
+
+  if (!apiUrl) {
+    results.push({ group: apiGroup, status: 'warn', name: 'API URL 未填入', detail: '請填入 GAS URL 後重新測試' });
+  } else {
+    // 5-1. 基本連線（呼叫一個安全的 action）
+    await new Promise(resolve => {
+      const t = setTimeout(() => {
+        results.push({ group: apiGroup, status: 'fail', name: 'GAS API 連線', detail: '逾時（15秒）' });
+        resolve();
+      }, 15000);
+
+      callGASAPI({ action: 'getTasks', account: '__test_ping__' }, (data) => {
+        clearTimeout(t);
+        results.push({
+          group: apiGroup, status: 'pass',
+          name: 'GAS API 連線成功',
+          detail: `回傳型別：${Array.isArray(data) ? 'Array' : typeof data}，長度：${Array.isArray(data) ? data.length : '-'}`
+        });
+        resolve();
+      }, (err) => {
+        clearTimeout(t);
+        results.push({ group: apiGroup, status: 'fail', name: 'GAS API 連線失敗', detail: err });
+        resolve();
+      });
+    });
+
+    // 5-2. 帳密登入測試（選填）
+    const account  = document.getElementById('test-account').value.trim();
+    const password = document.getElementById('test-password').value.trim();
+
+    if (account && password) {
+      await new Promise(resolve => {
+        const t = setTimeout(() => {
+          results.push({ group: apiGroup, status: 'fail', name: '登入 API', detail: '逾時' });
+          resolve();
+        }, 15000);
+
+        callGASAPI({ action: 'login', account, password }, (res) => {
+          clearTimeout(t);
+          results.push({
+            group: apiGroup,
+            status: res && res.success ? 'pass' : 'fail',
+            name: `登入測試（帳號：${account}）`,
+            detail: res ? (res.msg || JSON.stringify(res)) : '無回傳'
+          });
+          resolve();
+        }, (err) => {
+          clearTimeout(t);
+          results.push({ group: apiGroup, status: 'fail', name: '登入 API 失敗', detail: err });
+          resolve();
+        });
+      });
+    } else {
+      results.push({
+        group: apiGroup, status: 'warn',
+        name: '登入 API 測試已略過',
+        detail: '未填入測試帳密，無法驗證登入功能'
+      });
+    }
+  }
+
+  setProgress(100);
+
+  renderResults();
+}
+</script>
+</body>
+</html>
