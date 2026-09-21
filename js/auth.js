@@ -172,6 +172,7 @@ async function submitManualForm() {
         actionBtn.classList.remove('btn-disabled');
         document.getElementById('message').innerText = errMsg;
       }
+    );
   }
 }
 
