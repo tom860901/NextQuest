@@ -6,10 +6,10 @@
 :root { --text-hi: #2B213A; --text-mid: #7D738A; --card-radius: 26px; }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 
-html { min-height: 100vh; background: #FDF9FC; }
+html { min-height: 100vh; background: #FDF9FC; overflow-y: scroll; scrollbar-gutter: stable; }
 body {
   min-height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-  background: transparent !important; color: var(--text-hi); overflow-y: auto; position: relative; padding: 40px 16px;
+  background: transparent !important; color: var(--text-hi); position: relative; padding: 40px 16px;
 }
 
 /* ── 背景雲霧 ── */
@@ -49,7 +49,7 @@ body.dark .window-shell, body.dark .modal-shell {
 .login-shell { width:100%; max-width:400px; margin:80px auto; z-index:2; position:relative; }
 
 /* ── Dashboard Grid ── */
-#dashboard-view { position:relative; z-index:2; }
+#dashboard-view { position:relative; z-index:2; transform-style: preserve-3d; transition: transform 0.12s ease-out; }
 #dashboard-view.view-active {
   display: grid !important; grid-template-columns: minmax(0,1fr) 280px !important;
   gap: 24px !important; align-items: start !important; width:100%; max-width:1060px !important; margin:0 auto !important;

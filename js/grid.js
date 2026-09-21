@@ -47,11 +47,17 @@ function renderTasks() {
     const isUrgent  = task.priority === '🔴 緊急' || (task.dueDate && task.dueDate <= todayStr);
     const isRoutine = task.tag && task.tag.includes('例行重複');
 
+    // 嚴格防呆：確保寬高只能為 1~3，避免歷史錯位資料將 2026 等日期當成卡片高度導致網頁爆炸
+    let safeW = parseInt(task.w);
+    if (isNaN(safeW) || safeW < 1 || safeW > 3) safeW = 1;
+    let safeH = parseInt(task.h);
+    if (isNaN(safeH) || safeH < 1 || safeH > 3) safeH = 1;
+
     const card = document.createElement('div');
     card.className = `widget-card ${isUrgent ? 'urgent-glow' : ''} ${isRoutine ? 'routine-card' : ''}`;
     card.setAttribute('data-id',  task.id);
-    card.setAttribute('data-w',   task.w);
-    card.setAttribute('data-h',   task.h);
+    card.setAttribute('data-w',   safeW);
+    card.setAttribute('data-h',   safeH);
     card.setAttribute('data-pri', task.priority);
 
     const progressHtml = total > 0
@@ -97,15 +103,27 @@ function initGridEngine() {
   }
 
   let cols = getColCount();
-  let cardsData = cardElements.map(el => ({
-    el,
-    w: Math.min(parseInt(el.getAttribute('data-w')) || 1, cols),
-    h: parseInt(el.getAttribute('data-h')) || 1
-  }));
+  let cardsData = cardElements.map(el => {
+    let rawW = parseInt(el.getAttribute('data-w'));
+    let rawH = parseInt(el.getAttribute('data-h'));
+    let w = (isNaN(rawW) || rawW < 1 || rawW > 3) ? 1 : rawW;
+    let h = (isNaN(rawH) || rawH < 1 || rawH > 3) ? 1 : rawH;
+    return {
+      el,
+      w: Math.min(w, cols),
+      h: h
+    };
+  });
 
   function renderGrid() {
     cols = getColCount();
-    cardsData.forEach(c => { c.w = Math.min(parseInt(c.el.getAttribute('data-w')) || 1, cols); });
+    cardsData.forEach(c => {
+      let rawW = parseInt(c.el.getAttribute('data-w'));
+      let rawH = parseInt(c.el.getAttribute('data-h'));
+      let w = (isNaN(rawW) || rawW < 1 || rawW > 3) ? 1 : rawW;
+      c.w = Math.min(w, cols);
+      c.h = (isNaN(rawH) || rawH < 1 || rawH > 3) ? 1 : rawH;
+    });
 
     const cellWidth = (container.clientWidth - (cols - 1) * gap) / cols;
     let gridMatrix = [], maxRow = 0;

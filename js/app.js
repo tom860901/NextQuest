@@ -67,7 +67,15 @@ window.onload = function () {
   }
 };
 
-// 視窗縮放時重新排列卡片矩陣
+// 視窗縮放時重新排列卡片矩陣（防抖與寬度改變保護，杜絕迴圈抖動）
+let lastWindowInnerWidth = window.innerWidth;
+let gridResizeTimer = null;
 window.addEventListener('resize', () => {
-  if (globalRenderGrid) globalRenderGrid();
+  if (window.innerWidth !== lastWindowInnerWidth) {
+    lastWindowInnerWidth = window.innerWidth;
+    clearTimeout(gridResizeTimer);
+    gridResizeTimer = setTimeout(() => {
+      if (globalRenderGrid) globalRenderGrid();
+    }, 80);
+  }
 });

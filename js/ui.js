@@ -74,15 +74,11 @@ function initGlobalTilt() {
     const tiltX = -yOffset * 2.5;
     const tiltY =  xOffset * 2.5;
 
-    dashView.querySelectorAll('.window-shell').forEach(el => {
-      el.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-    });
+    dashView.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
   });
 
   document.addEventListener('mouseleave', () => {
     if (!dashView) return;
-    dashView.querySelectorAll('.window-shell').forEach(el => {
-      el.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg)';
-    });
+    dashView.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg)';
   });
 }
