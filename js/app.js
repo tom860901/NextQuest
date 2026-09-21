@@ -58,10 +58,12 @@ window.onload = function () {
   const savedUser = localStorage.getItem('planit_user');
   if (savedUser) {
     currentUser = savedUser;
-    document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
-    document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
+    const loginEl = document.getElementById('login-view');
+    const dashEl = document.getElementById('dashboard-view');
+    if (loginEl) loginEl.classList.replace('view-active', 'view-hidden');
+    if (dashEl) dashEl.classList.replace('view-hidden', 'view-active');
     updateAvatarBadge();
-    fetchTasks();
+    if (loginEl || dashEl) fetchTasks();
   }
 };
 
