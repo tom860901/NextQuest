@@ -65,6 +65,22 @@ function handleCredentialResponse(r) {
   });
 }
 
+// ── 密碼 SHA-256 雜湊（保護密碼不以明文存於試算表）────────────
+
+async function hashPassword(str) {
+  try {
+    if (window.crypto && window.crypto.subtle) {
+      const msgBuffer = new TextEncoder().encode(str);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+  } catch (e) {
+    console.warn("Crypto API 不可用，使用原字串", e);
+  }
+  return str;
+}
+
 // ── 登入 / 註冊模式切換 ──────────────────────────────────────
 
 function toggleMode() {
@@ -79,7 +95,7 @@ function toggleMode() {
 
 // ── 帳密登入 / 註冊提交 ──────────────────────────────────────
 
-function submitManualForm() {
+async function submitManualForm() {
   const acc   = document.getElementById('account').value.trim();
   const pwd   = document.getElementById('password').value.trim();
   const email = document.getElementById('email').value.trim();
@@ -92,33 +108,71 @@ function submitManualForm() {
   actionBtn.disabled = true;
   actionBtn.classList.add('btn-disabled');
 
-  callGASAPI(
-    { action: isLoginMode ? 'login' : 'register', account: acc, password: pwd, email: email },
-    (res) => {
-      actionBtn.disabled = false;
-      actionBtn.classList.remove('btn-disabled');
-      if (!res) { document.getElementById('message').innerText = "伺服器未回傳有效狀態！"; return; }
-      document.getElementById('message').innerText = res.msg || (res.success ? "成功" : "驗證失敗");
+  // 將密碼轉為 SHA-256 雜湊碼，確保試算表中只呈現亂碼而不洩漏真實密碼
+  const hashedPwd = await hashPassword(pwd);
 
-      if (res.success) {
-        if (!isLoginMode) {
-          setTimeout(toggleMode, 1500);
-        } else {
-          currentUser = String(res.account);
-          localStorage.setItem('planit_user', currentUser);
-          updateAvatarBadge();
-          document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
-          document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
-          fetchTasks();
-        }
+  function handleLoginSuccess(res) {
+    actionBtn.disabled = false;
+    actionBtn.classList.remove('btn-disabled');
+    currentUser = String(res.account);
+    localStorage.setItem('planit_user', currentUser);
+    updateAvatarBadge();
+    document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
+    document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
+    fetchTasks();
+  }
+
+  if (!isLoginMode) {
+    // 註冊：強制使用雜湊碼存入試算表（保護密碼安全）
+    callGASAPI(
+      { action: 'register', account: acc, password: hashedPwd, email: email },
+      (res) => {
+        actionBtn.disabled = false;
+        actionBtn.classList.remove('btn-disabled');
+        if (!res) { document.getElementById('message').innerText = "伺服器未回傳有效狀態！"; return; }
+        document.getElementById('message').innerText = res.msg || (res.success ? "成功" : "驗證失敗");
+        if (res.success) setTimeout(toggleMode, 1500);
+      },
+      (errMsg) => {
+        actionBtn.disabled = false;
+        actionBtn.classList.remove('btn-disabled');
+        document.getElementById('message').innerText = errMsg;
       }
-    },
-    (errMsg) => {
-      actionBtn.disabled = false;
-      actionBtn.classList.remove('btn-disabled');
-      document.getElementById('message').innerText = errMsg;
-    }
-  );
+    );
+  } else {
+    // 登入：優先以 SHA-256 雜湊比對（符合原始 1234 等帳號）；若未匹配則嘗試明文（相容過渡期註冊帳號）
+    callGASAPI(
+      { action: 'login', account: acc, password: hashedPwd },
+      (res) => {
+        if (res && res.success) {
+          handleLoginSuccess(res);
+        } else {
+          // 降級嘗試：相容過渡期直接存明文的帳號
+          callGASAPI(
+            { action: 'login', account: acc, password: pwd },
+            (fallbackRes) => {
+              actionBtn.disabled = false;
+              actionBtn.classList.remove('btn-disabled');
+              if (fallbackRes && fallbackRes.success) {
+                handleLoginSuccess(fallbackRes);
+              } else {
+                document.getElementById('message').innerText = (fallbackRes && fallbackRes.msg) || (res && res.msg) || "帳號或密碼錯誤！";
+              }
+            },
+            (errMsg) => {
+              actionBtn.disabled = false;
+              actionBtn.classList.remove('btn-disabled');
+              document.getElementById('message').innerText = errMsg;
+            }
+          );
+        }
+      },
+      (errMsg) => {
+        actionBtn.disabled = false;
+        actionBtn.classList.remove('btn-disabled');
+        document.getElementById('message').innerText = errMsg;
+      }
+  }
 }
 
 // ── 登出 ─────────────────────────────────────────────────────

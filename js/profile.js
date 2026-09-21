@@ -49,17 +49,29 @@ function triggerDailyCheckin() {
 
 // ── 修改密碼 ────────────────────────────────────────────────
 
-function submitPasswordReset() {
+async function submitPasswordReset() {
   const oldPwd = document.getElementById('reset-old-pwd').value.trim();
   const newPwd = document.getElementById('reset-new-pwd').value.trim();
   if (!oldPwd || !newPwd) { alert("請完整填寫新舊密碼！"); return; }
 
-  callGASAPI({ action: 'resetPassword', account: currentUser, oldPassword: oldPwd, newPassword: newPwd }, (res) => {
-    if (!res) return;
-    alert(res.msg);
-    if (res.success) {
+  const hashedOld = (typeof hashPassword === 'function') ? await hashPassword(oldPwd) : oldPwd;
+  const hashedNew = (typeof hashPassword === 'function') ? await hashPassword(newPwd) : newPwd;
+
+  // 優先以雜湊舊密碼比對並更新為雜湊新密碼
+  callGASAPI({ action: 'resetPassword', account: currentUser, oldPassword: hashedOld, newPassword: hashedNew }, (res) => {
+    if (res && res.success) {
+      alert(res.msg || "密碼修改成功！");
       document.getElementById('reset-old-pwd').value = "";
       document.getElementById('reset-new-pwd').value = "";
+    } else {
+      // 降級嘗試：舊密碼可能是早期明文存檔
+      callGASAPI({ action: 'resetPassword', account: currentUser, oldPassword: oldPwd, newPassword: hashedNew }, (res2) => {
+        if (res2) alert(res2.msg);
+        if (res2 && res2.success) {
+          document.getElementById('reset-old-pwd').value = "";
+          document.getElementById('reset-new-pwd').value = "";
+        }
+      });
     }
   });
 }
