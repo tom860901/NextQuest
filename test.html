@@ -345,6 +345,36 @@ async function runAllTests() {
         detail: '未填入測試帳密，無法驗證登入功能'
       });
     }
+
+    // 5-3. AI 步驟拆解 API 測試
+    await new Promise(resolve => {
+      const t = setTimeout(() => {
+        results.push({ group: apiGroup, status: 'fail', name: 'AI 步驟拆解 API', detail: '逾時（15秒）' });
+        resolve();
+      }, 15000);
+
+      callGASAPI({ action: 'aiDecompose', title: '跟朋友聚餐' }, (res) => {
+        clearTimeout(t);
+        if (res && res.success && Array.isArray(res.steps) && res.steps.length > 0) {
+          results.push({
+            group: apiGroup, status: 'pass',
+            name: 'AI 步驟拆解 API 測試',
+            detail: `成功產生 ${res.steps.length} 個步驟：${res.steps.join(' ➔ ')}`
+          });
+        } else {
+          results.push({
+            group: apiGroup, status: 'fail',
+            name: 'AI 步驟拆解 API 失敗',
+            detail: res ? (res.msg || JSON.stringify(res)) : '無回傳'
+          });
+        }
+        resolve();
+      }, (err) => {
+        clearTimeout(t);
+        results.push({ group: apiGroup, status: 'fail', name: 'AI 步驟拆解連線失敗', detail: err });
+        resolve();
+      });
+    });
   }
 
   setProgress(100);
