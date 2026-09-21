@@ -28,6 +28,11 @@ function closeModal(id) {
   if (m) { m.classList.remove('view-active'); m.classList.add('view-hidden'); }
 }
 
+// ── 具名 Modal 快捷函式（供 HTML onclick 直接呼叫）────────────
+// 說明 Modal
+function openGuideModal()  { openModal('guide-modal'); }
+function closeGuideModal() { closeModal('guide-modal'); }
+
 // Esc 鍵一鍵關閉所有開啟中的 Modal
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
