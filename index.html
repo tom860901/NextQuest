@@ -13,7 +13,7 @@
     body { 
       min-height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
       background: transparent !important; color: var(--text-hi); overflow-y: auto; position: relative; padding: 40px 16px;
-      perspective: 1600px;
+      /* 🔧 修復：移除 perspective，改到 #dashboard-view 自身的 wrapper，避免影響 fixed 子元素 */
     }
 
     .sky-container { position: fixed; inset: 0; width: 100vw; height: 100vh; overflow: hidden; z-index: 0; pointer-events: none; }
@@ -42,7 +42,18 @@
 
     .login-shell { width: 100%; max-width: 400px; margin: 80px auto; z-index: 2; position: relative; }
     
-    #dashboard-view { position: relative; z-index: 2; transform-style: preserve-3d; transition: transform 0.12s ease-out; }
+    /* 🔧 修復：dashboard-view 自帶 perspective，不污染 body 層，讓 fixed modal 不受影響 */
+    #dashboard-view { 
+      position: relative; z-index: 2; 
+      perspective: 1600px; 
+      perspective-origin: 50% 50%;
+    }
+    /* 🔧 修復：tilt 套在內部 tilt-inner wrapper，不是最外層 */
+    #dashboard-tilt-inner {
+      transform-style: preserve-3d;
+      transition: transform 0.12s ease-out;
+      display: contents; /* 讓它不影響佈局，只負責 3D 效果 */
+    }
     #dashboard-view.view-active { display: grid !important; grid-template-columns: minmax(0, 1fr) 280px !important; gap: 24px !important; align-items: start !important; width: 100%; max-width: 1060px !important; margin: 0 auto !important; }
     @media (max-width: 840px) { #dashboard-view.view-active { grid-template-columns: 1fr !important; } .upcoming-panel { position: static !important; } }
 
@@ -121,8 +132,8 @@
     .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 8px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
     .ai-btn { background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white; border: none; box-shadow: 0 4px 15px rgba(142, 45, 226, 0.25); }
 
-    .grid-container { position: relative; width: 100%; transition: height 0.3s ease; min-height: 120px; perspective: 1000px; }
-    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.52); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 22px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3); padding: 12px 14px 9px 14px; color: var(--text-hi); transform-style: preserve-3d; transition: top 0.25s ease-out, left 0.25s ease-out, transform 0.15s ease-out, box-shadow 0.2s ease; }
+    .grid-container { position: relative; width: 100%; transition: height 0.3s ease; min-height: 120px; }
+    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.52); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 22px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3); padding: 12px 14px 9px 14px; color: var(--text-hi); transition: top 0.25s ease-out, left 0.25s ease-out, transform 0.15s ease-out, box-shadow 0.2s ease; }
     body.dark .widget-card { background: rgba(25, 25, 38, 0.65) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #F1F0F7; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
     .widget-card.dragging { z-index: 100 !important; cursor: grabbing !important; transform: scale(1.05) !important; box-shadow: 0 20px 45px rgba(0,0,0,0.25) !important; transition: none !important; }
     
@@ -140,7 +151,11 @@
     .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
     body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
 
-    /* 🎯 核心修復：徹底解決 3D 穿透與點擊失效的 Modal 樣式 */
+    /* =====================================================================
+       🔧 核心修復：Modal 層疊問題
+       原問題：body 無 perspective，modal 的 translateZ(9999px) 超過透視點 → 元素消失
+       修復：移除 translateZ，改用純 z-index + position:fixed 確保最頂層
+       ===================================================================== */
     .modal-overlay { 
       position: fixed !important; 
       inset: 0 !important; 
@@ -149,15 +164,14 @@
       background: rgba(10, 10, 20, 0.45) !important; 
       backdrop-filter: blur(14px) !important; 
       -webkit-backdrop-filter: blur(14px) !important; 
-      z-index: 99999 !important; 
-      transform: translateZ(9999px) !important; /* 確保在 3D 視差座標系永遠處於最頂層 */
-      isolation: isolate;
+      z-index: 9999 !important;
+      /* ❌ 移除：transform: translateZ(9999px) — 此值超過 perspective 距離會讓元素消失 */
     }
     .modal-overlay.view-active { 
       display: grid !important; 
       place-items: center !important; 
       pointer-events: auto !important; 
-      cursor: pointer; /* 點擊暗底時顯示可點擊指標 */
+      cursor: pointer;
     }
     .modal-overlay.view-hidden { 
       display: none !important; 
@@ -165,8 +179,12 @@
     }
     .modal-shell { 
       max-width: 480px; width: 90%; margin: auto; padding: 28px; max-height: 85vh; overflow-y: auto; 
-      color: var(--text-hi); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.8) !important; 
-      position: relative; z-index: 100000 !important; pointer-events: auto !important; cursor: default;
+      color: var(--text-hi); 
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.8) !important; 
+      position: relative; 
+      z-index: 10000 !important; 
+      pointer-events: auto !important; 
+      cursor: default;
     }
     body.dark .modal-shell { box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.15) !important; }
 
@@ -174,7 +192,7 @@
       position: absolute; top: 18px; right: 18px; width: 32px; height: 32px; border-radius: 50%;
       border: 1px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.4); color: var(--text-hi);
       font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 0.2s; z-index: 100001;
+      cursor: pointer; transition: all 0.2s; z-index: 10001;
     }
     .modal-close-corner-btn:hover { background: rgba(255,255,255,0.8); transform: scale(1.08); }
     body.dark .modal-close-corner-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #F1F0F7; }
@@ -187,7 +205,7 @@
     .check-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: rgba(255,255,255,0.4); border-radius: 16px; cursor: pointer; border: 1px solid rgba(255,255,255,0.6); color: var(--text-hi); }
     body.dark .check-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #F1F0F7; }
     .check-item.done { opacity: 0.55; text-decoration: line-through; }
-    .checkbox-circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--text-mid); display: flex; justify-content: center; align-items: center; font-size: 12px; color: transparent; }
+    .checkbox-circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--text-mid); display: flex; justify-content: center; align-items: center; font-size: 12px; color: transparent; flex-shrink: 0; }
     .check-item.done .checkbox-circle { background: #2A9D8F; border-color: #2A9D8F; color: white; }
 
     .archive-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.35); border-radius: 16px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.5); color: var(--text-hi); }
@@ -253,7 +271,7 @@
 
       <div class="calendar-container">
         <div class="cal-header">
-          <div style="display: gap: 4px;">
+          <div style="display: flex; gap: 4px;">
             <button class="bubble-menu-btn" onclick="changeMonth(-1)">◀</button>
             <button class="bubble-menu-btn" onclick="jumpToToday()">今天</button>
             <button class="bubble-menu-btn" onclick="changeMonth(1)">▶</button>
@@ -417,7 +435,7 @@
     </div>
   </div>
 
-  <!-- VIEW 7: 說明 Modal (🎯 核心防穿透修復) -->
+  <!-- VIEW 7: 說明 Modal -->
   <div id="guide-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'guide-modal')">
     <div class="window-shell modal-shell">
       <button class="modal-close-corner-btn" onclick="closeGuideModal()" title="關閉說明">✕</button>
@@ -455,7 +473,7 @@
         </div>
       </div>
 
-      <button id="guide-modal-close-btn" type="button" class="btn-main btn-secondary" style="margin-top: 14px; position: relative; z-index: 100002;" onclick="closeGuideModal()">關閉說明</button>
+      <button type="button" class="btn-main btn-secondary" style="margin-top: 14px;" onclick="closeGuideModal()">關閉說明</button>
     </div>
   </div>
 
@@ -507,7 +525,7 @@
       return `${year}-${month}-${day}`;
     }
 
-    // 🎯 通用點擊遮罩外圍關閉邏輯
+    // 點擊遮罩外圍關閉 Modal
     function handleModalOverlayClick(e, modalId) {
       if (e.target.id === modalId) {
         const modal = document.getElementById(modalId);
@@ -518,7 +536,7 @@
       }
     }
 
-    // 🎯 鍵盤 Esc 鍵一鍵關閉所有開啟的彈窗
+    // Esc 鍵一鍵關閉所有彈窗
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal-overlay.view-active').forEach(m => {
@@ -560,20 +578,29 @@
       }
     }
 
+    // 🔧 修復：3D tilt 只套在 dashboard-view 本身，不影響 modal 層
     function initGlobalTilt() {
+      const dashView = document.getElementById('dashboard-view');
       document.addEventListener('mousemove', (e) => {
-        // 若有任何彈窗開啟中，自動暫停 3D tilt，避免圖層偏移干擾滑鼠點擊
+        // 有 modal 開啟時，暫停 tilt 避免視覺偏移
         if (document.querySelector('.modal-overlay.view-active')) return;
+        if (!dashView || !dashView.classList.contains('view-active')) return;
 
-        const activeView = document.getElementById('dashboard-view');
-        if (!activeView || !activeView.classList.contains('view-active')) return;
         const xOffset = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
         const yOffset = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
-        activeView.style.transform = `rotateX(${-yOffset * 3.5}deg) rotateY(${xOffset * 3.5}deg)`;
+        // 🔧 修復：tilt 效果套在 dashboard-view 的 CSS perspective 內部元素
+        //    用 style 直接改 gridContainer 和 upcomingPanel 的 transform
+        const tiltX = -yOffset * 2.5;
+        const tiltY = xOffset * 2.5;
+        dashView.querySelectorAll('.window-shell').forEach(el => {
+          el.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+        });
       });
       document.addEventListener('mouseleave', () => {
-        const activeView = document.getElementById('dashboard-view');
-        if (activeView) activeView.style.transform = `rotateX(0deg) rotateY(0deg)`;
+        if (!dashView) return;
+        dashView.querySelectorAll('.window-shell').forEach(el => {
+          el.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg)';
+        });
       });
     }
 
@@ -1031,13 +1058,10 @@
       m.classList.remove('view-active'); m.classList.add('view-hidden');
     }
     
-    // 🎯 說明 Modal 開關（保證即時關閉並復原視差）
     function openGuideModal() { 
       const m = document.getElementById('guide-modal');
       m.classList.remove('view-hidden');
       m.classList.add('view-active');
-      const dash = document.getElementById('dashboard-view');
-      if (dash) dash.style.transform = 'rotateX(0deg) rotateY(0deg)';
     }
 
     function closeGuideModal() { 
