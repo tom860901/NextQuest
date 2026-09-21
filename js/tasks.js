@@ -63,7 +63,11 @@ function openTaskModal() {
 }
 function closeTaskModal() { closeModal('task-modal'); }
 
+let isAddingTaskInProgress = false;
+
 function confirmAddTask() {
+  if (isAddingTaskInProgress) return;
+
   const input = document.getElementById('new-task-input');
   const title = input.value.trim();
   if (!title) { input.focus(); return; }
@@ -77,20 +81,29 @@ function confirmAddTask() {
     if (inp.value.trim()) subTasks.push({ step: inp.value.trim(), done: false });
   });
 
-  closeTaskModal();
   const autoWidth = ((dueDate && dueDate.trim() !== "") || subTasks.length > 0) ? 2 : 1;
+
+  isAddingTaskInProgress = true;
+  closeTaskModal();
+  input.value = ""; // 立刻清空，防止殘留
 
   callGASAPI({
     action: 'addTask', account: currentUser, title, tag, priority: pri,
     subTasks: JSON.stringify(subTasks), dueDate
   }, (res) => {
+    isAddingTaskInProgress = false;
     if (res && res.success) {
       res.task.w = autoWidth;
-      allTasksData.push(res.task);
+      if (!allTasksData.some(t => t.id === res.task.id)) {
+        allTasksData.push(res.task);
+      }
       renderCalendar();
       renderUpcomingPanel();
       renderTasks();
     }
+  }, (err) => {
+    isAddingTaskInProgress = false;
+    console.error("新增任務異常:", err);
   });
 }
 
