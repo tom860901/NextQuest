@@ -1,0 +1,300 @@
+/* ============================================================
+   js/tasks.js — 任務 CRUD 全部操作
+   - 新增任務 Modal
+   - 任務詳情 Modal（含子任務 Checklist）
+   - 儲存編輯、完成、Rollover（移到明天）
+   - 已完成區（Archive）
+   - 刪除確認 Modal
+   - AI 拆解子任務
+   ============================================================ */
+
+// ── 通用選項工具 ─────────────────────────────────────────────
+
+/** Tag / Priority 按鈕互斥選取 */
+function selectOpt(groupClass, btn) {
+  document.querySelectorAll(groupClass).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── 子任務輸入 ───────────────────────────────────────────────
+
+function addManualSubtaskInput(defaultText = "") {
+  const container = document.getElementById('manual-subtasks-container');
+  const row = document.createElement('div');
+  row.className = 'subtask-input-row';
+  row.innerHTML = `<input type="text" placeholder="步驟描述..." value="${defaultText}">
+    <button class="add-step-btn" onclick="this.parentElement.remove()" style="border:none">❌</button>`;
+  container.appendChild(row);
+  if (!defaultText) row.querySelector('input').focus();
+}
+
+// ── AI 拆解 ──────────────────────────────────────────────────
+
+function triggerAIDecompose() {
+  const titleInput = document.getElementById('new-task-input');
+  const title = titleInput.value.trim();
+  if (!title) { alert("請先輸入上方目標名稱！"); titleInput.focus(); return; }
+
+  const aiBtn = document.getElementById('ai-decompose-btn');
+  const originalText = aiBtn.innerHTML;
+  aiBtn.innerHTML = "🧠 思考中..."; aiBtn.disabled = true;
+
+  callGASAPI({ action: 'aiDecompose', title }, (res) => {
+    aiBtn.innerHTML = originalText; aiBtn.disabled = false;
+    if (res.success && res.steps && res.steps.length > 0) {
+      document.getElementById('manual-subtasks-container').innerHTML = "";
+      res.steps.forEach(stepText => addManualSubtaskInput(stepText));
+    } else {
+      alert(res.msg || "AI 拆解失敗！");
+    }
+  }, (err) => {
+    aiBtn.innerHTML = originalText; aiBtn.disabled = false;
+    alert(err);
+  });
+}
+
+// ── 新增任務 Modal ───────────────────────────────────────────
+
+function openTaskModal() {
+  openModal('task-modal');
+  document.getElementById('manual-subtasks-container').innerHTML = '';
+  document.getElementById('new-task-input').value = "";
+  document.getElementById('new-task-duedate').value = getLocalDateString();
+}
+function closeTaskModal() { closeModal('task-modal'); }
+
+function confirmAddTask() {
+  const input = document.getElementById('new-task-input');
+  const title = input.value.trim();
+  if (!title) { input.focus(); return; }
+
+  const tag     = document.querySelector('.tag-btn.active').getAttribute('data-val');
+  const pri     = document.querySelector('.pri-btn.active').getAttribute('data-val');
+  const dueDate = document.getElementById('new-task-duedate').value;
+
+  let subTasks = [];
+  document.querySelectorAll('#manual-subtasks-container input').forEach(inp => {
+    if (inp.value.trim()) subTasks.push({ step: inp.value.trim(), done: false });
+  });
+
+  closeTaskModal();
+  const autoWidth = ((dueDate && dueDate.trim() !== "") || subTasks.length > 0) ? 2 : 1;
+
+  callGASAPI({
+    action: 'addTask', account: currentUser, title, tag, priority: pri,
+    subTasks: JSON.stringify(subTasks), dueDate
+  }, (res) => {
+    if (res && res.success) {
+      res.task.w = autoWidth;
+      allTasksData.push(res.task);
+      renderCalendar();
+      renderUpcomingPanel();
+      renderTasks();
+    }
+  });
+}
+
+// ── 任務詳情 Modal ───────────────────────────────────────────
+
+function openTaskDetail(taskId) {
+  const task = allTasksData.find(t => t.id === taskId);
+  if (!task) return;
+  currentDetailTaskId = taskId;
+
+  document.getElementById('edit-task-title').value    = task.title;
+  document.getElementById('edit-task-duedate').value  = task.dueDate || '';
+  document.getElementById('edit-task-priority').value = task.priority || '🟡 一般';
+
+  let subTasksArr = [];
+  try { subTasksArr = JSON.parse(task.subTasks); } catch (e) {}
+
+  const listContainer = document.getElementById('detail-checklist');
+  listContainer.innerHTML = '';
+
+  if (subTasksArr.length === 0) {
+    listContainer.innerHTML = `<div style="text-align:center; color:var(--text-mid); padding:10px; font-size:0.85rem;">一般任務，可直接標記完成或修改內容。</div>`;
+    document.getElementById('detail-progress-text').innerText = '';
+  } else {
+    renderChecklist(subTasksArr);
+  }
+
+  updateCompleteButtonState(subTasksArr);
+  openModal('detail-modal');
+}
+
+function renderChecklist(subTasksArr) {
+  const listContainer = document.getElementById('detail-checklist');
+  listContainer.innerHTML = '';
+  let doneCount = 0;
+
+  subTasksArr.forEach(st => {
+    if (st.done) doneCount++;
+    const item = document.createElement('div');
+    item.className = `check-item ${st.done ? 'done' : ''}`;
+    item.innerHTML = `<div class="checkbox-circle">✔</div><div style="font-weight:600; font-size:0.9rem;">${st.step}</div>`;
+
+    item.onclick = () => {
+      st.done = !st.done;
+      const idx = allTasksData.findIndex(t => t.id === currentDetailTaskId);
+      allTasksData[idx].subTasks = JSON.stringify(subTasksArr);
+      renderChecklist(subTasksArr);
+      updateCompleteButtonState(subTasksArr);
+      callGASAPI({ action: 'updateTask', taskId: currentDetailTaskId, subTasks: JSON.stringify(subTasksArr) }, () => {});
+    };
+    listContainer.appendChild(item);
+  });
+
+  const prog = Math.round((doneCount / subTasksArr.length) * 100);
+  document.getElementById('detail-progress-text').innerText = `目前進度：${prog}%`;
+}
+
+function updateCompleteButtonState(subTasksArr) {
+  const btn = document.getElementById('detail-complete-btn');
+  if (!subTasksArr || subTasksArr.length === 0) {
+    btn.classList.remove('btn-disabled');
+    return;
+  }
+  btn.classList.toggle('btn-disabled', subTasksArr.some(st => !st.done));
+}
+
+// ── 儲存編輯 ────────────────────────────────────────────────
+
+function saveTaskEdits() {
+  if (!currentDetailTaskId) return;
+  const idx = allTasksData.findIndex(t => t.id === currentDetailTaskId);
+  if (idx === -1) return;
+
+  const newTitle    = document.getElementById('edit-task-title').value.trim();
+  const newDueDate  = document.getElementById('edit-task-duedate').value;
+  const newPriority = document.getElementById('edit-task-priority').value;
+
+  if (!newTitle) { alert("任務名稱不能為空！"); return; }
+
+  allTasksData[idx].title    = newTitle;
+  allTasksData[idx].dueDate  = newDueDate;
+  allTasksData[idx].priority = newPriority;
+
+  callGASAPI({
+    action: 'updateTaskDetails', taskId: currentDetailTaskId,
+    title: newTitle, dueDate: newDueDate, priority: newPriority
+  }, () => {});
+
+  alert("✨ 任務修改已儲存！");
+  closeDetailModal();
+}
+
+function closeDetailModal() {
+  closeModal('detail-modal');
+  currentDetailTaskId = null;
+  renderCalendar();
+  renderUpcomingPanel();
+  renderTasks();
+}
+
+// ── 完成任務 ────────────────────────────────────────────────
+
+function markTaskCompleted() {
+  if (!currentDetailTaskId) return;
+  const task = allTasksData.find(t => t.id === currentDetailTaskId);
+  if (!task) return;
+
+  let subTasksArr = [];
+  try { subTasksArr = JSON.parse(task.subTasks); } catch (e) {}
+  if (subTasksArr.length > 0 && subTasksArr.some(st => !st.done)) {
+    alert("⚠️ 還有子任務尚未完成，請先完成所有步驟！");
+    return;
+  }
+
+  const idx = allTasksData.findIndex(t => t.id === currentDetailTaskId);
+  allTasksData[idx].status = 'completed';
+  callGASAPI({ action: 'updateTaskStatus', taskId: currentDetailTaskId, status: 'completed' }, () => {});
+  closeDetailModal();
+}
+
+// ── Rollover：移到明天 ───────────────────────────────────────
+
+function rolloverTaskToTomorrow() {
+  if (!currentDetailTaskId) return;
+  const idx = allTasksData.findIndex(t => t.id === currentDetailTaskId);
+  if (idx === -1) return;
+
+  const currentTask = allTasksData[idx];
+  let nextDateStr = "";
+
+  if (currentTask.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(currentTask.dueDate)) {
+    const [y, m, d] = currentTask.dueDate.split('-').map(Number);
+    nextDateStr = getLocalDateString(new Date(y, m - 1, d + 1));
+  } else {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    nextDateStr = getLocalDateString(tomorrow);
+  }
+
+  allTasksData[idx].dueDate  = nextDateStr;
+  allTasksData[idx].priority = '🔴 緊急';
+
+  closeDetailModal();
+
+  callGASAPI({ action: 'rolloverTask', taskId: currentDetailTaskId, tomorrowDate: nextDateStr },
+    () => {}, (err) => console.error("順延同步異常:", err));
+}
+
+// ── 已完成區（Archive）──────────────────────────────────────
+
+function openArchiveModal() {
+  const archiveList = document.getElementById('archive-list');
+  archiveList.innerHTML = '';
+  const completedTasks = allTasksData.filter(t => t.status === 'completed');
+
+  if (completedTasks.length === 0) {
+    archiveList.innerHTML = `<div style="text-align:center; color:var(--text-mid); padding:20px;">目前沒有已完成的任務</div>`;
+  } else {
+    completedTasks.forEach(task => {
+      const item = document.createElement('div');
+      item.className = 'archive-item';
+      item.innerHTML = `
+        <div>
+          <div style="font-weight:700; font-size:0.95rem;">✅ ${task.title}</div>
+          <div style="font-size:0.75rem; color:var(--text-mid);">${task.tag} | 期限: ${task.dueDate || '常駐'}</div>
+        </div>
+        <button class="btn-main btn-secondary" onclick="restoreTask('${task.id}')">復原</button>`;
+      archiveList.appendChild(item);
+    });
+  }
+  openModal('archive-modal');
+}
+function closeArchiveModal() { closeModal('archive-modal'); }
+
+function restoreTask(taskId) {
+  const idx = allTasksData.findIndex(t => t.id === taskId);
+  if (idx === -1) return;
+  allTasksData[idx].status = 'active';
+  callGASAPI({ action: 'updateTaskStatus', taskId, status: 'active' }, () => {});
+  closeArchiveModal();
+  renderCalendar();
+  renderUpcomingPanel();
+  renderTasks();
+}
+
+// ── 刪除確認 Modal ───────────────────────────────────────────
+
+function openDeleteModal(taskId) {
+  if (navigator.vibrate) navigator.vibrate(50);
+  targetElementToDelete = taskId;
+  openModal('delete-modal');
+}
+function closeDeleteModal() {
+  closeModal('delete-modal');
+  targetElementToDelete = null;
+}
+
+function confirmDeleteTask() {
+  if (!targetElementToDelete) return;
+  const taskId = targetElementToDelete;
+  closeDeleteModal();
+  allTasksData = allTasksData.filter(t => t.id !== taskId);
+  renderCalendar();
+  renderUpcomingPanel();
+  renderTasks();
+  callGASAPI({ action: 'deleteTask', taskId }, () => {});
+}

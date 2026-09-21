@@ -4,453 +4,251 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Planit - Control Center</title>
+
+  <!-- Google OAuth SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <style>
-    :root { --text-hi: #2B213A; --text-mid: #7D738A; --card-radius: 26px; }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    
-    html { min-height: 100vh; background: #FDF9FC; }
-    body { 
-      min-height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-      background: transparent !important; color: var(--text-hi); overflow-y: auto; position: relative; padding: 40px 16px;
-      /* 🔧 修復：移除 perspective，改到 #dashboard-view 自身的 wrapper，避免影響 fixed 子元素 */
-    }
 
-    .sky-container { position: fixed; inset: 0; width: 100vw; height: 100vh; overflow: hidden; z-index: 0; pointer-events: none; }
-    @keyframes driftPeach { 0% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(80px, -60px) scale(1.18); } 100% { transform: translate(-50px, 50px) scale(0.92); } }
-    @keyframes driftPurple { 0% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(-70px, 70px) scale(1.15); } 100% { transform: translate(60px, -50px) scale(0.9); } }
-    @keyframes driftOrange { 0% { transform: translate(0px, 0px) scale(1); } 50% { transform: translate(60px, 80px) scale(1.22); } 100% { transform: translate(-70px, -40px) scale(0.85); } }
-    
-    .cloud-orb { position: absolute; border-radius: 50%; filter: blur(55px); opacity: 0.85; animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: ease-in-out; }
-    .orb-peach { top: -100px; left: 5%; width: 520px; height: 520px; background: radial-gradient(circle, #FF477E 10%, #FFA8B6 80%); animation: driftPeach 14s infinite alternate ease-in-out; }
-    .orb-purple { bottom: -80px; left: 10%; width: 580px; height: 580px; background: radial-gradient(circle, #7B2CBF 0%, #C77DFF 65%, rgba(224, 170, 255, 0) 100%); animation: driftPurple 18s infinite alternate ease-in-out; animation-delay: -3s; }
-    .orb-orange { top: 50px; right: -100px; width: 540px; height: 540px; background: radial-gradient(circle, #FF9E00 0%, #FFD000 65%, rgba(255, 234, 167, 0) 100%); animation: driftOrange 16s infinite alternate ease-in-out; animation-delay: -6s; }
-    
-    body.dark { background-color: #0A0A12 !important; color: #F1F0F7 !important; --text-hi: #F1F0F7; --text-mid: #9E9AA8; }
-    body.dark .orb-peach { background: radial-gradient(circle, #2E1065 0%, #0A0A12 80%) !important; opacity: 0.5; } 
-    body.dark .orb-purple { background: radial-gradient(circle, #1E1B4B 0%, #0A0A12 80%) !important; opacity: 0.5; } 
-    body.dark .orb-orange { background: radial-gradient(circle, #082F49 0%, #0A0A12 80%) !important; opacity: 0.5; } 
-
-    .view-hidden { display: none !important; }
-    .view-active { display: block !important; }
-
-    .window-shell, .modal-shell {
-      background: rgba(255, 255, 255, 0.4) !important; backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); 
-      border: 1px solid rgba(255, 255, 255, 0.8) !important; border-radius: var(--card-radius); padding: 26px; box-shadow: 0 16px 40px rgba(112, 128, 175, 0.15), inset 0 0 20px rgba(255,255,255,0.4);
-    }
-    body.dark .window-shell, body.dark .modal-shell { background: rgba(18, 18, 26, 0.85) !important; border: 1px solid rgba(255, 255, 255, 0.14) !important; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255,255,255,0.02) !important; }
-
-    .login-shell { width: 100%; max-width: 400px; margin: 80px auto; z-index: 2; position: relative; }
-    
-    /* 🔧 修復：dashboard-view 自帶 perspective，不污染 body 層，讓 fixed modal 不受影響 */
-    #dashboard-view { 
-      position: relative; z-index: 2; 
-      perspective: 1600px; 
-      perspective-origin: 50% 50%;
-    }
-    /* 🔧 修復：tilt 套在內部 tilt-inner wrapper，不是最外層 */
-    #dashboard-tilt-inner {
-      transform-style: preserve-3d;
-      transition: transform 0.12s ease-out;
-      display: contents; /* 讓它不影響佈局，只負責 3D 效果 */
-    }
-    #dashboard-view.view-active { display: grid !important; grid-template-columns: minmax(0, 1fr) 280px !important; gap: 24px !important; align-items: start !important; width: 100%; max-width: 1060px !important; margin: 0 auto !important; }
-    @media (max-width: 840px) { #dashboard-view.view-active { grid-template-columns: 1fr !important; } .upcoming-panel { position: static !important; } }
-
-    .dashboard-main { min-width: 0; height: auto; overflow: visible; }
-    .upcoming-panel { position: sticky; top: 30px; max-height: calc(100vh - 60px); overflow-y: auto; }
-    .upcoming-panel h3 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; color: var(--text-hi); }
-    .upcoming-item { padding: 11px 14px; background: rgba(255,255,255,0.45); border-radius: 16px; margin-bottom: 9px; border: 1px solid rgba(255,255,255,0.7); font-size: 0.85rem; cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: var(--text-hi); }
-    body.dark .upcoming-item { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #F1F0F7; }
-    .upcoming-item:hover { transform: translateY(-2px) scale(1.02); background: rgba(255,255,255,0.7); }
-
-    .titlebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-    .titlebar h1, #form-title { font-family: 'Brush Script MT', 'Lucida Handwriting', 'Segoe Script', cursive, sans-serif; font-size: 2.2rem !important; font-weight: 700; letter-spacing: 1px; margin: 0; color: var(--text-hi); }
-
-    .action-button-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-    .bubble-menu-btn { height: 36px; padding: 0 13px; border-radius: 18px; background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.75); color: var(--text-hi); cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: all 0.2s ease; }
-    .bubble-menu-btn:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-1px); }
-    body.dark .bubble-menu-btn { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: #F1F0F7; }
-    
-    .profile-avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #6C5CE7, #8E78FF); color: white; font-weight: 700; display: flex; justify-content: center; align-items: center; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.9); box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3); font-size: 0.85rem; user-select: none; }
-
-    .input-group { margin-bottom: 16px; position: relative; }
-    .input-group input, .input-group select { width: 100%; padding: 14px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.5); color: var(--text-hi); font-size: 1rem; outline: none; }
-    body.dark .input-group input, body.dark .input-group select { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.15); color: #F1F0F7; }
-    
-    .pwd-wrapper { position: relative; width: 100%; }
-    .pwd-wrapper input { padding-right: 48px; }
-    .eye-toggle-btn { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.65; padding: 4px; }
-    .eye-toggle-btn:hover { opacity: 1; }
-
-    .btn-main { width: 100%; padding: 14px; border-radius: 20px; border: none; background: #2D283E; color: #FFFFFF; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(45, 40, 62, 0.25); margin-top: 8px; transition: all 0.2s; }
-    body.dark .btn-main { background: #6C5CE7; color: #FFFFFF; box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4); }
-    .btn-main:active { transform: scale(0.97); }
-    .btn-secondary { background: rgba(255,255,255,0.4); color: var(--text-hi); border: 1px solid rgba(255,255,255,0.7); box-shadow: none; }
-    body.dark .btn-secondary { background: rgba(255,255,255,0.08); color: #F1F0F7; border-color: rgba(255,255,255,0.15); }
-    .btn-danger { background: #E63946 !important; color: #FFFFFF !important; }
-    .btn-success { background: #2A9D8F !important; color: #FFFFFF !important; }
-    .btn-warning { background: #F4A261 !important; color: #FFFFFF !important; }
-    .btn-disabled { background: rgba(120, 120, 120, 0.18) !important; color: rgba(150, 150, 150, 0.6) !important; cursor: not-allowed !important; pointer-events: none; }
-
-    .form-links { display: flex; justify-content: space-between; margin-top: 16px; font-size: 0.85rem; color: var(--text-mid); }
-    .form-links span { cursor: pointer; text-decoration: underline; }
-    #message { margin-top: 12px; font-size: 0.9rem; color: #E63946; min-height: 20px; text-align: center; font-weight: 600; }
-
-    .calendar-container { background: rgba(255, 255, 255, 0.25); padding: 16px; border-radius: 22px; border: 1px solid rgba(255, 255, 255, 0.6); margin-bottom: 20px; }
-    body.dark .calendar-container { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.08); }
-    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; font-size: 0.95rem; color: var(--text-hi); }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-    .cal-weekday { font-size: 0.75rem; color: var(--text-mid); font-weight: 600; padding-bottom: 4px; }
-    .cal-day { padding: 8px 2px; border-radius: 12px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; position: relative; color: var(--text-hi); }
-    .cal-day:hover { background: rgba(255, 255, 255, 0.5); }
-    body.dark .cal-day:hover { background: rgba(255, 255, 255, 0.1); }
-    .cal-day.empty { pointer-events: none; opacity: 0.25; }
-    .cal-day.today { border: 1.5px dashed var(--text-hi); font-weight: 700; }
-    .cal-day.active-filter { background: var(--text-hi); color: #FFF; box-shadow: 0 4px 14px rgba(0,0,0,0.2); }
-    body.dark .cal-day.active-filter { background: #6C5CE7; color: #FFF; }
-    .cal-dot-container { display: flex; justify-content: center; gap: 2px; margin-top: 2px; min-height: 5px; }
-    .cal-dot { width: 4px; height: 4px; background: #2A9D8F; border-radius: 50%; }
-    .cal-dot.urgent { background: #E63946; }
-
-    .selector-group { margin-bottom: 16px; text-align: left; }
-    .selector-title { font-size: 0.8rem; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; margin-left: 4px; }
-    .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tag-btn, .pri-btn { padding: 7px 15px; border-radius: 16px; font-size: 0.85rem; font-weight: 600; background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(255, 255, 255, 0.7); color: var(--text-mid); cursor: pointer; transition: all 0.2s; }
-    body.dark .tag-btn, body.dark .pri-btn { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: #F1F0F7; }
-    .tag-btn.active { background: var(--text-hi); color: #FFF; border-color: transparent; }
-    body.dark .tag-btn.active { background: #6C5CE7; color: #FFF; }
-    
-    .pri-btn[data-val="🔴 緊急"].active { background: #E63946; color: white; border-color: transparent; }
-    .pri-btn[data-val="🟡 一般"].active { background: #E9C46A; color: #2B2543; border-color: transparent; }
-    .pri-btn[data-val="🟢 輕鬆"].active { background: #2A9D8F; color: white; border-color: transparent; }
-
-    .manual-subtasks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-    .subtask-input-row { display: flex; gap: 8px; }
-    .subtask-input-row input { flex: 1; padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.4); outline: none; }
-    body.dark .subtask-input-row input { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: white; }
-    .add-step-btn { background: none; border: 1px dashed var(--text-mid); color: var(--text-mid); padding: 8px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-    .ai-btn { background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white; border: none; box-shadow: 0 4px 15px rgba(142, 45, 226, 0.25); }
-
-    .grid-container { position: relative; width: 100%; transition: height 0.3s ease; min-height: 120px; }
-    .widget-card { position: absolute; background: rgba(255, 255, 255, 0.52); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 22px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; font-weight: 600; overflow: hidden; user-select: none; touch-action: none; cursor: grab; box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,0.3); padding: 12px 14px 9px 14px; color: var(--text-hi); transition: top 0.25s ease-out, left 0.25s ease-out, transform 0.15s ease-out, box-shadow 0.2s ease; }
-    body.dark .widget-card { background: rgba(25, 25, 38, 0.65) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #F1F0F7; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-    .widget-card.dragging { z-index: 100 !important; cursor: grabbing !important; transform: scale(1.05) !important; box-shadow: 0 20px 45px rgba(0,0,0,0.25) !important; transition: none !important; }
-    
-    @keyframes urgentPulse { 0% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.45); border-color: rgba(230, 57, 70, 0.85); } 50% { box-shadow: 0 0 24px rgba(230, 57, 70, 0.75); border-color: #E63946; } 100% { box-shadow: 0 0 10px rgba(230, 57, 70, 0.45); border-color: rgba(230, 57, 70, 0.85); } }
-    .widget-card.urgent-glow { animation: urgentPulse 2s infinite ease-in-out; border-top: 3.5px solid #E63946; }
-    .widget-card.routine-card { border-bottom: 3.5px solid #4A90E2; }
-
-    .card-topbar { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 4px; font-size: 0.68rem; pointer-events: none; }
-    .card-tag-text { flex: 1; color: var(--text-mid); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
-    .card-due-badge { flex-shrink: 0; color: #E63946; font-weight: 700; background: rgba(230, 57, 70, 0.12); padding: 2px 6px; border-radius: 8px; font-size: 0.65rem; white-space: nowrap; }
-    .card-title-text { text-align: center; width: 100%; font-size: 0.95rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; margin: auto 0; pointer-events: none; }
-    
-    .progress-bar-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: rgba(0,0,0,0.05); pointer-events: none; }
-    body.dark .progress-bar-bg { background: rgba(255,255,255,0.05); }
-    .progress-bar-fill { height: 100%; background: var(--text-hi); transition: width 0.3s ease; }
-    body.dark .progress-bar-fill { background: #6C5CE7; box-shadow: 0 0 10px #6C5CE7; }
-
-    /* =====================================================================
-       🔧 核心修復：Modal 層疊問題
-       原問題：body 無 perspective，modal 的 translateZ(9999px) 超過透視點 → 元素消失
-       修復：移除 translateZ，改用純 z-index + position:fixed 確保最頂層
-       ===================================================================== */
-    .modal-overlay { 
-      position: fixed !important; 
-      inset: 0 !important; 
-      width: 100vw !important; 
-      height: 100vh !important; 
-      background: rgba(10, 10, 20, 0.45) !important; 
-      backdrop-filter: blur(14px) !important; 
-      -webkit-backdrop-filter: blur(14px) !important; 
-      z-index: 9999 !important;
-      /* ❌ 移除：transform: translateZ(9999px) — 此值超過 perspective 距離會讓元素消失 */
-    }
-    .modal-overlay.view-active { 
-      display: grid !important; 
-      place-items: center !important; 
-      pointer-events: auto !important; 
-      cursor: pointer;
-    }
-    .modal-overlay.view-hidden { 
-      display: none !important; 
-      pointer-events: none !important; 
-    }
-    .modal-shell { 
-      max-width: 480px; width: 90%; margin: auto; padding: 28px; max-height: 85vh; overflow-y: auto; 
-      color: var(--text-hi); 
-      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.8) !important; 
-      position: relative; 
-      z-index: 10000 !important; 
-      pointer-events: auto !important; 
-      cursor: default;
-    }
-    body.dark .modal-shell { box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.15) !important; }
-
-    .modal-close-corner-btn {
-      position: absolute; top: 18px; right: 18px; width: 32px; height: 32px; border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.4); color: var(--text-hi);
-      font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 0.2s; z-index: 10001;
-    }
-    .modal-close-corner-btn:hover { background: rgba(255,255,255,0.8); transform: scale(1.08); }
-    body.dark .modal-close-corner-btn { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #F1F0F7; }
-
-    .profile-info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
-    body.dark .profile-info-row { border-color: rgba(255,255,255,0.08); }
-    .streak-banner { background: linear-gradient(135deg, #FF6B6B, #FF8E53); color: white; border-radius: 18px; padding: 14px; text-align: center; margin-bottom: 18px; font-weight: 700; box-shadow: 0 6px 18px rgba(255, 107, 107, 0.3); }
-
-    .checklist-container { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; text-align: left; }
-    .check-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: rgba(255,255,255,0.4); border-radius: 16px; cursor: pointer; border: 1px solid rgba(255,255,255,0.6); color: var(--text-hi); }
-    body.dark .check-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #F1F0F7; }
-    .check-item.done { opacity: 0.55; text-decoration: line-through; }
-    .checkbox-circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--text-mid); display: flex; justify-content: center; align-items: center; font-size: 12px; color: transparent; flex-shrink: 0; }
-    .check-item.done .checkbox-circle { background: #2A9D8F; border-color: #2A9D8F; color: white; }
-
-    .archive-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.35); border-radius: 16px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.5); color: var(--text-hi); }
-    body.dark .archive-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #F1F0F7; }
-    .archive-item > div { flex: 1; min-width: 0; }
-    .archive-item button { flex-shrink: 0; width: auto !important; padding: 6px 14px !important; font-size: 0.8rem !important; margin-top: 0 !important; }
-    
-    .guide-box { text-align: left; line-height: 1.6; font-size: 0.88rem; }
-    .guide-item { margin-bottom: 12px; padding: 12px 16px; background: rgba(255,255,255,0.45); border-radius: 16px; border: 1px solid rgba(255,255,255,0.6); }
-    body.dark .guide-item { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
-    .version-tag { display: inline-block; padding: 3px 10px; border-radius: 12px; background: rgba(108, 92, 231, 0.15); color: #6C5CE7; font-weight: 700; font-size: 0.75rem; margin-left: 6px; }
-  </style>
+  <!-- 樣式：所有 CSS 集中於此 -->
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+  <!-- ── 背景雲霧 ─────────────────────────────── -->
   <div class="sky-container">
     <div class="cloud-orb orb-peach"></div>
     <div class="cloud-orb orb-purple"></div>
     <div class="cloud-orb orb-orange"></div>
   </div>
 
-  <!-- VIEW 1: 登入畫面 -->
+  <!-- ── VIEW 1：登入畫面 ─────────────────────── -->
   <div id="login-view" class="view-active window-shell login-shell">
-    <div class="titlebar" style="position: relative;">
+    <div class="titlebar" style="position:relative;">
       <h1 id="form-title">Planit</h1>
-      <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題" style="position: absolute; right: 0;">☾</button>
+      <button class="bubble-menu-btn theme-toggle-btn" aria-label="切換主題" style="position:absolute; right:0;">☾</button>
     </div>
-    
-    <div class="input-group"><input type="text" id="account" placeholder="帳號 Account" autocomplete="off"></div>
-    <div class="input-group view-hidden" id="email-field-group"><input type="email" id="email" placeholder="電子信箱 Email (接收歡迎信)" autocomplete="off"></div>
-    
+
+    <div class="input-group">
+      <input type="text" id="account" placeholder="帳號 Account" autocomplete="off">
+    </div>
+    <div class="input-group view-hidden" id="email-field-group">
+      <input type="email" id="email" placeholder="電子信箱 Email (接收歡迎信)" autocomplete="off">
+    </div>
     <div class="input-group">
       <div class="pwd-wrapper">
         <input type="password" id="password" placeholder="密碼 Password">
-        <button class="eye-toggle-btn" type="button" onclick="togglePasswordVisibility('password', this)" title="顯示/隱藏密碼">👁️</button>
+        <button class="eye-toggle-btn" type="button" onclick="togglePasswordVisibility('password', this)">👁️</button>
       </div>
     </div>
 
     <button id="action-btn" class="btn-main" onclick="submitManualForm()">進入系統</button>
     <div id="message"></div>
-    
+
     <div class="form-links">
       <span onclick="toggleMode()" id="switch-mode-text">沒有帳號？點此新建帳號</span>
       <span onclick="openForgotPasswordModal()" id="forgot-pwd-btn">忘記密碼？</span>
     </div>
 
-    <div style="display: flex; justify-content: center; min-height: 45px; margin-top:24px;" id="google-btn-container"></div>
+    <div style="display:flex; justify-content:center; min-height:45px; margin-top:24px;" id="google-btn-container"></div>
   </div>
 
-  <!-- VIEW 2: 控制中心 Dashboard -->
+  <!-- ── VIEW 2：Dashboard 控制中心 ───────────── -->
   <div id="dashboard-view" class="view-hidden">
+
     <div class="window-shell dashboard-main">
       <div class="titlebar">
         <h1>Planit</h1>
         <div class="action-button-group">
-          <button class="bubble-menu-btn" onclick="openTaskModal()" title="新增任務">＋ 新增</button>
+          <button class="bubble-menu-btn" onclick="openTaskModal()"    title="新增任務">＋ 新增</button>
           <button class="bubble-menu-btn" onclick="openArchiveModal()" title="已完成完成區">📁 完成區</button>
-          <button class="bubble-menu-btn" onclick="openGuideModal()" title="功能說明">💡 說明</button>
-          <button class="bubble-menu-btn theme-toggle-btn" title="切換主題">☾</button>
+          <button class="bubble-menu-btn" onclick="openGuideModal()"   title="功能說明">💡 說明</button>
+          <button class="bubble-menu-btn theme-toggle-btn"             title="切換主題">☾</button>
           <div class="profile-avatar-btn" onclick="openProfileModal()" id="user-avatar-badge" title="個人中心">U</div>
-          <button class="bubble-menu-btn" onclick="logout()" title="登出">🚪</button>
+          <button class="bubble-menu-btn" onclick="logout()"           title="登出">🚪</button>
         </div>
       </div>
 
+      <!-- 月曆 -->
       <div class="calendar-container">
         <div class="cal-header">
-          <div style="display: flex; gap: 4px;">
+          <div style="display:flex; gap:4px;">
             <button class="bubble-menu-btn" onclick="changeMonth(-1)">◀</button>
             <button class="bubble-menu-btn" onclick="jumpToToday()">今天</button>
             <button class="bubble-menu-btn" onclick="changeMonth(1)">▶</button>
           </div>
-          <span id="cal-month-title">2026年 9月</span>
+          <span id="cal-month-title">載入中...</span>
         </div>
         <div class="cal-grid">
           <div class="cal-weekday">一</div><div class="cal-weekday">二</div><div class="cal-weekday">三</div>
           <div class="cal-weekday">四</div><div class="cal-weekday">五</div><div class="cal-weekday">六</div><div class="cal-weekday">日</div>
         </div>
-        <div class="cal-grid" id="cal-days-grid" style="margin-top: 4px;"></div>
+        <div class="cal-grid" id="cal-days-grid" style="margin-top:4px;"></div>
       </div>
 
+      <!-- 任務矩陣 -->
       <div class="grid-container" id="grid-container">
-        <div style="text-align:center; padding: 40px; color: var(--text-mid);">載入任務矩陣中...</div>
+        <div style="text-align:center; padding:40px; color:var(--text-mid);">載入任務矩陣中...</div>
       </div>
     </div>
 
+    <!-- 右欄：即將到來 -->
     <div class="window-shell upcoming-panel">
       <h3>🔔 即將到來</h3>
-      <div id="upcoming-list" style="font-size: 0.85rem; color: var(--text-mid);">
-        載入預告中...
-      </div>
+      <div id="upcoming-list" style="font-size:0.85rem; color:var(--text-mid);">載入預告中...</div>
     </div>
   </div>
 
-  <!-- VIEW 3: 新增任務 Modal -->
-  <div id="task-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'task-modal')">
+  <!-- ── VIEW 3：新增任務 Modal ────────────────── -->
+  <div id="task-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event,'task-modal')">
     <div class="window-shell modal-shell">
-      <button class="modal-close-corner-btn" onclick="closeTaskModal()" title="關閉">✕</button>
-      <h2 style="font-size: 1.25rem; margin-bottom: 16px; text-align: center;">✨ 新增目標任務</h2>
-      
+      <button class="modal-close-corner-btn" onclick="closeTaskModal()">✕</button>
+      <h2 style="font-size:1.25rem; margin-bottom:16px; text-align:center;">✨ 新增目標任務</h2>
+
       <div class="selector-group">
         <div class="selector-title">任務類型</div>
         <div class="tag-selector">
-          <div class="tag-btn active" onclick="selectOpt('.tag-btn', this)" data-val="⚡️ 碎片 (<15m)">⚡️ 碎片 (&lt;15m)</div>
-          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🧠 深度專注">🧠 深度專注</div>
-          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="🔁 例行重複">🔁 例行重複</div>
-          <div class="tag-btn" onclick="selectOpt('.tag-btn', this)" data-val="☕️ 生活/社交">☕️ 生活/社交</div>
+          <div class="tag-btn active" onclick="selectOpt('.tag-btn',this)" data-val="⚡️ 碎片 (<15m)">⚡️ 碎片 (&lt;15m)</div>
+          <div class="tag-btn" onclick="selectOpt('.tag-btn',this)" data-val="🧠 深度專注">🧠 深度專注</div>
+          <div class="tag-btn" onclick="selectOpt('.tag-btn',this)" data-val="🔁 例行重複">🔁 例行重複</div>
+          <div class="tag-btn" onclick="selectOpt('.tag-btn',this)" data-val="☕️ 生活/社交">☕️ 生活/社交</div>
         </div>
       </div>
 
       <div class="selector-group">
         <div class="selector-title">優先順序</div>
         <div class="tag-selector">
-          <div class="pri-btn" onclick="selectOpt('.pri-btn', this)" data-val="🔴 緊急">🔴 緊急</div>
-          <div class="pri-btn active" onclick="selectOpt('.pri-btn', this)" data-val="🟡 一般">🟡 一般</div>
-          <div class="pri-btn" onclick="selectOpt('.pri-btn', this)" data-val="🟢 輕鬆">🟢 輕鬆</div>
+          <div class="pri-btn" onclick="selectOpt('.pri-btn',this)" data-val="🔴 緊急">🔴 緊急</div>
+          <div class="pri-btn active" onclick="selectOpt('.pri-btn',this)" data-val="🟡 一般">🟡 一般</div>
+          <div class="pri-btn" onclick="selectOpt('.pri-btn',this)" data-val="🟢 輕鬆">🟢 輕鬆</div>
         </div>
       </div>
 
       <div class="selector-group">
         <div class="selector-title">預計完成期限 (Due Date)</div>
-        <div class="input-group" style="margin-bottom: 0;">
+        <div class="input-group" style="margin-bottom:0;">
           <input type="date" id="new-task-duedate">
         </div>
       </div>
 
-      <div class="input-group" style="margin-top: 14px;">
+      <div class="input-group" style="margin-top:14px;">
         <input type="text" id="new-task-input" placeholder="目標名稱 (例：與朋友聚餐 / 專案簡報)" autocomplete="off">
       </div>
 
       <div class="selector-group">
         <div class="selector-title">階段性子任務 (選填)</div>
         <div id="manual-subtasks-container" class="manual-subtasks"></div>
-        <div style="display: flex; gap: 8px;">
-          <button class="add-step-btn" style="flex: 1;" onclick="addManualSubtaskInput()">➕ 手動新增</button>
-          <button id="ai-decompose-btn" class="add-step-btn ai-btn" style="flex: 1;" onclick="triggerAIDecompose()">✨ AI 幫我拆解</button>
+        <div style="display:flex; gap:8px;">
+          <button class="add-step-btn" style="flex:1;" onclick="addManualSubtaskInput()">➕ 手動新增</button>
+          <button id="ai-decompose-btn" class="add-step-btn ai-btn" style="flex:1;" onclick="triggerAIDecompose()">✨ AI 幫我拆解</button>
         </div>
       </div>
 
-      <div style="display: flex; gap: 12px; margin-top: 20px;">
+      <div style="display:flex; gap:12px; margin-top:20px;">
         <button class="btn-main btn-secondary" onclick="closeTaskModal()">取消</button>
         <button class="btn-main" onclick="confirmAddTask()">建立卡片</button>
       </div>
     </div>
   </div>
 
-  <!-- VIEW 4: 任務詳情與編輯 Modal -->
-  <div id="detail-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'detail-modal')">
-    <div class="window-shell modal-shell" style="text-align: center;">
-      <button class="modal-close-corner-btn" onclick="closeDetailModal()" title="關閉">✕</button>
-      <div style="margin-bottom: 12px;">
-        <input type="text" id="edit-task-title" style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.5); font-size: 1.1rem; font-weight: 700; text-align: center; color: var(--text-hi); outline: none;" placeholder="任務名稱">
+  <!-- ── VIEW 4：任務詳情 Modal ─────────────────── -->
+  <div id="detail-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event,'detail-modal')">
+    <div class="window-shell modal-shell" style="text-align:center;">
+      <button class="modal-close-corner-btn" onclick="closeDetailModal()">✕</button>
+
+      <div style="margin-bottom:12px;">
+        <input type="text" id="edit-task-title"
+          style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.7); background:rgba(255,255,255,0.5); font-size:1.1rem; font-weight:700; text-align:center; color:var(--text-hi); outline:none;"
+          placeholder="任務名稱">
       </div>
 
-      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-        <input type="date" id="edit-task-duedate" style="flex: 1; padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.5); color: var(--text-hi); font-size: 0.85rem;">
-        <select id="edit-task-priority" style="flex: 1; padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.7); background: rgba(255,255,255,0.5); color: var(--text-hi); font-size: 0.85rem;">
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <input type="date" id="edit-task-duedate"
+          style="flex:1; padding:8px; border-radius:10px; border:1px solid rgba(255,255,255,0.7); background:rgba(255,255,255,0.5); color:var(--text-hi); font-size:0.85rem;">
+        <select id="edit-task-priority"
+          style="flex:1; padding:8px; border-radius:10px; border:1px solid rgba(255,255,255,0.7); background:rgba(255,255,255,0.5); color:var(--text-hi); font-size:0.85rem;">
           <option value="🔴 緊急">🔴 緊急</option>
           <option value="🟡 一般">🟡 一般</option>
           <option value="🟢 輕鬆">🟢 輕鬆</option>
         </select>
       </div>
 
-      <div id="detail-progress-text" style="font-size: 0.85rem; font-weight: 600; color: #2A9D8F;"></div>
+      <div id="detail-progress-text" style="font-size:0.85rem; font-weight:600; color:#2A9D8F;"></div>
       <div id="detail-checklist" class="checklist-container"></div>
-      
-      <div style="display: flex; gap: 8px; margin-top: 18px;">
-        <button id="detail-complete-btn" class="btn-main btn-success" style="flex: 1; padding: 10px;" onclick="markTaskCompleted()">✅ 完成</button>
-        <button class="btn-main btn-warning" style="flex: 1; padding: 10px;" onclick="rolloverTaskToTomorrow()">➡️ 移到明天</button>
+
+      <div style="display:flex; gap:8px; margin-top:18px;">
+        <button id="detail-complete-btn" class="btn-main btn-success" style="flex:1; padding:10px;" onclick="markTaskCompleted()">✅ 完成</button>
+        <button class="btn-main btn-warning" style="flex:1; padding:10px;" onclick="rolloverTaskToTomorrow()">➡️ 移到明天</button>
       </div>
-      <div style="display: flex; gap: 8px; margin-top: 8px;">
-        <button class="btn-main btn-secondary" onclick="saveTaskEdits()" style="flex: 1; padding: 10px;">💾 儲存編輯</button>
-        <button class="btn-main btn-secondary" onclick="closeDetailModal()" style="flex: 1; padding: 10px;">關閉</button>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button class="btn-main btn-secondary" onclick="saveTaskEdits()" style="flex:1; padding:10px;">💾 儲存編輯</button>
+        <button class="btn-main btn-secondary" onclick="closeDetailModal()" style="flex:1; padding:10px;">關閉</button>
       </div>
     </div>
   </div>
 
-  <!-- VIEW 5: 忘記密碼 Modal -->
-  <div id="forgot-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'forgot-modal')">
-    <div class="window-shell modal-shell" style="text-align: center;">
-      <button class="modal-close-corner-btn" onclick="closeForgotPasswordModal()" title="關閉">✕</button>
-      <h2 style="font-size: 1.25rem; margin-bottom: 12px;">🔑 忘記密碼</h2>
-      <p style="font-size: 0.85rem; color: var(--text-mid); margin-bottom: 16px;">輸入註冊信箱，系統將寄送一組臨時密碼供登入。</p>
+  <!-- ── VIEW 5：忘記密碼 Modal ─────────────────── -->
+  <div id="forgot-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event,'forgot-modal')">
+    <div class="window-shell modal-shell" style="text-align:center;">
+      <button class="modal-close-corner-btn" onclick="closeForgotPasswordModal()">✕</button>
+      <h2 style="font-size:1.25rem; margin-bottom:12px;">🔑 忘記密碼</h2>
+      <p style="font-size:0.85rem; color:var(--text-mid); margin-bottom:16px;">輸入註冊信箱，系統將寄送一組臨時密碼供登入。</p>
       <div class="input-group">
         <input type="email" id="forgot-email-input" placeholder="註冊電子信箱">
       </div>
       <button class="btn-main" id="forgot-submit-btn" onclick="submitForgotPassword()">發送臨時密碼</button>
-      <button class="btn-main btn-secondary" style="margin-top: 8px;" onclick="closeForgotPasswordModal()">取消</button>
+      <button class="btn-main btn-secondary" style="margin-top:8px;" onclick="closeForgotPasswordModal()">取消</button>
     </div>
   </div>
 
-  <!-- VIEW 6: 個人中心與簽到 Modal -->
-  <div id="profile-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'profile-modal')">
+  <!-- ── VIEW 6：個人中心 Modal ─────────────────── -->
+  <div id="profile-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event,'profile-modal')">
     <div class="window-shell modal-shell">
-      <button class="modal-close-corner-btn" onclick="closeProfileModal()" title="關閉">✕</button>
-      <h2 style="font-size: 1.25rem; margin-bottom: 14px; text-align: center;">👤 個人控制檔案</h2>
+      <button class="modal-close-corner-btn" onclick="closeProfileModal()">✕</button>
+      <h2 style="font-size:1.25rem; margin-bottom:14px; text-align:center;">👤 個人控制檔案</h2>
 
-      <div class="streak-banner" id="profile-streak-box">
-        🔥 連續簽到 <span id="profile-streak-days" style="font-size: 1.4rem;">0</span> 天
-        <button class="btn-main" style="margin-top: 8px; padding: 8px; font-size: 0.85rem; background: white; color: #FF6B6B;" onclick="triggerDailyCheckin()" id="checkin-action-btn">🎯 今日簽到</button>
+      <div class="streak-banner">
+        🔥 連續簽到 <span id="profile-streak-days" style="font-size:1.4rem;">0</span> 天
+        <button class="btn-main" style="margin-top:8px; padding:8px; font-size:0.85rem; background:white; color:#FF6B6B;"
+          onclick="triggerDailyCheckin()" id="checkin-action-btn">🎯 今日簽到</button>
       </div>
 
       <div class="profile-info-row"><span>帳號 ID</span><strong id="p-acc">-</strong></div>
       <div class="profile-info-row"><span>綁定信箱</span><strong id="p-email">-</strong></div>
       <div class="profile-info-row"><span>註冊時間</span><span id="p-created" style="color:var(--text-mid); font-size:0.85rem; font-weight:600;">-</span></div>
-      <div class="profile-info-row"><span>上次登入</span><span id="p-login" style="color:var(--text-mid); font-size:0.85rem; font-weight:600;">-</span></div>
+      <div class="profile-info-row"><span>上次登入</span><span id="p-login"   style="color:var(--text-mid); font-size:0.85rem; font-weight:600;">-</span></div>
 
-      <div style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed rgba(0,0,0,0.1);">
-        <h4 style="font-size: 0.9rem; margin-bottom: 10px;">🔐 修改密碼</h4>
-        
-        <div class="input-group" style="margin-bottom: 8px;">
+      <div style="margin-top:18px; padding-top:14px; border-top:1px dashed rgba(0,0,0,0.1);">
+        <h4 style="font-size:0.9rem; margin-bottom:10px;">🔐 修改密碼</h4>
+        <div class="input-group" style="margin-bottom:8px;">
           <div class="pwd-wrapper">
             <input type="password" id="reset-old-pwd" placeholder="目前密碼">
-            <button class="eye-toggle-btn" type="button" onclick="togglePasswordVisibility('reset-old-pwd', this)">👁️</button>
+            <button class="eye-toggle-btn" type="button" onclick="togglePasswordVisibility('reset-old-pwd',this)">👁️</button>
           </div>
         </div>
-
-        <div class="input-group" style="margin-bottom: 8px;">
+        <div class="input-group" style="margin-bottom:8px;">
           <div class="pwd-wrapper">
             <input type="password" id="reset-new-pwd" placeholder="新密碼">
-            <button class="eye-toggle-btn" type="button" onclick="togglePasswordVisibility('reset-new-pwd', this)">👁️</button>
+            <button class="eye-toggle-btn" type="button" onclick="togglePasswordVisibility('reset-new-pwd',this)">👁️</button>
           </div>
         </div>
-
-        <button class="btn-main btn-secondary" style="padding: 10px; font-size: 0.85rem;" onclick="submitPasswordReset()">確認變更密碼</button>
+        <button class="btn-main btn-secondary" style="padding:10px; font-size:0.85rem;" onclick="submitPasswordReset()">確認變更密碼</button>
       </div>
 
-      <button class="btn-main btn-secondary" style="margin-top: 16px;" onclick="closeProfileModal()">關閉</button>
+      <button class="btn-main btn-secondary" style="margin-top:16px;" onclick="closeProfileModal()">關閉</button>
     </div>
   </div>
 
-  <!-- VIEW 7: 說明 Modal -->
-  <div id="guide-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'guide-modal')">
+  <!-- ── VIEW 7：說明 Modal ──────────────────────── -->
+  <div id="guide-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event,'guide-modal')">
     <div class="window-shell modal-shell">
-      <button class="modal-close-corner-btn" onclick="closeGuideModal()" title="關閉說明">✕</button>
-
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-right: 36px;">
-        <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">💡 關於 Planit</h2>
+      <button class="modal-close-corner-btn" onclick="closeGuideModal()">✕</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-right:36px;">
+        <h2 style="font-size:1.25rem; font-weight:700; margin:0;">💡 關於 Planit</h2>
         <span class="version-tag">v4.9 Stable</span>
       </div>
-
       <div class="guide-box">
-        <div class="guide-item" style="border-left: 3.5px solid #6C5CE7;">
-          <strong>🎯 核心精神</strong><br>
-          融合子彈筆記、AI 拆解與 2.5D 控制中心的輕量敏捷任務協調工具。
+        <div class="guide-item" style="border-left:3.5px solid #6C5CE7;">
+          <strong>🎯 核心精神</strong><br>融合子彈筆記、AI 拆解與 2.5D 控制中心的輕量敏捷任務協調工具。
         </div>
-
         <div class="guide-item">
           <strong>🏷️ 標籤定義</strong><br>
           • <strong>⚡️ 碎片 (&lt;15m)</strong>：15 分鐘瑣事。<br>
@@ -458,993 +256,65 @@
           • <strong>🔁 例行重複</strong>：藍線固定工作。<br>
           • <strong>☕️ 生活/社交</strong>：聚會與日常採購。
         </div>
-
         <div class="guide-item">
           <strong>📌 智慧排序規則</strong><br>
-          任務卡片強制按「🔴 緊急 &gt; 🟡 一般 &gt; 🟢 輕鬆」順序排列，無指定日期項目自動作為「常駐項目」顯示於清單。
+          任務卡片強制按「🔴 緊急 &gt; 🟡 一般 &gt; 🟢 輕鬆」排列，無日期項目自動常駐。
         </div>
-
-        <div class="guide-item" style="border-left: 3.5px solid #2A9D8F;">
-          <strong>🚀 最新版本更新亮點 (v4.9)</strong><br>
-          • <strong>純數字帳號防呆</strong>：完整支援純數字（如 1234）相容讀寫，防止自動轉型中斷。<br>
-          • <strong>隔日延期 (Rollover)</strong>：以任務原本截止日為基準精準 +1 天，並自動升級為「🔴 緊急」紅框呼吸發光。<br>
-          • <strong>時區防偏差</strong>：強制鎖定 Asia/Taipei 台北標準時區，杜絕跨日換算倒退 1 天。<br>
-          • <strong>安全強型態</strong>：全站寫入強制前綴純文字格式，避免 Google Sheets 格式污染。
+        <div class="guide-item" style="border-left:3.5px solid #2A9D8F;">
+          <strong>🚀 v4.9 更新亮點</strong><br>
+          • 純數字帳號防呆 / Rollover 精準 +1 天 / 時區鎖定 Asia/Taipei / 強型態防 Sheets 污染。
         </div>
       </div>
-
-      <button type="button" class="btn-main btn-secondary" style="margin-top: 14px;" onclick="closeGuideModal()">關閉說明</button>
+      <button type="button" class="btn-main btn-secondary" style="margin-top:14px;" onclick="closeGuideModal()">關閉說明</button>
     </div>
   </div>
 
-  <!-- VIEW 8: 刪除確認 Modal -->
-  <div id="delete-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'delete-modal')">
-    <div class="window-shell modal-shell" style="text-align: center;">
-      <h2 style="font-size: 1.25rem; margin-bottom: 16px;">⚠️ 刪除確認</h2>
-      <p style="color: var(--text-mid); margin-bottom: 24px; font-size: 0.95rem;">確定移除此任務嗎？</p>
-      <div style="display: flex; gap: 12px;">
+  <!-- ── VIEW 8：刪除確認 Modal ─────────────────── -->
+  <div id="delete-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event,'delete-modal')">
+    <div class="window-shell modal-shell" style="text-align:center;">
+      <h2 style="font-size:1.25rem; margin-bottom:16px;">⚠️ 刪除確認</h2>
+      <p style="color:var(--text-mid); margin-bottom:24px; font-size:0.95rem;">確定移除此任務嗎？</p>
+      <div style="display:flex; gap:12px;">
         <button class="btn-main btn-secondary" onclick="closeDeleteModal()">保留</button>
-        <button class="btn-main btn-danger" onclick="confirmDeleteTask()">確定刪除</button>
+        <button class="btn-main btn-danger"    onclick="confirmDeleteTask()">確定刪除</button>
       </div>
     </div>
   </div>
 
-  <!-- VIEW 9: 📁 已完成區 Modal -->
-  <div id="archive-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event, 'archive-modal')">
-    <div class="window-shell modal-shell" style="text-align: center;">
-      <button class="modal-close-corner-btn" onclick="closeArchiveModal()" title="關閉">✕</button>
-      <h2 style="font-size: 1.25rem; margin-bottom: 16px;">📁 已完成任務完成區</h2>
-      <p style="color: var(--text-mid); margin-bottom: 16px; font-size: 0.85rem;">這裡存放所有已結案的成就！</p>
-      <div id="archive-list" style="max-height: 300px; overflow-y: auto; text-align: left; margin-bottom: 18px;">
-        <div style="text-align:center; color: var(--text-mid); padding: 20px;">目前沒有已完成的任務</div>
+  <!-- ── VIEW 9：已完成區 Modal ─────────────────── -->
+  <div id="archive-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event,'archive-modal')">
+    <div class="window-shell modal-shell" style="text-align:center;">
+      <button class="modal-close-corner-btn" onclick="closeArchiveModal()">✕</button>
+      <h2 style="font-size:1.25rem; margin-bottom:16px;">📁 已完成任務完成區</h2>
+      <p style="color:var(--text-mid); margin-bottom:16px; font-size:0.85rem;">這裡存放所有已結案的成就！</p>
+      <div id="archive-list" style="max-height:300px; overflow-y:auto; text-align:left; margin-bottom:18px;">
+        <div style="text-align:center; color:var(--text-mid); padding:20px;">目前沒有已完成的任務</div>
       </div>
       <button class="btn-main btn-secondary" onclick="closeArchiveModal()">關閉抽屜</button>
     </div>
   </div>
 
-  <script>
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw9130xk5gFZxkrtpIR-YQSClZaqW3IH0JxU-Ka4fRKsdaq9FFZZzxIEgvVBExnxXTVOQ/exec"; 
-    const GOOGLE_CLIENT_ID = "867237692766-9o2nhlnrqlq00k75apvsbvl2r2u1jsqi.apps.googleusercontent.com";
-    
-    let isLoginMode = true;
-    let currentUser = ""; 
-    let targetElementToDelete = null; 
-    let allTasksData = []; 
-    let currentDetailTaskId = null; 
-    let selectedDateFilter = null; 
-    
-    let currentCalendarYear = new Date().getFullYear();
-    let currentCalendarMonth = new Date().getMonth();
+  <!-- ════════════════════════════════════════════
+       JS 載入順序（依賴關係由上到下）
+       1. config  → 常數
+       2. api     → 需要 GAS_API_URL
+       3. app     → 全域狀態 + window.onload
+       4. ui      → Modal/Tilt（立即執行的 addEventListener）
+       5. auth    → 登入（需 callGASAPI、currentUser）
+       6. tasks   → 任務（需 allTasksData、openModal）
+       7. calendar→ 月曆（需 allTasksData）
+       8. grid    → 矩陣（需 allTasksData、openTaskDetail）
+       9. profile → 個人（需 callGASAPI、currentUser）
+  ════════════════════════════════════════════ -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/tasks.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/grid.js"></script>
+  <script src="js/profile.js"></script>
 
-    let globalRenderGrid = null;
-
-    function getLocalDateString(dateObj = new Date()) {
-      const year = dateObj.getFullYear();
-      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const day = String(dateObj.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    // 點擊遮罩外圍關閉 Modal
-    function handleModalOverlayClick(e, modalId) {
-      if (e.target.id === modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-          modal.classList.remove('view-active');
-          modal.classList.add('view-hidden');
-        }
-      }
-    }
-
-    // Esc 鍵一鍵關閉所有彈窗
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-overlay.view-active').forEach(m => {
-          m.classList.remove('view-active');
-          m.classList.add('view-hidden');
-        });
-      }
-    });
-
-    window.onload = function () {
-      initGoogleAuth();
-      initGlobalTilt();
-      
-      const savedUser = localStorage.getItem('planit_user');
-      if (savedUser) {
-        currentUser = savedUser;
-        document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
-        document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
-        updateAvatarBadge();
-        fetchTasks();
-      }
-    };
-
-    function updateAvatarBadge() {
-      const badge = document.getElementById('user-avatar-badge');
-      if (currentUser) {
-        badge.innerText = currentUser.charAt(0).toUpperCase();
-      }
-    }
-
-    function togglePasswordVisibility(inputId, btn) {
-      const input = document.getElementById(inputId);
-      if (input.type === 'password') {
-        input.type = 'text';
-        btn.innerText = '🙈';
-      } else {
-        input.type = 'password';
-        btn.innerText = '👁️';
-      }
-    }
-
-    // 🔧 修復：3D tilt 只套在 dashboard-view 本身，不影響 modal 層
-    function initGlobalTilt() {
-      const dashView = document.getElementById('dashboard-view');
-      document.addEventListener('mousemove', (e) => {
-        // 有 modal 開啟時，暫停 tilt 避免視覺偏移
-        if (document.querySelector('.modal-overlay.view-active')) return;
-        if (!dashView || !dashView.classList.contains('view-active')) return;
-
-        const xOffset = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
-        const yOffset = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
-        // 🔧 修復：tilt 效果套在 dashboard-view 的 CSS perspective 內部元素
-        //    用 style 直接改 gridContainer 和 upcomingPanel 的 transform
-        const tiltX = -yOffset * 2.5;
-        const tiltY = xOffset * 2.5;
-        dashView.querySelectorAll('.window-shell').forEach(el => {
-          el.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-        });
-      });
-      document.addEventListener('mouseleave', () => {
-        if (!dashView) return;
-        dashView.querySelectorAll('.window-shell').forEach(el => {
-          el.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg)';
-        });
-      });
-    }
-
-    window.addEventListener('resize', () => {
-      if (globalRenderGrid) globalRenderGrid();
-    });
-
-    function initGoogleAuth() {
-      setTimeout(() => {
-        try {
-          if (typeof google !== 'undefined' && google.accounts) {
-            google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse, auto_select: false });
-            google.accounts.id.renderButton(document.getElementById("google-btn-container"), { theme: "outline", size: "large", shape: "pill", width: 280 });
-          }
-        } catch(e) {}
-      }, 200);
-    }
-
-    function callGASAPI(payload, callback, onError) {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-      fetch(GAS_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      })
-      .then(res => {
-        clearTimeout(timeoutId);
-        return res.json();
-      })
-      .then(data => {
-        if (callback) callback(data);
-      })
-      .catch(err => {
-        clearTimeout(timeoutId);
-        console.error("API 連線異常:", err);
-        const errorMsg = err.name === 'AbortError' ? "連線逾時，請檢查網路或 GAS 權限" : "無法連線至雲端服務";
-        if (onError) onError(errorMsg);
-      });
-    }
-
-    function fetchTasks() {
-      callGASAPI({ action: 'getTasks', account: currentUser }, (data) => {
-        allTasksData = Array.isArray(data) ? data : [];
-        renderCalendar();
-        renderUpcomingPanel();
-        renderTasks();
-      }, () => {
-        document.getElementById('grid-container').innerHTML = `<div style="text-align:center; padding: 40px; color: #E63946;">任務載入失敗，請重新整理頁面。</div>`;
-      });
-    }
-
-    function decodeJwtResponse(t) { return JSON.parse(decodeURIComponent(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''))); }
-    
-    function handleCredentialResponse(r) {
-       document.getElementById('message').innerText = "驗證成功，進入控制中心...";
-       const userInfo = decodeJwtResponse(r.credential);
-       const email = userInfo.email;
-       const name = userInfo.name || "User";
-
-       callGASAPI({ action: 'googleLogin', email: email, name: name }, (res) => {
-          currentUser = (res && res.account) ? res.account : email;
-          localStorage.setItem('planit_user', currentUser);
-          updateAvatarBadge();
-          document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
-          document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
-          fetchTasks();
-       }, (err) => {
-          document.getElementById('message').innerText = err;
-       });
-    }
-
-    function toggleMode() {
-      isLoginMode = !isLoginMode;
-      document.getElementById('form-title').innerText = isLoginMode ? 'Planit' : '新建帳號';
-      document.getElementById('action-btn').innerText = isLoginMode ? '進入系統' : '註冊帳號';
-      document.getElementById('email-field-group').classList.toggle('view-hidden', isLoginMode);
-      document.getElementById('switch-mode-text').innerText = isLoginMode ? '沒有帳號？點此新建帳號' : '已有帳號？返回登入';
-      document.getElementById('forgot-pwd-btn').style.display = isLoginMode ? 'inline' : 'none';
-      document.getElementById('message').innerText = ''; 
-    }
-
-    function submitManualForm() {
-      const acc = document.getElementById('account').value.trim(); 
-      const pwd = document.getElementById('password').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const actionBtn = document.getElementById('action-btn');
-
-      if (!acc || !pwd) { 
-        document.getElementById('message').innerText = "請輸入帳號與密碼！"; 
-        return; 
-      }
-      if (!isLoginMode && !email) { 
-        document.getElementById('message').innerText = "註冊請填寫電子信箱！"; 
-        return; 
-      }
-
-      document.getElementById('message').innerText = "連線驗證中...";
-      actionBtn.disabled = true;
-      actionBtn.classList.add('btn-disabled');
-      
-      callGASAPI(
-        { action: isLoginMode ? 'login' : 'register', account: acc, password: pwd, email: email },
-        (res) => {
-          actionBtn.disabled = false;
-          actionBtn.classList.remove('btn-disabled');
-
-          if (!res) {
-            document.getElementById('message').innerText = "伺服器未回傳有效狀態！";
-            return;
-          }
-
-          document.getElementById('message').innerText = res.msg || (res.success ? "成功" : "驗證失敗");
-
-          if (res.success) {
-            if (!isLoginMode) { 
-              setTimeout(toggleMode, 1500); 
-            } else { 
-              currentUser = String(res.account); 
-              localStorage.setItem('planit_user', currentUser); 
-              updateAvatarBadge();
-              document.getElementById('login-view').classList.replace('view-active', 'view-hidden');
-              document.getElementById('dashboard-view').classList.replace('view-hidden', 'view-active');
-              fetchTasks();
-            }
-          }
-        },
-        (errMsg) => {
-          actionBtn.disabled = false;
-          actionBtn.classList.remove('btn-disabled');
-          document.getElementById('message').innerText = errMsg;
-        }
-      );
-    }
-
-    function logout() {
-      localStorage.removeItem('planit_user'); 
-      currentUser = ""; 
-      allTasksData = [];
-      selectedDateFilter = null;
-      document.getElementById('dashboard-view').classList.replace('view-active', 'view-hidden');
-      document.getElementById('login-view').classList.replace('view-hidden', 'view-active');
-      document.getElementById('account').value = '';
-      document.getElementById('password').value = '';
-      document.getElementById('email').value = '';
-      document.getElementById('message').innerText = '';
-      initGoogleAuth();
-    }
-
-    function openForgotPasswordModal() {
-      const m = document.getElementById('forgot-modal');
-      m.classList.remove('view-hidden'); m.classList.add('view-active');
-      document.getElementById('forgot-email-input').value = "";
-    }
-    function closeForgotPasswordModal() {
-      const m = document.getElementById('forgot-modal');
-      m.classList.remove('view-active'); m.classList.add('view-hidden');
-    }
-    function submitForgotPassword() {
-      const email = document.getElementById('forgot-email-input').value.trim();
-      if (!email) { alert("請填寫註冊信箱！"); return; }
-      const btn = document.getElementById('forgot-submit-btn');
-      btn.innerText = "發送中..."; btn.disabled = true;
-
-      callGASAPI({ action: 'forgotPassword', email: email }, (res) => {
-        btn.innerText = "發送臨時密碼"; btn.disabled = false;
-        alert(res.msg || "信件已發送");
-        if (res.success) closeForgotPasswordModal();
-      }, (err) => {
-        btn.innerText = "發送臨時密碼"; btn.disabled = false;
-        alert(err);
-      });
-    }
-
-    function openProfileModal() {
-      const m = document.getElementById('profile-modal');
-      m.classList.remove('view-hidden'); m.classList.add('view-active');
-      document.getElementById('p-acc').innerText = currentUser;
-      document.getElementById('p-email').innerText = "載入中...";
-
-      callGASAPI({ action: 'getUserProfile', account: currentUser }, (res) => {
-        if (res && res.success && res.profile) {
-          document.getElementById('p-email').innerText = res.profile.email;
-          document.getElementById('p-created').innerText = res.profile.createdAt || "無紀錄";
-          document.getElementById('p-login').innerText = res.profile.lastLoginAt || "無紀錄";
-          document.getElementById('profile-streak-days').innerText = res.profile.checkinStreak;
-          
-          const todayStr = getLocalDateString();
-          const checkBtn = document.getElementById('checkin-action-btn');
-          if (res.profile.checkinDate === todayStr) {
-            checkBtn.innerText = "✅ 今日已完成簽到";
-            checkBtn.classList.add('btn-disabled');
-          } else {
-            checkBtn.innerText = "🎯 今日簽到";
-            checkBtn.classList.remove('btn-disabled');
-          }
-        }
-      });
-    }
-
-    function closeProfileModal() {
-      const m = document.getElementById('profile-modal');
-      m.classList.remove('view-active'); m.classList.add('view-hidden');
-    }
-
-    function triggerDailyCheckin() {
-      callGASAPI({ action: 'checkIn', account: currentUser }, (res) => {
-        if (!res) return;
-        alert(res.msg);
-        if (res.success) {
-          document.getElementById('profile-streak-days').innerText = res.streak;
-          const checkBtn = document.getElementById('checkin-action-btn');
-          checkBtn.innerText = "✅ 今日已完成簽到";
-          checkBtn.classList.add('btn-disabled');
-        }
-      });
-    }
-
-    function submitPasswordReset() {
-      const oldPwd = document.getElementById('reset-old-pwd').value.trim();
-      const newPwd = document.getElementById('reset-new-pwd').value.trim();
-      if (!oldPwd || !newPwd) { alert("請完整填寫新舊密碼！"); return; }
-
-      callGASAPI({ action: 'resetPassword', account: currentUser, oldPassword: oldPwd, newPassword: newPwd }, (res) => {
-        if (!res) return;
-        alert(res.msg);
-        if (res.success) {
-          document.getElementById('reset-old-pwd').value = "";
-          document.getElementById('reset-new-pwd').value = "";
-        }
-      });
-    }
-
-    document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.body.classList.toggle('dark');
-        const isDark = document.body.classList.contains('dark');
-        document.querySelectorAll('.theme-toggle-btn').forEach(b => b.innerText = isDark ? '☀' : '☾');
-      });
-    });
-
-    function changeMonth(direction) {
-      currentCalendarMonth += direction;
-      if (currentCalendarMonth > 11) {
-        currentCalendarMonth = 0; currentCalendarYear++;
-      } else if (currentCalendarMonth < 0) {
-        currentCalendarMonth = 11; currentCalendarYear--;
-      }
-      renderCalendar();
-    }
-
-    function jumpToToday() {
-      const today = new Date();
-      currentCalendarYear = today.getFullYear();
-      currentCalendarMonth = today.getMonth();
-      selectedDateFilter = getLocalDateString(today);
-      renderCalendar();
-      renderTasks();
-    }
-
-    function renderCalendar() {
-      const titleEl = document.getElementById('cal-month-title');
-      const gridEl = document.getElementById('cal-days-grid');
-      gridEl.innerHTML = '';
-
-      titleEl.innerText = `${currentCalendarYear}年 ${currentCalendarMonth + 1}月`;
-
-      const firstDayIndex = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay();
-      let startDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
-      const totalDays = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
-
-      const todayStr = getLocalDateString();
-      const activeTasks = allTasksData.filter(t => t.status !== 'completed');
-
-      for (let i = 0; i < startDay; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = 'cal-day empty';
-        gridEl.appendChild(emptyCell);
-      }
-
-      for (let day = 1; day <= totalDays; day++) {
-        const mStr = String(currentCalendarMonth + 1).padStart(2, '0');
-        const dStr = String(day).padStart(2, '0');
-        const dateStr = `${currentCalendarYear}-${mStr}-${dStr}`;
-        const isToday = dateStr === todayStr;
-
-        const tasksOnThisDay = activeTasks.filter(t => t.dueDate === dateStr);
-        let dotsHtml = '';
-        tasksOnThisDay.forEach(t => {
-          let isUrgent = t.priority === '🔴 緊急' || t.dueDate <= todayStr;
-          dotsHtml += `<div class="cal-dot ${isUrgent ? 'urgent' : ''}"></div>`;
-        });
-
-        const cell = document.createElement('div');
-        cell.className = `cal-day ${isToday ? 'today' : ''} ${selectedDateFilter === dateStr ? 'active-filter' : ''}`;
-        cell.innerHTML = `<div>${day}</div><div class="cal-dot-container">${dotsHtml}</div>`;
-
-        cell.onclick = () => {
-          selectedDateFilter = (selectedDateFilter === dateStr) ? null : dateStr;
-          renderCalendar();
-          renderTasks();
-        };
-
-        gridEl.appendChild(cell);
-      }
-    }
-
-    function renderUpcomingPanel() {
-      const panel = document.getElementById('upcoming-list');
-      panel.innerHTML = '';
-
-      const todayStr = getLocalDateString();
-      const activeTasks = allTasksData.filter(t => t.status !== 'completed' && t.dueDate && t.dueDate >= todayStr);
-      
-      activeTasks.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
-
-      if (activeTasks.length === 0) {
-        panel.innerHTML = `<div style="text-align:center; color: var(--text-mid); padding: 12px; font-size: 0.8rem;">近期沒有待辦期限</div>`;
-        return;
-      }
-
-      activeTasks.slice(0, 8).forEach(task => {
-        const item = document.createElement('div');
-        item.className = 'upcoming-item';
-        item.innerHTML = `
-          <div style="font-weight: 700; margin-bottom: 2px;">📌 ${task.title}</div>
-          <div style="font-size: 0.75rem; color: var(--text-mid); display: flex; justify-content: space-between;">
-            <span>${task.tag}</span>
-            <span style="color: #E63946; font-weight: 700;">${task.dueDate}</span>
-          </div>
-        `;
-        item.onclick = () => openTaskDetail(task.id);
-        panel.appendChild(item);
-      });
-    }
-
-    function renderTasks() {
-      const container = document.getElementById('grid-container');
-      container.innerHTML = ""; 
-      
-      const todayStr = getLocalDateString();
-      let activeTasks = allTasksData.filter(t => t.status !== 'completed');
-
-      if (selectedDateFilter) {
-        activeTasks = activeTasks.filter(t => t.dueDate === selectedDateFilter || !t.dueDate);
-      }
-
-      const priorityWeight = { '🔴 緊急': 3, '🟡 一般': 2, '🟢 輕鬆': 1 };
-      activeTasks.sort((a, b) => {
-        let wA = priorityWeight[a.priority] || 2;
-        let wB = priorityWeight[b.priority] || 2;
-        if (wA !== wB) return wB - wA;
-
-        let dateA = a.dueDate || "9999-99-99";
-        let dateB = b.dueDate || "9999-99-99";
-        return dateA.localeCompare(dateB);
-      });
-
-      if (activeTasks.length === 0) {
-        let msg = selectedDateFilter ? `📅 ${selectedDateFilter} 沒有進行中的任務` : `目前沒有進行中的任務，點擊 ＋ 新增！`;
-        container.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-mid);">${msg}</div>`;
-        container.style.height = "100px";
-        return;
-      }
-
-      activeTasks.forEach(task => {
-         let subTasksArr = [];
-         try { subTasksArr = JSON.parse(task.subTasks); } catch(e){}
-         let total = subTasksArr.length;
-         let done = subTasksArr.filter(s => s.done).length;
-         let progress = total === 0 ? 0 : Math.round((done / total) * 100);
-
-         const card = document.createElement('div');
-         let isUrgent = task.priority === '🔴 緊急' || (task.dueDate && task.dueDate <= todayStr);
-         let isRoutine = task.tag && task.tag.includes('例行重複');
-
-         card.className = `widget-card ${isUrgent ? 'urgent-glow' : ''} ${isRoutine ? 'routine-card' : ''}`;
-         card.setAttribute('data-id', task.id); 
-         card.setAttribute('data-w', task.w); card.setAttribute('data-h', task.h);
-         card.setAttribute('data-pri', task.priority);
-         
-         let progressHtml = total > 0 ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%"></div></div>` : '';
-         let subTaskHint = total > 0 ? `<div style="font-size:0.72rem; color:var(--text-mid); margin-top:2px; pointer-events:none;">${done}/${total} 步驟</div>` : '';
-         
-         let dueHtml = '';
-         if (task.dueDate) {
-           dueHtml = `<div class="card-due-badge">📅 ${task.dueDate.slice(5)}</div>`;
-         } else {
-           dueHtml = `<div class="card-due-badge" style="color:var(--text-mid); background:rgba(0,0,0,0.05);">常駐</div>`;
-         }
-
-         card.innerHTML = `
-            <div class="card-topbar">
-              <span class="card-tag-text">${task.tag}</span>
-              ${dueHtml}
-            </div>
-            <div class="card-title-text">${task.title}</div>
-            ${subTaskHint}
-            ${progressHtml}
-         `;
-         container.appendChild(card);
-      });
-      setTimeout(() => { initGridEngine(); }, 40);
-    }
-
-    function selectOpt(groupClass, btn) { 
-      document.querySelectorAll(groupClass).forEach(b => b.classList.remove('active')); 
-      btn.classList.add('active'); 
-    }
-    
-    function addManualSubtaskInput(defaultText = "") {
-      const container = document.getElementById('manual-subtasks-container');
-      const row = document.createElement('div'); row.className = 'subtask-input-row';
-      row.innerHTML = `<input type="text" placeholder="步驟描述..." value="${defaultText}"><button class="add-step-btn" onclick="this.parentElement.remove()" style="border:none">❌</button>`;
-      container.appendChild(row);
-      if(!defaultText) row.querySelector('input').focus();
-    }
-
-    function triggerAIDecompose() {
-      const titleInput = document.getElementById('new-task-input');
-      const title = titleInput.value.trim();
-      if (!title) { alert("請先輸入上方目標名稱！"); titleInput.focus(); return; }
-      
-      const aiBtn = document.getElementById('ai-decompose-btn');
-      const originalText = aiBtn.innerHTML;
-      aiBtn.innerHTML = "🧠 思考中..."; aiBtn.disabled = true;
-
-      callGASAPI({ action: 'aiDecompose', title: title }, (res) => {
-        aiBtn.innerHTML = originalText; aiBtn.disabled = false;
-        if (res.success && res.steps && res.steps.length > 0) {
-          const container = document.getElementById('manual-subtasks-container');
-          container.innerHTML = ""; 
-          res.steps.forEach(stepText => { addManualSubtaskInput(stepText); });
-        } else {
-          alert(res.msg || "AI 拆解失敗！");
-        }
-      }, (err) => {
-        aiBtn.innerHTML = originalText; aiBtn.disabled = false;
-        alert(err);
-      });
-    }
-
-    function openTaskModal() { 
-      const m = document.getElementById('task-modal');
-      m.classList.remove('view-hidden'); m.classList.add('view-active');
-      document.getElementById('manual-subtasks-container').innerHTML = ''; 
-      document.getElementById('new-task-input').value = "";
-      document.getElementById('new-task-duedate').value = getLocalDateString();
-    }
-    
-    function closeTaskModal() { 
-      const m = document.getElementById('task-modal');
-      m.classList.remove('view-active'); m.classList.add('view-hidden');
-    }
-    
-    function openGuideModal() { 
-      const m = document.getElementById('guide-modal');
-      m.classList.remove('view-hidden');
-      m.classList.add('view-active');
-    }
-
-    function closeGuideModal() { 
-      const m = document.getElementById('guide-modal');
-      if (m) {
-        m.classList.remove('view-active');
-        m.classList.add('view-hidden');
-      }
-    }
-
-    function confirmAddTask() {
-      const input = document.getElementById('new-task-input');
-      const title = input.value.trim();
-      if (!title) { input.focus(); return; }
-      
-      const tag = document.querySelector('.tag-btn.active').getAttribute('data-val');
-      const pri = document.querySelector('.pri-btn.active').getAttribute('data-val');
-      const dueDate = document.getElementById('new-task-duedate').value;
-      
-      let subTasks = [];
-      document.querySelectorAll('#manual-subtasks-container input').forEach(inp => {
-        if(inp.value.trim()) subTasks.push({ step: inp.value.trim(), done: false });
-      });
-
-      closeTaskModal();
-      const autoWidth = ((dueDate && dueDate.trim() !== "") || subTasks.length > 0) ? 2 : 1; 
-
-      callGASAPI({ 
-        action: 'addTask', account: currentUser, title: title, tag: tag, priority: pri, subTasks: JSON.stringify(subTasks), dueDate: dueDate 
-      }, (res) => {
-        if(res && res.success) {
-          res.task.w = autoWidth;
-          allTasksData.push(res.task);
-          renderCalendar();
-          renderUpcomingPanel();
-          renderTasks(); 
-        }
-      });
-    }
-
-    function openTaskDetail(taskId) {
-      const task = allTasksData.find(t => t.id === taskId);
-      if(!task) return;
-      currentDetailTaskId = taskId;
-
-      document.getElementById('edit-task-title').value = task.title;
-      document.getElementById('edit-task-duedate').value = task.dueDate || '';
-      document.getElementById('edit-task-priority').value = task.priority || '🟡 一般';
-
-      const listContainer = document.getElementById('detail-checklist');
-      listContainer.innerHTML = '';
-      let subTasksArr = [];
-      try { subTasksArr = JSON.parse(task.subTasks); } catch(e){}
-      
-      if(subTasksArr.length === 0) {
-        listContainer.innerHTML = `<div style="text-align:center; color:var(--text-mid); padding: 10px; font-size: 0.85rem;">一般任務，可直接標記完成或修改內容。</div>`;
-        document.getElementById('detail-progress-text').innerText = '';
-      } else {
-        renderChecklist(subTasksArr);
-      }
-      
-      updateCompleteButtonState(subTasksArr);
-      const m = document.getElementById('detail-modal');
-      m.classList.remove('view-hidden'); m.classList.add('view-active');
-    }
-
-    function renderChecklist(subTasksArr) {
-      const listContainer = document.getElementById('detail-checklist');
-      listContainer.innerHTML = '';
-      let doneCount = 0;
-
-      subTasksArr.forEach((st, index) => {
-        if(st.done) doneCount++;
-        const item = document.createElement('div');
-        item.className = `check-item ${st.done ? 'done' : ''}`;
-        item.innerHTML = `<div class="checkbox-circle">✔</div><div style="font-weight:600; font-size:0.9rem;">${st.step}</div>`;
-        
-        item.onclick = () => {
-          st.done = !st.done; 
-          const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
-          allTasksData[taskIndex].subTasks = JSON.stringify(subTasksArr);
-          renderChecklist(subTasksArr);
-          updateCompleteButtonState(subTasksArr);
-          callGASAPI({ action: 'updateTask', taskId: currentDetailTaskId, subTasks: JSON.stringify(subTasksArr) }, ()=>{});
-        };
-        listContainer.appendChild(item);
-      });
-      const prog = Math.round((doneCount / subTasksArr.length) * 100);
-      document.getElementById('detail-progress-text').innerText = `目前進度：${prog}%`;
-    }
-
-    function updateCompleteButtonState(subTasksArr) {
-      const btn = document.getElementById('detail-complete-btn');
-      if (!subTasksArr || subTasksArr.length === 0) {
-        btn.classList.remove('btn-disabled');
-        return;
-      }
-      btn.classList.toggle('btn-disabled', subTasksArr.some(st => !st.done));
-    }
-
-    function saveTaskEdits() {
-      if(!currentDetailTaskId) return;
-      const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
-      if(taskIndex === -1) return;
-
-      const newTitle = document.getElementById('edit-task-title').value.trim();
-      const newDueDate = document.getElementById('edit-task-duedate').value;
-      const newPriority = document.getElementById('edit-task-priority').value;
-
-      if(!newTitle) { alert("任務名稱不能為空！"); return; }
-
-      allTasksData[taskIndex].title = newTitle;
-      allTasksData[taskIndex].dueDate = newDueDate;
-      allTasksData[taskIndex].priority = newPriority;
-
-      callGASAPI({ 
-        action: 'updateTaskDetails', taskId: currentDetailTaskId, title: newTitle, dueDate: newDueDate, priority: newPriority 
-      }, () => {});
-
-      alert("✨ 任務修改已儲存！");
-      closeDetailModal();
-    }
-
-    function closeDetailModal() {
-      const m = document.getElementById('detail-modal');
-      m.classList.remove('view-active'); m.classList.add('view-hidden');
-      currentDetailTaskId = null;
-      renderCalendar();
-      renderUpcomingPanel();
-      renderTasks(); 
-    }
-    
-    function markTaskCompleted() {
-      if(!currentDetailTaskId) return;
-      const task = allTasksData.find(t => t.id === currentDetailTaskId);
-      if(!task) return;
-
-      let subTasksArr = [];
-      try { subTasksArr = JSON.parse(task.subTasks); } catch(e){}
-      if (subTasksArr.length > 0 && subTasksArr.some(st => !st.done)) {
-        alert("⚠️ 還有子任務尚未完成，請先完成所有步驟！");
-        return;
-      }
-
-      const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
-      allTasksData[taskIndex].status = 'completed';
-      callGASAPI({ action: 'updateTaskStatus', taskId: currentDetailTaskId, status: 'completed' }, () => {});
-      closeDetailModal();
-    }
-
-    function rolloverTaskToTomorrow() {
-      if(!currentDetailTaskId) return;
-      const taskIndex = allTasksData.findIndex(t => t.id === currentDetailTaskId);
-      if(taskIndex === -1) return;
-
-      const currentTask = allTasksData[taskIndex];
-      let nextDateStr = "";
-
-      if (currentTask.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(currentTask.dueDate)) {
-        const parts = currentTask.dueDate.split('-');
-        const y = parseInt(parts[0], 10);
-        const m = parseInt(parts[1], 10) - 1;
-        const d = parseInt(parts[2], 10);
-        
-        const nextDate = new Date(y, m, d + 1);
-        nextDateStr = getLocalDateString(nextDate);
-      } else {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        nextDateStr = getLocalDateString(tomorrow);
-      }
-
-      allTasksData[taskIndex].dueDate = nextDateStr;
-      allTasksData[taskIndex].priority = '🔴 緊急';
-
-      closeDetailModal();
-      renderCalendar();
-      renderUpcomingPanel();
-      renderTasks();
-
-      callGASAPI({ 
-        action: 'rolloverTask', 
-        taskId: currentDetailTaskId, 
-        tomorrowDate: nextDateStr 
-      }, (res) => {}, (err) => {
-        console.error("順延同步異常:", err);
-      });
-    }
-
-    function openArchiveModal() {
-      const archiveList = document.getElementById('archive-list');
-      archiveList.innerHTML = '';
-      const completedTasks = allTasksData.filter(t => t.status === 'completed');
-      
-      if(completedTasks.length === 0) {
-        archiveList.innerHTML = `<div style="text-align:center; color: var(--text-mid); padding: 20px;">目前沒有已完成的任務</div>`;
-      } else {
-        completedTasks.forEach(task => {
-          const item = document.createElement('div');
-          item.className = 'archive-item';
-          let cleanDate = task.dueDate || '常駐';
-          item.innerHTML = `
-            <div>
-              <div style="font-weight: 700; font-size: 0.95rem;">✅ ${task.title}</div>
-              <div style="font-size: 0.75rem; color: var(--text-mid);">${task.tag} | 期限: ${cleanDate}</div>
-            </div>
-            <button class="btn-main btn-secondary" onclick="restoreTask('${task.id}')">復原</button>
-          `;
-          archiveList.appendChild(item);
-        });
-      }
-      const m = document.getElementById('archive-modal');
-      m.classList.remove('view-hidden'); m.classList.add('view-active');
-    }
-
-    function closeArchiveModal() { 
-      const m = document.getElementById('archive-modal');
-      m.classList.remove('view-active'); m.classList.add('view-hidden');
-    }
-
-    function restoreTask(taskId) {
-      const taskIndex = allTasksData.findIndex(t => t.id === taskId);
-      if(taskIndex === -1) return;
-      allTasksData[taskIndex].status = 'active';
-      callGASAPI({ action: 'updateTaskStatus', taskId: taskId, status: 'active' }, () => {});
-      closeArchiveModal();
-      renderCalendar();
-      renderUpcomingPanel();
-      renderTasks();
-    }
-
-    function openDeleteModal(taskId) {
-      if (navigator.vibrate) navigator.vibrate(50);
-      targetElementToDelete = taskId;
-      const m = document.getElementById('delete-modal');
-      m.classList.remove('view-hidden'); m.classList.add('view-active');
-    }
-    function closeDeleteModal() { 
-      const m = document.getElementById('delete-modal');
-      m.classList.remove('view-active'); m.classList.add('view-hidden');
-      targetElementToDelete = null; 
-    }
-    
-    function confirmDeleteTask() {
-      if (!targetElementToDelete) return;
-      const taskId = targetElementToDelete;
-      closeDeleteModal();
-      allTasksData = allTasksData.filter(t => t.id !== taskId);
-      renderCalendar();
-      renderUpcomingPanel();
-      renderTasks();
-      callGASAPI({ action: 'deleteTask', taskId: taskId }, () => {});
-    }
-
-    function initGridEngine() {
-      let oldContainer = document.getElementById('grid-container');
-      let container = oldContainer.cloneNode(true);
-      oldContainer.parentNode.replaceChild(container, oldContainer);
-      const cardElements = Array.from(container.children);
-      
-      function getColCount() { return container.clientWidth <= 420 ? 1 : container.clientWidth <= 640 ? 2 : 3; }
-
-      let cols = getColCount();
-      const gap = 16; const rowHeight = 86;
-
-      let cardsData = cardElements.map(el => ({ 
-        el: el, w: Math.min(parseInt(el.getAttribute('data-w')) || 1, cols), h: parseInt(el.getAttribute('data-h')) || 1 
-      }));
-
-      function renderGrid() {
-        cols = getColCount();
-        cardsData.forEach(c => c.w = Math.min(parseInt(c.el.getAttribute('data-w')) || 1, cols));
-
-        const cellWidth = (container.clientWidth - (cols - 1) * gap) / cols;
-        let gridMatrix = []; let maxRow = 0;
-
-        cardsData.forEach(card => {
-          let placed = false; let r = 0;
-          while (!placed) {
-            for (let c = 0; c <= cols - card.w; c++) {
-              let isFree = true;
-              for (let y = 0; y < card.h; y++) {
-                for (let x = 0; x < card.w; x++) {
-                  if (gridMatrix[r + y] && gridMatrix[r + y][c + x]) isFree = false;
-                }
-              }
-              if (isFree) {
-                for (let y = 0; y < card.h; y++) { 
-                  if (!gridMatrix[r + y]) gridMatrix[r + y] = []; 
-                  for (let x = 0; x < card.w; x++) gridMatrix[r + y][c + x] = true; 
-                }
-                card.el.style.left = `${c * (cellWidth + gap)}px`; 
-                card.el.style.top = `${r * (rowHeight + gap)}px`;
-                card.el.style.width = `${card.w * cellWidth + (card.w - 1) * gap}px`; 
-                card.el.style.height = `${card.h * rowHeight + (card.h - 1) * gap}px`;
-                maxRow = Math.max(maxRow, r + card.h); 
-                placed = true; 
-                break;
-              }
-            }
-            if (!placed) r++; 
-          }
-        });
-        container.style.height = `${maxRow * rowHeight + (maxRow - 1) * gap}px`;
-      }
-
-      globalRenderGrid = renderGrid;
-      renderGrid();
-
-      let draggingIndex = -1; let startX, startY, initialLeft, initialTop;
-      let longPressTimer; let clickStartTime;
-
-      cardsData.forEach((card) => {
-        card.el.addEventListener('pointerdown', (e) => {
-          if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return; 
-          e.preventDefault(); 
-          draggingIndex = cardsData.indexOf(card);
-          startX = e.clientX; startY = e.clientY;
-          clickStartTime = new Date().getTime(); 
-          initialLeft = parseFloat(card.el.style.left || 0); initialTop = parseFloat(card.el.style.top || 0);
-          
-          longPressTimer = setTimeout(() => { 
-            draggingIndex = -1; card.el.classList.remove('dragging'); 
-            try { card.el.releasePointerCapture(e.pointerId); } catch(e){}
-            openDeleteModal(card.el.getAttribute('data-id')); 
-          }, 700);
-
-          card.el.classList.add('dragging'); 
-          card.el.setPointerCapture(e.pointerId);
-        });
-
-        card.el.addEventListener('pointermove', (e) => {
-          if (Math.abs(e.clientX - startX) > 6 || Math.abs(e.clientY - startY) > 6) clearTimeout(longPressTimer);
-          
-          if (draggingIndex !== -1 && draggingIndex === cardsData.indexOf(card)) {
-            const dx = e.clientX - startX; const dy = e.clientY - startY;
-            card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
-
-            const currentRect = card.el.getBoundingClientRect();
-            const currentCenterX = currentRect.left + currentRect.width / 2;
-            const currentCenterY = currentRect.top + currentRect.height / 2;
-
-            let targetIndex = -1;
-            cardsData.forEach((otherCard, i) => {
-               if (i === draggingIndex) return;
-               const rect = otherCard.el.getBoundingClientRect();
-               if (currentCenterX >= rect.left && currentCenterX <= rect.right && currentCenterY >= rect.top && currentCenterY <= rect.bottom) targetIndex = i;
-            });
-
-            if (targetIndex !== -1 && targetIndex !== draggingIndex) {
-               cardsData.splice(targetIndex, 0, cardsData.splice(draggingIndex, 1)[0]);
-               draggingIndex = targetIndex; 
-               renderGrid(); 
-               card.el.style.left = `${initialLeft + dx}px`; card.el.style.top = `${initialTop + dy}px`;
-            }
-          }
-        });
-
-        card.el.addEventListener('pointerup', (e) => {
-          clearTimeout(longPressTimer); 
-          const timeElapsed = new Date().getTime() - clickStartTime;
-          const moved = Math.abs(e.clientX - startX) > 6 || Math.abs(e.clientY - startY) > 6;
-          
-          if (draggingIndex !== -1) {
-            card.el.classList.remove('dragging'); 
-            try { card.el.releasePointerCapture(e.pointerId); } catch(err){}
-            draggingIndex = -1; 
-            renderGrid(); 
-          }
-          if (!moved && timeElapsed < 300) openTaskDetail(card.el.getAttribute('data-id'));
-        });
-
-        card.el.addEventListener('pointercancel', (e) => {
-          clearTimeout(longPressTimer);
-          if (draggingIndex !== -1) {
-            card.el.classList.remove('dragging'); 
-            try { card.el.releasePointerCapture(e.pointerId); } catch(err){}
-            draggingIndex = -1;
-            renderGrid();
-          }
-        });
-      });
-    }
-  </script>
 </body>
 </html>

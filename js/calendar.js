@@ -1,0 +1,106 @@
+/* ============================================================
+   js/calendar.js — 月曆渲染 & 日期篩選
+   - renderCalendar()：繪製月曆格子與任務點
+   - renderUpcomingPanel()：右欄「即將到來」預告
+   - changeMonth()：上下月切換
+   - jumpToToday()：跳回今日
+   ============================================================ */
+
+function renderCalendar() {
+  const titleEl = document.getElementById('cal-month-title');
+  const gridEl  = document.getElementById('cal-days-grid');
+  gridEl.innerHTML = '';
+
+  titleEl.innerText = `${currentCalendarYear}年 ${currentCalendarMonth + 1}月`;
+
+  const firstDayIndex = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay();
+  const startDay  = firstDayIndex === 0 ? 6 : firstDayIndex - 1; // 週一為首欄
+  const totalDays = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
+
+  const todayStr   = getLocalDateString();
+  const activeTasks = allTasksData.filter(t => t.status !== 'completed');
+
+  // 空白格（月初前的空位）
+  for (let i = 0; i < startDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    gridEl.appendChild(el);
+  }
+
+  // 日期格
+  for (let day = 1; day <= totalDays; day++) {
+    const mStr    = String(currentCalendarMonth + 1).padStart(2, '0');
+    const dStr    = String(day).padStart(2, '0');
+    const dateStr = `${currentCalendarYear}-${mStr}-${dStr}`;
+    const isToday = dateStr === todayStr;
+
+    // 當天有任務時顯示小點
+    const tasksOnDay = activeTasks.filter(t => t.dueDate === dateStr);
+    let dotsHtml = '';
+    tasksOnDay.forEach(t => {
+      const isUrgent = t.priority === '🔴 緊急' || t.dueDate <= todayStr;
+      dotsHtml += `<div class="cal-dot ${isUrgent ? 'urgent' : ''}"></div>`;
+    });
+
+    const cell = document.createElement('div');
+    cell.className = [
+      'cal-day',
+      isToday ? 'today' : '',
+      selectedDateFilter === dateStr ? 'active-filter' : ''
+    ].join(' ').trim();
+    cell.innerHTML = `<div>${day}</div><div class="cal-dot-container">${dotsHtml}</div>`;
+
+    // 點擊日期：切換篩選（再點一次取消篩選）
+    cell.onclick = () => {
+      selectedDateFilter = (selectedDateFilter === dateStr) ? null : dateStr;
+      renderCalendar();
+      renderTasks();
+    };
+
+    gridEl.appendChild(cell);
+  }
+}
+
+function renderUpcomingPanel() {
+  const panel = document.getElementById('upcoming-list');
+  panel.innerHTML = '';
+
+  const todayStr = getLocalDateString();
+  const activeTasks = allTasksData
+    .filter(t => t.status !== 'completed' && t.dueDate && t.dueDate >= todayStr)
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+
+  if (activeTasks.length === 0) {
+    panel.innerHTML = `<div style="text-align:center; color:var(--text-mid); padding:12px; font-size:0.8rem;">近期沒有待辦期限</div>`;
+    return;
+  }
+
+  activeTasks.slice(0, 8).forEach(task => {
+    const item = document.createElement('div');
+    item.className = 'upcoming-item';
+    item.innerHTML = `
+      <div style="font-weight:700; margin-bottom:2px;">📌 ${task.title}</div>
+      <div style="font-size:0.75rem; color:var(--text-mid); display:flex; justify-content:space-between;">
+        <span>${task.tag}</span>
+        <span style="color:#E63946; font-weight:700;">${task.dueDate}</span>
+      </div>`;
+    item.onclick = () => openTaskDetail(task.id);
+    panel.appendChild(item);
+  });
+}
+
+function changeMonth(direction) {
+  currentCalendarMonth += direction;
+  if (currentCalendarMonth > 11) { currentCalendarMonth = 0; currentCalendarYear++; }
+  else if (currentCalendarMonth < 0) { currentCalendarMonth = 11; currentCalendarYear--; }
+  renderCalendar();
+}
+
+function jumpToToday() {
+  const today = new Date();
+  currentCalendarYear  = today.getFullYear();
+  currentCalendarMonth = today.getMonth();
+  selectedDateFilter   = getLocalDateString(today);
+  renderCalendar();
+  renderTasks();
+}
