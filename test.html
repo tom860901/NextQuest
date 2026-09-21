@@ -184,11 +184,19 @@ async function runAllTests() {
   const stateVars = ['isLoginMode','currentUser','allTasksData','currentDetailTaskId',
                      'selectedDateFilter','currentCalendarYear','currentCalendarMonth','globalRenderGrid'];
   stateVars.forEach(v => {
-    const exists = typeof window[v] !== 'undefined';
+    let exists = false;
+    let val = undefined;
+    try {
+      val = eval(v);
+      exists = true;
+    } catch (e) {
+      exists = (typeof window[v] !== 'undefined');
+      if (exists) val = window[v];
+    }
     results.push({
       group: stateGroup, status: exists ? 'pass' : 'fail',
       name: v,
-      detail: exists ? `目前值：${JSON.stringify(window[v])}` : '變數未定義（app.js 未載入？）'
+      detail: exists ? `目前值：${JSON.stringify(val)}` : '變數未定義（app.js 未載入？）'
     });
   });
 

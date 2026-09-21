@@ -6,15 +6,15 @@
    ============================================================ */
 
 // ── 全域狀態 ────────────────────────────────────────────────
-let isLoginMode        = true;   // 登入/註冊模式切換
-let currentUser        = "";     // 目前登入帳號
-let targetElementToDelete = null; // 長按刪除暫存的 task id
-let allTasksData       = [];     // 本地任務快取陣列
-let currentDetailTaskId = null;  // 目前開啟詳情的 task id
-let selectedDateFilter = null;   // 月曆篩選的日期字串 'YYYY-MM-DD'
-let currentCalendarYear  = new Date().getFullYear();
-let currentCalendarMonth = new Date().getMonth();
-let globalRenderGrid   = null;   // grid.js 暴露的重繪函式（供 resize 使用）
+var isLoginMode        = true;   // 登入/註冊模式切換
+var currentUser        = "";     // 目前登入帳號
+var targetElementToDelete = null; // 長按刪除暫存的 task id
+var allTasksData       = [];     // 本地任務快取陣列
+var currentDetailTaskId = null;  // 目前開啟詳情的 task id
+var selectedDateFilter = null;   // 月曆篩選的日期字串 'YYYY-MM-DD'
+var currentCalendarYear  = new Date().getFullYear();
+var currentCalendarMonth = new Date().getMonth();
+var globalRenderGrid   = null;   // grid.js 暴露的重繪函式（供 resize 使用）
 
 // ── 工具函式 ────────────────────────────────────────────────
 
