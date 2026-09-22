@@ -63,7 +63,12 @@ function openTaskModal() {
   openModal('task-modal');
   document.getElementById('manual-subtasks-container').innerHTML = '';
   document.getElementById('new-task-input').value = "";
-  document.getElementById('new-task-duedate').value = getLocalDateString();
+  document.getElementById('new-task-duedate').value = ""; // 預設不設定任何時間，由使用者自訂
+
+  // 重置標籤選取至第一項
+  document.querySelectorAll('.new-tag-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === 0);
+  });
 }
 function closeTaskModal() { closeModal('task-modal'); }
 
@@ -76,7 +81,8 @@ function confirmAddTask() {
   const title = input.value.trim();
   if (!title) { input.focus(); return; }
 
-  const tag     = document.querySelector('.tag-btn.active').getAttribute('data-val');
+  const tagEl   = document.querySelector('.new-tag-btn.active') || document.querySelector('.tag-btn.active');
+  const tag     = tagEl ? tagEl.getAttribute('data-val') : '⚡️ 碎片 (<15m)';
   const pri     = document.querySelector('.pri-btn.active').getAttribute('data-val');
   const dueDate = document.getElementById('new-task-duedate').value;
 
@@ -121,6 +127,12 @@ function openTaskDetail(taskId) {
   document.getElementById('edit-task-title').value    = task.title;
   document.getElementById('edit-task-duedate').value  = task.dueDate || '';
   document.getElementById('edit-task-priority').value = task.priority || '🟡 一般';
+
+  // 同步設定任務類型標籤
+  const currentTag = task.tag || '⚡️ 碎片 (<15m)';
+  document.querySelectorAll('.edit-tag-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-val') === currentTag);
+  });
 
   let subTasksArr = [];
   try { subTasksArr = JSON.parse(task.subTasks); } catch (e) {}
@@ -185,15 +197,19 @@ function saveTaskEdits() {
   const newDueDate  = document.getElementById('edit-task-duedate').value;
   const newPriority = document.getElementById('edit-task-priority').value;
 
+  const activeTagBtn = document.querySelector('.edit-tag-btn.active');
+  const newTag = activeTagBtn ? activeTagBtn.getAttribute('data-val') : (allTasksData[idx].tag || '⚡️ 碎片 (<15m)');
+
   if (!newTitle) { alert("任務名稱不能為空！"); return; }
 
   allTasksData[idx].title    = newTitle;
   allTasksData[idx].dueDate  = newDueDate;
   allTasksData[idx].priority = newPriority;
+  allTasksData[idx].tag      = newTag;
 
   callGASAPI({
     action: 'updateTaskDetails', taskId: currentDetailTaskId,
-    title: newTitle, dueDate: newDueDate, priority: newPriority
+    title: newTitle, dueDate: newDueDate, priority: newPriority, tag: newTag
   }, () => {});
 
   alert("✨ 任務修改已儲存！");

@@ -9,9 +9,11 @@
  * @param {Function} callback  - 成功回調 (data) => {}
  * @param {Function} onError   - 失敗回調 (errorMsg) => {}
  */
-function callGASAPI(payload, callback, onError) {
+function callGASAPI(payload, callback, onError, timeoutMs) {
+  // AI 拆解通常需大模型思考，給予 45 秒超時彈性；一般操作 25 秒
+  const effectiveTimeout = timeoutMs || (payload && payload.action === 'aiDecompose' ? 45000 : 25000);
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  const timeoutId = setTimeout(() => controller.abort(), effectiveTimeout);
 
   fetch(GAS_API_URL, {
     method: 'POST',
@@ -30,7 +32,9 @@ function callGASAPI(payload, callback, onError) {
     clearTimeout(timeoutId);
     console.error("API 連線異常:", err);
     const errorMsg = err.name === 'AbortError'
-      ? "連線逾時，請檢查網路或 GAS 權限"
+      ? (payload && payload.action === 'aiDecompose'
+          ? "AI 拆解連線逾時（伺服器回應較慢），請再試一次！"
+          : "連線逾時，請檢查網路或 GAS 權限")
       : "無法連線至雲端服務";
     if (onError) onError(errorMsg);
   });

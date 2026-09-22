@@ -106,10 +106,10 @@
       <div class="selector-group">
         <div class="selector-title">任務類型</div>
         <div class="tag-selector">
-          <div class="tag-btn active" onclick="selectOpt('.tag-btn',this)" data-val="⚡️ 碎片 (<15m)">⚡️ 碎片 (&lt;15m)</div>
-          <div class="tag-btn" onclick="selectOpt('.tag-btn',this)" data-val="🧠 深度專注">🧠 深度專注</div>
-          <div class="tag-btn" onclick="selectOpt('.tag-btn',this)" data-val="🔁 例行重複">🔁 例行重複</div>
-          <div class="tag-btn" onclick="selectOpt('.tag-btn',this)" data-val="☕️ 生活/社交">☕️ 生活/社交</div>
+          <div class="tag-btn new-tag-btn active" onclick="selectOpt('.new-tag-btn',this)" data-val="⚡️ 碎片 (<15m)">⚡️ 碎片 (&lt;15m)</div>
+          <div class="tag-btn new-tag-btn" onclick="selectOpt('.new-tag-btn',this)" data-val="🧠 深度專注">🧠 深度專注</div>
+          <div class="tag-btn new-tag-btn" onclick="selectOpt('.new-tag-btn',this)" data-val="🔁 例行重複">🔁 例行重複</div>
+          <div class="tag-btn new-tag-btn" onclick="selectOpt('.new-tag-btn',this)" data-val="☕️ 生活/社交">☕️ 生活/社交</div>
         </div>
       </div>
 
@@ -158,6 +158,16 @@
         <input type="text" id="edit-task-title"
           style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.7); background:rgba(255,255,255,0.5); font-size:1.1rem; font-weight:700; text-align:center; color:var(--text-hi); outline:none;"
           placeholder="任務名稱">
+      </div>
+
+      <div class="selector-group" style="text-align:left; margin-bottom:12px;">
+        <div class="selector-title">任務類型</div>
+        <div class="tag-selector" id="edit-tag-selector">
+          <div class="tag-btn edit-tag-btn" onclick="selectOpt('.edit-tag-btn',this)" data-val="⚡️ 碎片 (<15m)">⚡️ 碎片 (&lt;15m)</div>
+          <div class="tag-btn edit-tag-btn" onclick="selectOpt('.edit-tag-btn',this)" data-val="🧠 深度專注">🧠 深度專注</div>
+          <div class="tag-btn edit-tag-btn" onclick="selectOpt('.edit-tag-btn',this)" data-val="🔁 例行重複">🔁 例行重複</div>
+          <div class="tag-btn edit-tag-btn" onclick="selectOpt('.edit-tag-btn',this)" data-val="☕️ 生活/社交">☕️ 生活/社交</div>
+        </div>
       </div>
 
       <div style="display:flex; gap:8px; margin-bottom:12px;">
