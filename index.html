@@ -20,6 +20,9 @@
     <div class="cloud-orb orb-orange"></div>
   </div>
 
+  <!-- ── 頂部浮動通知容器 (Toast Notifications) ── -->
+  <div id="toast-container" class="toast-container"></div>
+
   <!-- ── VIEW 1：登入畫面 ─────────────────────── -->
   <div id="login-view" class="view-active window-shell login-shell">
     <div class="titlebar" style="position:relative;">
@@ -58,12 +61,13 @@
       <div class="titlebar">
         <h1>Planit</h1>
         <div class="action-button-group">
-          <button class="bubble-menu-btn" onclick="openTaskModal()"    title="新增任務">＋ 新增</button>
-          <button class="bubble-menu-btn" onclick="openArchiveModal()" title="已完成完成區">📁 完成區</button>
-          <button class="bubble-menu-btn" onclick="openGuideModal()"   title="功能說明">💡 說明</button>
-          <button class="bubble-menu-btn theme-toggle-btn"             title="切換主題">☾</button>
+          <button class="bubble-menu-btn" onclick="openTaskModal()"        title="新增任務">＋ 新增</button>
+          <button class="bubble-menu-btn" onclick="openArchiveModal()"     title="已完成完成區">📁 完成區</button>
+          <button class="bubble-menu-btn" onclick="openLeaderboardModal()" title="今日先鋒榜">🏆 排行榜</button>
+          <button class="bubble-menu-btn" onclick="openGuideModal()"       title="功能說明">💡 說明</button>
+          <button class="bubble-menu-btn theme-toggle-btn"                 title="切換主題">☾</button>
           <div class="profile-avatar-btn" onclick="openProfileModal()" id="user-avatar-badge" title="個人中心">U</div>
-          <button class="bubble-menu-btn" onclick="logout()"           title="登出">🚪</button>
+          <button class="bubble-menu-btn logout-btn" onclick="openLogoutModal()" title="登出">🚪 登出</button>
         </div>
       </div>
 
@@ -328,6 +332,36 @@
         <div style="text-align:center; color:var(--text-mid); padding:20px;">目前沒有已完成的任務</div>
       </div>
       <button class="btn-main btn-secondary" onclick="closeArchiveModal()">關閉抽屜</button>
+    </div>
+  </div>
+
+  <!-- ── VIEW 10：登出確認 Modal ─────────────────── -->
+  <div id="logout-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event,'logout-modal')">
+    <div class="window-shell modal-shell" style="text-align:center;">
+      <h2 style="font-size:1.25rem; margin-bottom:16px;">🚪 登出確認</h2>
+      <p style="color:var(--text-mid); margin-bottom:24px; font-size:0.95rem;">確定要登出系統嗎？<br><span style="font-size:0.85rem; opacity:0.8;">登出後需重新輸入帳號密碼。</span></p>
+      <div style="display:flex; gap:12px;">
+        <button class="btn-main btn-secondary" onclick="closeLogoutModal()">取消</button>
+        <button class="btn-main btn-danger" onclick="confirmLogout()">確定登出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── VIEW 11：今日敏捷先鋒榜 Modal ────────────── -->
+  <div id="leaderboard-modal" class="modal-overlay view-hidden" onclick="handleModalOverlayClick(event,'leaderboard-modal')">
+    <div class="window-shell modal-shell" style="text-align:center; max-width:420px;">
+      <button class="modal-close-corner-btn" onclick="closeLeaderboardModal()">✕</button>
+      <h2 style="font-size:1.25rem; margin-bottom:8px;">🏆 今日敏捷先鋒榜</h2>
+      <p style="color:var(--text-mid); margin-bottom:16px; font-size:0.85rem;">依今日任務達成率 (%) 即時排行</p>
+      
+      <div id="leaderboard-container" style="max-height:320px; overflow-y:auto; margin-bottom:16px;">
+        <div style="text-align:center; color:var(--text-mid); padding:24px;">載入排行榜中...</div>
+      </div>
+
+      <div style="font-size:0.75rem; color:var(--text-mid); margin-bottom:14px; opacity:0.85;">
+        🔒 僅公開達成率與完成件數，個人任務清單完全隱私保護
+      </div>
+      <button class="btn-main btn-secondary" onclick="closeLeaderboardModal()">關閉榜單</button>
     </div>
   </div>
 

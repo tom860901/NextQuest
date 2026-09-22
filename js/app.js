@@ -50,6 +50,39 @@ function fetchTasks() {
   });
 }
 
+// ── 🔔 全域 Toast 浮動回饋通知 ──────────────────────────────
+function showToast(message, type = 'success', duration = 2500) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast-notification toast-${type}`;
+  toast.innerText = message;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add('toast-hide');
+    setTimeout(() => {
+      if (toast.parentElement) toast.remove();
+    }, 300);
+  }, duration);
+}
+
+// ── 🚪 登出防呆確認 Modal ────────────────────────────────────
+function openLogoutModal() {
+  openModal('logout-modal');
+}
+
+function closeLogoutModal() {
+  closeModal('logout-modal');
+}
+
+function confirmLogout() {
+  closeLogoutModal();
+  logout();
+  showToast('👋 已安全登出系統', 'info');
+}
+
 // ── 進入點 ──────────────────────────────────────────────────
 window.onload = function () {
   initGoogleAuth();

@@ -139,3 +139,64 @@ function jumpToToday() {
   renderCalendar();
   renderTasks();
 }
+
+// ── 🏆 今日敏捷先鋒榜 Modal ──────────────────────────────────
+function openLeaderboardModal() {
+  openModal('leaderboard-modal');
+  const container = document.getElementById('leaderboard-container');
+  if (!container) return;
+  container.innerHTML = `<div style="text-align:center; color:var(--text-mid); padding:24px;">計算今日先鋒榜中...</div>`;
+
+  callGASAPI({ action: 'getLeaderboard' }, (res) => {
+    if (res && res.success && Array.isArray(res.rankings)) {
+      renderLeaderboard(res.rankings);
+    } else {
+      container.innerHTML = `<div style="text-align:center; color:var(--text-mid); padding:24px;">暫無今日排行資料</div>`;
+    }
+  }, () => {
+    container.innerHTML = `<div style="text-align:center; color:#E63946; padding:24px;">讀取榜單失敗</div>`;
+  });
+}
+
+function closeLeaderboardModal() {
+  closeModal('leaderboard-modal');
+}
+
+function renderLeaderboard(rankings) {
+  const container = document.getElementById('leaderboard-container');
+  if (!container) return;
+  if (!rankings || rankings.length === 0) {
+    container.innerHTML = `<div style="text-align:center; color:var(--text-mid); padding:24px; font-size:0.85rem;">今日尚無成員排定待辦任務，快來建立搶下第一名！</div>`;
+    return;
+  }
+
+  container.innerHTML = '';
+  rankings.forEach((item, index) => {
+    const isMe = (item.account === currentUser);
+    let rankBadge = `${index + 1}`;
+    if (index === 0) rankBadge = '🥇';
+    else if (index === 1) rankBadge = '🥈';
+    else if (index === 2) rankBadge = '🥉';
+
+    const row = document.createElement('div');
+    row.className = `lb-item ${isMe ? 'is-current-user' : ''}`;
+    row.innerHTML = `
+      <div class="lb-rank">${rankBadge}</div>
+      <div class="lb-user-info">
+        <div class="lb-username">
+          <span>${item.account}</span>
+          ${isMe ? '<span class="lb-me-tag">我</span>' : ''}
+        </div>
+        <div class="lb-progress-bar">
+          <div class="lb-progress-fill" style="width:${item.rate}%"></div>
+        </div>
+      </div>
+      <div class="lb-rate-box">
+        <div class="lb-rate">${item.rate}%</div>
+        <div class="lb-counts">${item.completed}/${item.total}</div>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+

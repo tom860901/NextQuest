@@ -47,13 +47,14 @@ function triggerAIDecompose() {
       const container = document.getElementById('manual-subtasks-container');
       container.innerHTML = "";
       res.steps.forEach(stepText => { addManualSubtaskInput(stepText); });
+      showToast("✨ AI 步驟拆解完成！", "info");
     } else {
-      alert((res && res.msg) || "AI 拆解失敗，請檢查後端 API 設定！");
+      showToast((res && res.msg) || "AI 拆解失敗，請檢查後端 API 設定！", "warning");
     }
   }, (err) => {
     aiBtn.innerHTML = originalText;
     aiBtn.disabled = false;
-    alert("AI 連線失敗：" + err);
+    showToast("AI 連線失敗：" + err, "danger");
   });
 }
 
@@ -117,10 +118,12 @@ function confirmAddTask() {
       renderCalendar();
       renderUpcomingPanel();
       renderTasks();
+      showToast("✅ 任務建立成功！", "success");
     }
   }, (err) => {
     isAddingTaskInProgress = false;
     console.error("新增任務異常:", err);
+    showToast("新增任務失敗，請檢查網路連線", "danger");
   });
 }
 
@@ -213,7 +216,7 @@ function saveTaskEdits() {
   const editPersistentCb = document.getElementById('edit-task-persistent');
   const newPersistent = editPersistentCb ? editPersistentCb.checked : false;
 
-  if (!newTitle) { alert("任務名稱不能為空！"); return; }
+  if (!newTitle) { showToast("任務名稱不能為空！", "warning"); return; }
 
   allTasksData[idx].title      = newTitle;
   allTasksData[idx].dueDate    = newDueDate;
@@ -222,12 +225,12 @@ function saveTaskEdits() {
   allTasksData[idx].persistent = newPersistent;
 
   callGASAPI({
-    action: 'updateTaskDetails', taskId: currentDetailTaskId,
+    action: 'updateTaskDetails', taskId: currentDetailTaskId, account: currentUser,
     title: newTitle, dueDate: newDueDate, priority: newPriority, tag: newTag,
     persistent: newPersistent ? 1 : 0
   }, () => {});
 
-  alert("✨ 任務修改已儲存！");
+  showToast("💾 變更已儲存！", "success");
   closeDetailModal();
 }
 
@@ -249,13 +252,14 @@ function markTaskCompleted() {
   let subTasksArr = [];
   try { subTasksArr = JSON.parse(task.subTasks); } catch (e) {}
   if (subTasksArr.length > 0 && subTasksArr.some(st => !st.done)) {
-    alert("⚠️ 還有子任務尚未完成，請先完成所有步驟！");
+    showToast("⚠️ 還有子任務尚未完成，請先完成所有步驟！", "warning");
     return;
   }
 
   const idx = allTasksData.findIndex(t => t.id === currentDetailTaskId);
   allTasksData[idx].status = 'completed';
-  callGASAPI({ action: 'updateTaskStatus', taskId: currentDetailTaskId, status: 'completed' }, () => {});
+  callGASAPI({ action: 'updateTaskStatus', taskId: currentDetailTaskId, account: currentUser, status: 'completed' }, () => {});
+  showToast("🎉 太棒了！完成一項任務！", "success");
   closeDetailModal();
 }
 
@@ -283,8 +287,9 @@ function rolloverTaskToTomorrow() {
 
   closeDetailModal();
 
-  callGASAPI({ action: 'rolloverTask', taskId: currentDetailTaskId, tomorrowDate: nextDateStr },
+  callGASAPI({ action: 'rolloverTask', taskId: currentDetailTaskId, account: currentUser, tomorrowDate: nextDateStr },
     () => {}, (err) => console.error("順延同步異常:", err));
+  showToast("⏰ 任務已成功移至明日！", "warning");
 }
 
 // ── 已完成區（Archive）──────────────────────────────────────
@@ -317,11 +322,12 @@ function restoreTask(taskId) {
   const idx = allTasksData.findIndex(t => t.id === taskId);
   if (idx === -1) return;
   allTasksData[idx].status = 'active';
-  callGASAPI({ action: 'updateTaskStatus', taskId, status: 'active' }, () => {});
+  callGASAPI({ action: 'updateTaskStatus', taskId, account: currentUser, status: 'active' }, () => {});
   closeArchiveModal();
   renderCalendar();
   renderUpcomingPanel();
   renderTasks();
+  showToast("🔄 任務已復原至看板！", "info");
 }
 
 // ── 刪除確認 Modal ───────────────────────────────────────────
@@ -344,5 +350,6 @@ function confirmDeleteTask() {
   renderCalendar();
   renderUpcomingPanel();
   renderTasks();
-  callGASAPI({ action: 'deleteTask', taskId }, () => {});
+  callGASAPI({ action: 'deleteTask', taskId, account: currentUser }, () => {});
+  showToast("🗑️ 任務已刪除！", "info");
 }

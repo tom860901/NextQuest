@@ -333,3 +333,178 @@ body.dark .edit-modal-select option {
 body.dark input[type="date"] {
   color-scheme: dark;
 }
+
+/* ── 🔔 全域 Toast 浮動通知系統 ────────────────────────── */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast-notification {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: toastSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast-notification.toast-hide {
+  opacity: 0;
+  transform: translateY(-16px) scale(0.95);
+}
+
+.toast-success {
+  background: rgba(42, 157, 143, 0.92);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.toast-info {
+  background: rgba(108, 92, 231, 0.92);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.toast-warning {
+  background: rgba(231, 111, 81, 0.92);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.toast-danger {
+  background: rgba(214, 48, 49, 0.92);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@keyframes toastSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── 🚪 登出按鈕樣式 ────────────────────────────────────── */
+.bubble-menu-btn.logout-btn {
+  color: var(--urgent, #E76F51);
+  font-weight: 600;
+  padding: 6px 12px;
+  border-color: rgba(231, 111, 81, 0.3);
+}
+
+.bubble-menu-btn.logout-btn:hover {
+  background: rgba(231, 111, 81, 0.12);
+  border-color: var(--urgent, #E76F51);
+}
+
+/* ── 🏆 今日敏捷先鋒榜樣式 ────────────────────────────────── */
+.lb-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: var(--card-bg, rgba(255, 255, 255, 0.7));
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+  text-align: left;
+  transition: transform 0.15s ease;
+}
+
+.lb-item:hover {
+  transform: translateY(-2px);
+}
+
+.lb-item.is-current-user {
+  border: 1.5px solid #6C5CE7;
+  background: rgba(108, 92, 231, 0.08);
+}
+
+.lb-rank {
+  font-size: 1.25rem;
+  font-weight: 800;
+  min-width: 28px;
+  text-align: center;
+}
+
+.lb-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.lb-username {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-dark, #2B213A);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-me-tag {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #6C5CE7;
+  color: #fff;
+  font-weight: 600;
+}
+
+.lb-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+body.dark .lb-progress-bar {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.lb-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6C5CE7, #2A9D8F);
+  transition: width 0.6s ease;
+}
+
+.lb-rate-box {
+  text-align: right;
+}
+
+.lb-rate {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #2A9D8F;
+}
+
+.lb-counts {
+  font-size: 0.72rem;
+  color: var(--text-mid, #666);
+}
+
