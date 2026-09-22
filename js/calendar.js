@@ -65,17 +65,22 @@ function renderUpcomingPanel() {
   const todayStr = getLocalDateString();
 
   // ── 1. 計算今日完成事項與待辦概況 (例如 5/8) ────────────────────
-  const todayDueTasks = allTasksData.filter(t => t.dueDate === todayStr);
+  // ── 1. 計算今日完成事項與待辦概況 (方案 B：聚焦今日截止與每日固定任務) ──
+  const todayDueTasks = allTasksData.filter(t => {
+    if (t.dueDate === todayStr) return true;
+    if (t.tag && (t.tag.includes('每日固定任務') || t.tag.includes('例行重複'))) return true;
+    return false;
+  });
 
   let completedCount = 0;
   let totalCount = 0;
 
   if (todayDueTasks.length > 0) {
-    // 今日有指定到期日的任務
+    // 今日有指定到期日或每日固定任務
     completedCount = todayDueTasks.filter(t => t.status === 'completed').length;
     totalCount = todayDueTasks.length;
   } else {
-    // 若今日無特定到期日任務，以全體任務統計（進行中 + 已完成）
+    // 若今日無特定到期日與固定任務，以全體任務統計
     completedCount = allTasksData.filter(t => t.status === 'completed').length;
     totalCount = allTasksData.length;
   }

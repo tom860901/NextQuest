@@ -65,6 +65,9 @@ function openTaskModal() {
   document.getElementById('new-task-input').value = "";
   document.getElementById('new-task-duedate').value = ""; // 預設不設定任何時間，由使用者自訂
 
+  const persistentCb = document.getElementById('new-task-persistent');
+  if (persistentCb) persistentCb.checked = false; // 預設不勾選，由使用者自由決定
+
   // 重置標籤選取至第一項
   document.querySelectorAll('.new-tag-btn').forEach((b, i) => {
     b.classList.toggle('active', i === 0);
@@ -86,6 +89,9 @@ function confirmAddTask() {
   const pri     = document.querySelector('.pri-btn.active').getAttribute('data-val');
   const dueDate = document.getElementById('new-task-duedate').value;
 
+  const persistentCb = document.getElementById('new-task-persistent');
+  const isPersistent = persistentCb ? persistentCb.checked : false;
+
   let subTasks = [];
   document.querySelectorAll('#manual-subtasks-container input').forEach(inp => {
     if (inp.value.trim()) subTasks.push({ step: inp.value.trim(), done: false });
@@ -99,11 +105,12 @@ function confirmAddTask() {
 
   callGASAPI({
     action: 'addTask', account: currentUser, title, tag, priority: pri,
-    subTasks: JSON.stringify(subTasks), dueDate
+    subTasks: JSON.stringify(subTasks), dueDate, persistent: isPersistent ? 1 : 0
   }, (res) => {
     isAddingTaskInProgress = false;
     if (res && res.success) {
       res.task.w = autoWidth;
+      res.task.persistent = isPersistent;
       if (!allTasksData.some(t => t.id === res.task.id)) {
         allTasksData.push(res.task);
       }
@@ -127,6 +134,9 @@ function openTaskDetail(taskId) {
   document.getElementById('edit-task-title').value    = task.title;
   document.getElementById('edit-task-duedate').value  = task.dueDate || '';
   document.getElementById('edit-task-priority').value = task.priority || '🟡 一般';
+
+  const editPersistentCb = document.getElementById('edit-task-persistent');
+  if (editPersistentCb) editPersistentCb.checked = !!task.persistent;
 
   // 同步設定任務類型標籤
   const currentTag = task.tag || '⚡️ 碎片 (<15m)';
@@ -200,16 +210,21 @@ function saveTaskEdits() {
   const activeTagBtn = document.querySelector('.edit-tag-btn.active');
   const newTag = activeTagBtn ? activeTagBtn.getAttribute('data-val') : (allTasksData[idx].tag || '⚡️ 碎片 (<15m)');
 
+  const editPersistentCb = document.getElementById('edit-task-persistent');
+  const newPersistent = editPersistentCb ? editPersistentCb.checked : false;
+
   if (!newTitle) { alert("任務名稱不能為空！"); return; }
 
-  allTasksData[idx].title    = newTitle;
-  allTasksData[idx].dueDate  = newDueDate;
-  allTasksData[idx].priority = newPriority;
-  allTasksData[idx].tag      = newTag;
+  allTasksData[idx].title      = newTitle;
+  allTasksData[idx].dueDate    = newDueDate;
+  allTasksData[idx].priority   = newPriority;
+  allTasksData[idx].tag        = newTag;
+  allTasksData[idx].persistent = newPersistent;
 
   callGASAPI({
     action: 'updateTaskDetails', taskId: currentDetailTaskId,
-    title: newTitle, dueDate: newDueDate, priority: newPriority, tag: newTag
+    title: newTitle, dueDate: newDueDate, priority: newPriority, tag: newTag,
+    persistent: newPersistent ? 1 : 0
   }, () => {});
 
   alert("✨ 任務修改已儲存！");
