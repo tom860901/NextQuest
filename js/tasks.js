@@ -154,7 +154,7 @@ function openTaskDetail(taskId) {
   listContainer.innerHTML = '';
 
   if (subTasksArr.length === 0) {
-    listContainer.innerHTML = `<div style="text-align:center; color:var(--text-mid); padding:10px; font-size:0.85rem;">一般任務，可直接標記完成或修改內容。</div>`;
+    listContainer.innerHTML = `<div class="detail-empty-hint">一般任務，可直接標記完成或修改內容。</div>`;
     document.getElementById('detail-progress-text').innerText = '';
   } else {
     renderChecklist(subTasksArr);

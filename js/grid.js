@@ -57,7 +57,7 @@ function renderTasks() {
     const progress = total === 0 ? 0 : Math.round((done / total) * 100);
 
     const isUrgent  = task.priority === '🔴 緊急' || (task.dueDate && task.dueDate <= todayStr);
-    const isRoutine = task.tag && (task.tag.includes('每日固定任務') || task.tag.includes('例行重複'));
+    const isRoutine = task.tag && (task.tag.includes('例行公事') || task.tag.includes('每日固定任務') || task.tag.includes('例行重複'));
 
     // 嚴格防呆：確保寬高只能為 1~3，避免歷史錯位資料將 2026 等日期當成卡片高度導致網頁爆炸
     let safeW = parseInt(task.w);

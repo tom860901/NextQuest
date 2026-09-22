@@ -126,7 +126,7 @@
         <div class="tag-selector">
           <div class="tag-btn new-tag-btn active" onclick="selectOpt('.new-tag-btn',this)" data-val="⚡️ 碎片 (<15m)">⚡️ 碎片 (&lt;15m)</div>
           <div class="tag-btn new-tag-btn" onclick="selectOpt('.new-tag-btn',this)" data-val="🧠 深度專注">🧠 深度專注</div>
-          <div class="tag-btn new-tag-btn" onclick="selectOpt('.new-tag-btn',this)" data-val="🔁 每日固定任務">🔁 每日固定任務</div>
+          <div class="tag-btn new-tag-btn" onclick="selectOpt('.new-tag-btn',this)" data-val="🔁 例行公事">🔁 例行公事</div>
           <div class="tag-btn new-tag-btn" onclick="selectOpt('.new-tag-btn',this)" data-val="☕️ 生活/社交">☕️ 生活/社交</div>
         </div>
       </div>
@@ -146,8 +146,8 @@
           <input type="date" id="new-task-duedate">
         </div>
         <div style="margin-top:8px; text-align:left;">
-          <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:0.85rem; color:var(--text-mid); user-select:none;">
-            <input type="checkbox" id="new-task-persistent" style="width:16px; height:16px; accent-color:#6C5CE7; cursor:pointer;">
+          <label class="persistent-toggle-label">
+            <input type="checkbox" id="new-task-persistent" style="width:17px; height:17px; accent-color:#6C5CE7; cursor:pointer;">
             <span>📌 截止日前持續顯示（每日常駐推進）</span>
           </label>
         </div>
@@ -189,7 +189,7 @@
         <div class="tag-selector" id="edit-tag-selector">
           <div class="tag-btn edit-tag-btn" onclick="selectOpt('.edit-tag-btn',this)" data-val="⚡️ 碎片 (<15m)">⚡️ 碎片 (&lt;15m)</div>
           <div class="tag-btn edit-tag-btn" onclick="selectOpt('.edit-tag-btn',this)" data-val="🧠 深度專注">🧠 深度專注</div>
-          <div class="tag-btn edit-tag-btn" onclick="selectOpt('.edit-tag-btn',this)" data-val="🔁 每日固定任務">🔁 每日固定任務</div>
+          <div class="tag-btn edit-tag-btn" onclick="selectOpt('.edit-tag-btn',this)" data-val="🔁 例行公事">🔁 例行公事</div>
           <div class="tag-btn edit-tag-btn" onclick="selectOpt('.edit-tag-btn',this)" data-val="☕️ 生活/社交">☕️ 生活/社交</div>
         </div>
       </div>
@@ -206,8 +206,8 @@
       </div>
 
       <div style="margin-bottom:12px; text-align:left;">
-        <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:0.85rem; color:var(--text-mid); user-select:none;">
-          <input type="checkbox" id="edit-task-persistent" style="width:16px; height:16px; accent-color:#6C5CE7; cursor:pointer;">
+        <label class="persistent-toggle-label">
+          <input type="checkbox" id="edit-task-persistent" style="width:17px; height:17px; accent-color:#6C5CE7; cursor:pointer;">
           <span>📌 截止日前持續顯示（每日常駐推進）</span>
         </label>
       </div>
@@ -294,7 +294,7 @@
           <strong>🏷️ 標籤定義</strong><br>
           • <strong>⚡️ 碎片 (&lt;15m)</strong>：15 分鐘瑣事。<br>
           • <strong>🧠 深度專注</strong>：重要專案。<br>
-          • <strong>🔁 每日固定任務</strong>：藍線固定工作。<br>
+          • <strong>🔁 例行公事</strong>：每日固定工作。<br>
           • <strong>☕️ 生活/社交</strong>：聚會與日常採購。
         </div>
         <div class="guide-item">
