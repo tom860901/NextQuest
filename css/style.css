@@ -211,3 +211,115 @@ body.dark .archive-item { background:rgba(255,255,255,0.04); border-color:rgba(2
 .guide-item { margin-bottom:12px; padding:12px 16px; background:rgba(255,255,255,0.45); border-radius:16px; border:1px solid rgba(255,255,255,0.6); }
 body.dark .guide-item { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); }
 .version-tag { display:inline-block; padding:3px 10px; border-radius:12px; background:rgba(108,92,231,0.15); color:#6C5CE7; font-weight:700; font-size:0.75rem; margin-left:6px; }
+
+/* ── 右欄：今日待辦概況模組 ── */
+.today-overview-box {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+}
+body.dark .today-overview-box {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+.today-overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.today-overview-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-hi);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.today-overview-badge {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2A9D8F;
+  background: rgba(42, 157, 143, 0.12);
+  padding: 3px 10px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+body.dark .today-overview-badge {
+  color: #48CAE4;
+  background: rgba(72, 202, 228, 0.15);
+}
+.today-overview-desc {
+  font-size: 0.8rem;
+  color: var(--text-mid);
+  margin-bottom: 8px;
+}
+.today-progress-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+body.dark .today-progress-bar-bg {
+  background: rgba(255, 255, 255, 0.08);
+}
+.today-progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #2A9D8F, #48CAE4);
+  border-radius: 3px;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+body.dark .today-progress-bar-fill {
+  background: linear-gradient(90deg, #6C5CE7, #8E78FF);
+  box-shadow: 0 0 8px rgba(108, 92, 231, 0.5);
+}
+
+/* ── 編輯任務表單元件與暗黑模式顏色修復 ── */
+.edit-modal-input, .edit-modal-select {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-hi);
+  outline: none;
+  transition: all 0.2s;
+}
+.edit-modal-input:focus, .edit-modal-select:focus {
+  border-color: var(--text-hi);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+body.dark .edit-modal-input,
+body.dark .edit-modal-select {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: #F1F0F7 !important;
+  color-scheme: dark;
+}
+body.dark .edit-modal-input:focus,
+body.dark .edit-modal-select:focus {
+  border-color: #6C5CE7 !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* 🎯 關鍵修復：下拉選單 option 在暗黑模式下的顏色完全可見 */
+select, select option,
+.edit-modal-select, .edit-modal-select option {
+  background-color: #ffffff;
+  color: #2B213A;
+}
+
+body.dark select,
+body.dark .edit-modal-select {
+  color-scheme: dark;
+}
+
+body.dark select option,
+body.dark .edit-modal-select option {
+  background-color: #1e1b2e !important;
+  color: #F1F0F7 !important;
+}
+
+body.dark input[type="date"] {
+  color-scheme: dark;
+}

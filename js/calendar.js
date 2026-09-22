@@ -62,10 +62,40 @@ function renderCalendar() {
 }
 
 function renderUpcomingPanel() {
+  const todayStr = getLocalDateString();
+
+  // ── 1. 計算今日完成事項與待辦概況 (例如 5/8) ────────────────────
+  const todayDueTasks = allTasksData.filter(t => t.dueDate === todayStr);
+
+  let completedCount = 0;
+  let totalCount = 0;
+
+  if (todayDueTasks.length > 0) {
+    // 今日有指定到期日的任務
+    completedCount = todayDueTasks.filter(t => t.status === 'completed').length;
+    totalCount = todayDueTasks.length;
+  } else {
+    // 若今日無特定到期日任務，以全體任務統計（進行中 + 已完成）
+    completedCount = allTasksData.filter(t => t.status === 'completed').length;
+    totalCount = allTasksData.length;
+  }
+
+  const badgeEl = document.getElementById('today-stats-badge');
+  const descEl  = document.getElementById('today-stats-desc');
+  const progEl  = document.getElementById('today-stats-progress');
+
+  if (badgeEl && descEl && progEl) {
+    badgeEl.innerText = `(${completedCount}/${totalCount})`;
+    const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+    descEl.innerText = `已完成 ${completedCount} 項 / 共 ${totalCount} 項待辦 (${pct}%)`;
+    progEl.style.width = `${pct}%`;
+  }
+
+  // ── 2. 渲染即將到來清單 ──────────────────────────────────────
   const panel = document.getElementById('upcoming-list');
+  if (!panel) return;
   panel.innerHTML = '';
 
-  const todayStr = getLocalDateString();
   const activeTasks = allTasksData
     .filter(t => t.status !== 'completed' && t.dueDate && t.dueDate >= todayStr)
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate));

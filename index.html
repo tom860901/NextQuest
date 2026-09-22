@@ -90,8 +90,22 @@
       </div>
     </div>
 
-    <!-- 右欄：即將到來 -->
+    <!-- 右欄：今日待辦概況與即將到來 -->
     <div class="window-shell upcoming-panel">
+      <!-- 🎯 今日待辦與完成事項模組 -->
+      <div class="today-overview-box" id="today-overview-box">
+        <div class="today-overview-header">
+          <span class="today-overview-title">📋 今日待辦</span>
+          <span class="today-overview-badge" id="today-stats-badge">(0/0)</span>
+        </div>
+        <div class="today-overview-desc" id="today-stats-desc">
+          已完成 0 項 / 共 0 項待辦
+        </div>
+        <div class="today-progress-bar-bg">
+          <div class="today-progress-bar-fill" id="today-stats-progress"></div>
+        </div>
+      </div>
+
       <h3>🔔 即將到來</h3>
       <div id="upcoming-list" style="font-size:0.85rem; color:var(--text-mid);">載入預告中...</div>
     </div>
@@ -155,8 +169,8 @@
       <button class="modal-close-corner-btn" onclick="closeDetailModal()">✕</button>
 
       <div style="margin-bottom:12px;">
-        <input type="text" id="edit-task-title"
-          style="width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.7); background:rgba(255,255,255,0.5); font-size:1.1rem; font-weight:700; text-align:center; color:var(--text-hi); outline:none;"
+        <input type="text" id="edit-task-title" class="edit-modal-input"
+          style="width:100%; padding:10px 14px; font-size:1.1rem; font-weight:700; text-align:center;"
           placeholder="任務名稱">
       </div>
 
@@ -171,10 +185,10 @@
       </div>
 
       <div style="display:flex; gap:8px; margin-bottom:12px;">
-        <input type="date" id="edit-task-duedate"
-          style="flex:1; padding:8px; border-radius:10px; border:1px solid rgba(255,255,255,0.7); background:rgba(255,255,255,0.5); color:var(--text-hi); font-size:0.85rem;">
-        <select id="edit-task-priority"
-          style="flex:1; padding:8px; border-radius:10px; border:1px solid rgba(255,255,255,0.7); background:rgba(255,255,255,0.5); color:var(--text-hi); font-size:0.85rem;">
+        <input type="date" id="edit-task-duedate" class="edit-modal-input"
+          style="flex:1; padding:8px; font-size:0.85rem;">
+        <select id="edit-task-priority" class="edit-modal-select"
+          style="flex:1; padding:8px; font-size:0.85rem;">
           <option value="🔴 緊急">🔴 緊急</option>
           <option value="🟡 一般">🟡 一般</option>
           <option value="🟢 輕鬆">🟢 輕鬆</option>
