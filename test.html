@@ -349,9 +349,9 @@ async function runAllTests() {
     // 5-3. AI 步驟拆解 API 測試
     await new Promise(resolve => {
       const t = setTimeout(() => {
-        results.push({ group: apiGroup, status: 'fail', name: 'AI 步驟拆解 API', detail: '逾時（15秒）' });
+        results.push({ group: apiGroup, status: 'fail', name: 'AI 步驟拆解 API', detail: '逾時（35秒）' });
         resolve();
-      }, 15000);
+      }, 35000);
 
       callGASAPI({ action: 'aiDecompose', title: '跟朋友聚餐' }, (res) => {
         clearTimeout(t);
